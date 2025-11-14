@@ -7,7 +7,7 @@ error_reporting(E_ALL);
 
 $id_filiere = $_SESSION['id_fac'];
 
-
+//echo 'Voici  le numéro de la filière : ' . $id_filiere;
 /*
 if(@$_GET['mot_recherche'])
 {
@@ -34,7 +34,7 @@ $mot_recherche=
 
 
 try {
-    $sql_select = "CALL Liste_Agent_Aligner(:idfiliere)";
+    $sql_select = "CALL Liste_Enseignants_Aligner(:idfiliere)";
     $stmt = $con->prepare($sql_select);
     $stmt->bindParam(':idfiliere', $id_filiere);
     $stmt->execute();
@@ -42,6 +42,7 @@ try {
     $agents = array();
     while ($ligne = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $agents[] = $ligne;
+        
     }
     echo json_encode($agents);
 } catch (PDOException $e) {
