@@ -498,25 +498,22 @@ function Fermer_Boite_Alert_G_jury() {
 
 function Ouvrir_Boite_Confirmation_Action_SM_UE(text_a_afficher,mat_agent,id_compte,tr)
 {
-  
   let btn_action_oui=document.getElementById("btn_action_oui");
   let btn_action_non=document.getElementById("btn_action_non");
-  
   document.getElementById("text_confirm_afficher").innerText=text_a_afficher;
   boite_Action_G_Jury.showModal();
 
   btn_action_oui.addEventListener("click", function(event)
   {
-      
-      boite_Action_G_Jury.close();
-      Suppression_compte_agent(mat_agent,id_compte,tr);
+    boite_Action_G_Jury.close();
+    Suppression_compte_agent(mat_agent,id_compte,tr);
 
   });
 
   btn_action_non.addEventListener("click", function(event)
   {
       boite_Action_G_Jury.close();
-      Ouvrir_Boite_Alert_G_Jury("Action annulée  !");  
+      Ouvrir_Boite_Alert_G_Jury("Action annulée  !");
 
   });
 
