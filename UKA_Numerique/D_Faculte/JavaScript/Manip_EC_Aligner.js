@@ -17,35 +17,27 @@
   let mat_agent_="";
   let verfi_=true;
 
-  const cmb_semestre_alignre=document.getElementById('id_semestre');
-  const cmb_promotion_FAC=document.getElementById('code_prom_Align_EC');
-  const cmb_annee_academique_aligne=document.getElementById('id_fac_annee');
-
-
-
-  /*const boite_form_EC = document.getElementById('boite_Form_EC');
-  const boite_alert_SM_EC= document.getElementById('boite_alert_SM_EC');
-  const boite_confirmation_action_SM_EC= document.getElementById('boite_confirmaion_action_SM_EC');*/
-  
-
-
-
-  // Ce code permet de capter l'évenement sur le combo_smestre afin d'afficher les UES
-
- /* if(cmb_semestre!==null)
-  {
-      cmb_semestre.addEventListener('change',(event)=> {
-        var id_semetre=cmb_semestre.value;
-        Affichage_UEs_FAC(id_semetre);  
-      });
-    
-  }*/
+  // Les éléments du DOM sont initialisés seulement si la page contient
+  // l'élément parent `div_gen_Aligne_Enseignant`. Cela évite que ce script lance des
+  // getElementById() au top-level et retourne `null` quand il est inclus
+  // sur d'autres pages.
+  let cmb_semestre_alignre;
+  let cmb_promotion_FAC;
+  let cmb_annee_academique_aligne;
 
   document.addEventListener("DOMContentLoaded",function(event)
   {
-    if(document.getElementById("div_gen_Aligne_Enseignant")!==null)
+    const container = document.getElementById("div_gen_Aligne_Enseignant");
+    if(container !== null)
     {
-      if(cmb_semestre_alignre!==null)
+      // initialiser les éléments en utilisant le conteneur pour éviter
+      // toute sélection hors-contexte lorsque ce script est inclus sur
+      // d'autres pages
+      cmb_semestre_alignre = container.querySelector('#id_semestre') || document.getElementById('id_semestre');
+      cmb_promotion_FAC = container.querySelector('#code_prom_Align_EC') || document.getElementById('code_prom_Align_EC');
+      cmb_annee_academique_aligne = container.querySelector('#id_fac_annee') || document.getElementById('id_fac_annee');
+
+      if(cmb_semestre_alignre !== null)
       {
         cmb_semestre_alignre.addEventListener('change',(event)=> 
           {
@@ -53,16 +45,21 @@
             
           });
 
-          cmb_annee_academique_aligne.addEventListener('change',(event)=> 
-            {
-              Affichage_ECs_Par_Filiere();
-              
-            });
+          if (cmb_annee_academique_aligne !== null) {
+            cmb_annee_academique_aligne.addEventListener('change',(event)=> 
+              {
+                Affichage_ECs_Par_Filiere();
+                
+              });
+          }
+
+          if (cmb_promotion_FAC !== null) {
             cmb_promotion_FAC.addEventListener('change',(event)=> 
               {
                 Affichage_ECs_Par_Filiere();
                 
               });
+          }
       }
       Affichage_Enseignant_Aligner();
       Affichage_ECs_Par_Filiere();

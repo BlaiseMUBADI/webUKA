@@ -18,42 +18,64 @@ var tr_selectionner="";
 var verfi=true;
 var code_ue_ec="";
 
-const txt_code_ue=document.getElementById('txt_code_ue');
-const txt_libelle_ue=document.getElementById('txt_libelle_ue');
-const cmb_categorie_ue=document.getElementById('categorie_ue');
-
-const txt_nom_ec=document.getElementById('txt_nom_ec');
-const txt_nb_credit=document.getElementById('txt_nb_credit');
-const txt_cmi=document.getElementById('txt_cmi');
-const txt_hr_td=document.getElementById('txt_hr_td');
-const txt_hr_tp=document.getElementById('txt_hr_tp');
-const txt_tpe=document.getElementById('txt_tpe');
-const txt_vht=document.getElementById('txt_vht');
-
-
-const boite_form_UEs = document.getElementById('boite_Form_UE');
-const boite_form_EC = document.getElementById('boite_Form_EC');
-const boite_alert_SM_UE= document.getElementById('boite_alert_SM_UE');
-const boite_confirmation_action_SM_UE= document.getElementById('boite_confirmaion_action_SM_UE');
-
-
-// Ce code nous permet de mettre en rouge le texte saisi dans la zone de text de code ue si
-// ce dernier est déjà utilisé 
-if(txt_code_ue!==null)
-{
-    txt_code_ue.addEventListener("keyup", function(event)
-    {
-      Verification_code_ue(txt_code_ue.value);        
-    });
-
-}
+// Les éléments du DOM sont initialisés seulement si la page contient
+// l'élément parent `div_gen_UE`. Cela évite que ce script lance des
+// getElementById() au top-level et retourne `null` quand il est inclus
+// sur d'autres pages.
+let txt_code_ue;
+let txt_libelle_ue;
+let cmb_categorie_ue;
+let txt_nom_ec;
+let txt_nb_credit;
+let txt_cmi;
+let txt_hr_td;
+let txt_hr_tp;
+let txt_tpe;
+let txt_vht;
+let boite_form_UEs;
+let boite_form_EC;
+let boite_alert_SM_UE;
+let boite_confirmation_action_SM_UE;
 
 /************************************************************************************
 ******************* CE CODE PERMET D'AFFICHER LES SEMESTRES **************************
 ***************************************************************************************/
 document.addEventListener("DOMContentLoaded",function(event)
 {
-  if(document.getElementById("div_gen_UE")!==null) Affichage_UEs();
+  const container = document.getElementById("div_gen_UE");
+  if(container !== null) {
+    // initialiser les éléments en utilisant le conteneur pour éviter
+    // toute sélection hors-contexte lorsque ce script est inclus sur
+    // d'autres pages
+    txt_code_ue = container.querySelector('#txt_code_ue') || document.getElementById('txt_code_ue');
+    txt_libelle_ue = container.querySelector('#txt_libelle_ue') || document.getElementById('txt_libelle_ue');
+    cmb_categorie_ue = container.querySelector('#categorie_ue') || document.getElementById('categorie_ue');
+    txt_nom_ec = container.querySelector('#txt_nom_ec') || document.getElementById('txt_nom_ec');
+    txt_nb_credit = container.querySelector('#txt_nb_credit') || document.getElementById('txt_nb_credit');
+    txt_cmi = container.querySelector('#txt_cmi') || document.getElementById('txt_cmi');
+    txt_hr_td = container.querySelector('#txt_hr_td') || document.getElementById('txt_hr_td');
+    txt_hr_tp = container.querySelector('#txt_hr_tp') || document.getElementById('txt_hr_tp');
+    txt_tpe = container.querySelector('#txt_tpe') || document.getElementById('txt_tpe');
+    txt_vht = container.querySelector('#txt_vht') || document.getElementById('txt_vht');
+
+    // boîtes de dialogue peuvent être en dehors du conteneur
+    boite_form_UEs = document.getElementById('boite_Form_UE');
+    boite_form_EC = document.getElementById('boite_Form_EC');
+    boite_alert_SM_UE = document.getElementById('boite_alert_SM_UE');
+    boite_confirmation_action_SM_UE = document.getElementById('boite_confirmaion_action_SM_UE');
+
+    // Ce code nous permet de mettre en rouge le texte saisi dans la zone de text de code ue si
+    // ce dernier est déjà utilisé 
+    if(txt_code_ue !== null)
+    {
+        txt_code_ue.addEventListener("keyup", function(event)
+        {
+          Verification_code_ue(txt_code_ue.value);        
+        });
+    }
+
+    Affichage_UEs();
+  }
 })
 
 

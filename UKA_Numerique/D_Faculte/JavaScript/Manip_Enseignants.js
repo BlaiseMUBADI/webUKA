@@ -13,35 +13,30 @@ console.log(" je suis dans Manip_Enseignant")
 *********************************************************************************************
 */
 
+// Les éléments du DOM sont initialisés seulement si la page contient
+// l'élément parent `div_gen_Enseignant`. Cela évite que ce script lance des
+// getElementById() au top-level et retourne `null` quand il est inclus
+// sur d'autres pages.
+let txt_mat_enseignant;
+let txt_nom_enseignant;
+let txt_post_enseignant;
+let txt_prenom_enseignant;
+let txt_telephone_enseignant;
+let txt_email_enseignant;
+let txt_institution_attache;
+let txt_domaine_enseignant;
 
-const txt_mat_enseignant=document.getElementById('txt_mat_enseignant');
-const txt_nom_enseignant=document.getElementById('txt_nom_enseignant');
-const txt_post_enseignant=document.getElementById('txt_post_nom_enseignant');
-const txt_prenom_enseignant=document.getElementById('txt_prenom_enseignant');
-const txt_telephone_enseignant=document.getElementById('txt_telephone_enseignant');
-const txt_email_enseignant=document.getElementById('txt_email_enseignant');
-const txt_institution_attache=document.getElementById('txt_institution_attache');
-const txt_domaine_enseignant=document.getElementById('txt_domaine_etude');
+let btn_sexe_enseignant_F;
+let btn_sexe_enseignant_M;
 
-const btn_sexe_enseignant_F=document.getElementById('sexe_enseignant_F');
-const btn_sexe_enseignant_M=document.getElementById('sexe_enseignant_M');
+let cmb_niveau_etude_enseignant;
+let cmb_grade__enseignant;
 
+let cmb_categorie_;
+let cmb_etat_civil;
 
-
-
-
-const cmb_niveau_etude_enseignant=document.getElementById('cmb_niveau_etude_enseignant');
-const cmb_grade__enseignant=document.getElementById('cmbr_titre_academique');
-
-const cmb_categorie_ = document.getElementById("cmb_Categorie");
-const cmb_etat_civil= document.getElementById("cmb_Etat_Civil");
-
-
-
-const boite_Form_Enseignant = document.getElementById('boite_Form_Enseignant');
-const boite_alert_Enseignant= document.getElementById('boite_alert_Enseignant');
-/*const boite_confirmation_action_SM_UE= document.getElementById('boite_confirmaion_action_SM_UE');
-*/
+let boite_Form_Enseignant;
+let boite_alert_Enseignant;
 
 
 
@@ -61,8 +56,33 @@ const boite_alert_Enseignant= document.getElementById('boite_alert_Enseignant');
 ***************************************************************************************/
 document.addEventListener("DOMContentLoaded",function(event)
 {
-  if(document.getElementById("div_gen_Enseignant")!==null)
-  {
+  const container = document.getElementById("div_gen_Enseignant");
+  if (container !== null) {
+    // initialiser les éléments en utilisant le conteneur pour éviter
+    // toute sélection hors-contexte lorsque ce script est inclus sur
+    // d'autres pages
+    txt_mat_enseignant = container.querySelector('#txt_mat_enseignant') || document.getElementById('txt_mat_enseignant');
+    txt_nom_enseignant = container.querySelector('#txt_nom_enseignant') || document.getElementById('txt_nom_enseignant');
+    txt_post_enseignant = container.querySelector('#txt_post_nom_enseignant') || document.getElementById('txt_post_nom_enseignant');
+    txt_prenom_enseignant = container.querySelector('#txt_prenom_enseignant') || document.getElementById('txt_prenom_enseignant');
+    txt_telephone_enseignant = container.querySelector('#txt_telephone_enseignant') || document.getElementById('txt_telephone_enseignant');
+    txt_email_enseignant = container.querySelector('#txt_email_enseignant') || document.getElementById('txt_email_enseignant');
+    txt_institution_attache = container.querySelector('#txt_institution_attache') || document.getElementById('txt_institution_attache');
+    txt_domaine_enseignant = container.querySelector('#txt_domaine_etude') || document.getElementById('txt_domaine_etude');
+
+    btn_sexe_enseignant_F = container.querySelector('#sexe_enseignant_F') || document.getElementById('sexe_enseignant_F');
+    btn_sexe_enseignant_M = container.querySelector('#sexe_enseignant_M') || document.getElementById('sexe_enseignant_M');
+
+    cmb_niveau_etude_enseignant = container.querySelector('#cmb_niveau_etude_enseignant') || document.getElementById('cmb_niveau_etude_enseignant');
+    cmb_grade__enseignant = container.querySelector('#cmbr_titre_academique') || document.getElementById('cmbr_titre_academique');
+
+    cmb_categorie_ = container.querySelector('#cmb_Categorie') || document.getElementById('cmb_Categorie');
+    cmb_etat_civil = container.querySelector('#cmb_Etat_Civil') || document.getElementById('cmb_Etat_Civil');
+
+    // boîtes de dialogue peuvent être en dehors du conteneur
+    boite_Form_Enseignant = document.getElementById('boite_Form_Enseignant');
+    boite_alert_Enseignant = document.getElementById('boite_alert_Enseignant');
+
     cmb_grade__enseignant.innerHTML = '<option value="rien" selected>Grade Enseignant</option>';
     cmb_categorie_.addEventListener('change',(event)=> 
     {

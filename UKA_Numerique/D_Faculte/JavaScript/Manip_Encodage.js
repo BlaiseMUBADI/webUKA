@@ -1,20 +1,32 @@
 console.log(" je suis dans Manip_encodage")
 
 // Déclaration de variable et des composants
-
-var cmb_semestre_encodage=document.getElementById("id_semestre_encodage")
+// Les éléments du DOM sont initialisés seulement si la page contient
+// l'élément parent `div_gen_encodage`. Cela évite que ce script lance des
+// getElementById() au top-level et retourne `null` quand il est inclus
+// sur d'autres pages.
+let cmb_semestre_encodage;
 
 document.addEventListener("DOMContentLoaded",function(event)
   {
-    if(document.getElementById("div_gen_encodage")!==null)
+    const container = document.getElementById("div_gen_encodage");
+    if(container !== null)
     {
+      // initialiser les éléments en utilisant le conteneur pour éviter
+      // toute sélection hors-contexte lorsque ce script est inclus sur
+      // d'autres pages
+      cmb_semestre_encodage = container.querySelector('#id_semestre_encodage') || document.getElementById('id_semestre_encodage');
+
       Liste_Etudiants();
       Afficher_EC_aligne_delibe();
-      cmb_semestre_encodage.addEventListener('change',(event)=> {
-        var id_semetre=cmb_semestre_encodage.value;
-        Liste_Ec_Aligne(id_semetre); 
-        Afficher_EC_aligne_delibe();
-      });
+      
+      if (cmb_semestre_encodage !== null) {
+        cmb_semestre_encodage.addEventListener('change',(event)=> {
+          var id_semetre=cmb_semestre_encodage.value;
+          Liste_Ec_Aligne(id_semetre); 
+          Afficher_EC_aligne_delibe();
+        });
+      }
 
 
     }

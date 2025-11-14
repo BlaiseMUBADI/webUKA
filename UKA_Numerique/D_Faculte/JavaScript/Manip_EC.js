@@ -13,41 +13,58 @@
   *********************************************************************************************
   */
 
- 
   var code_ue_ec="";
   var tr_selectionner="";
   var verfi=true;
 
-  const cmb_semestre=document.getElementById('id_semestre_FAC');
-  const cmb_promotion_FAC=document.getElementById('code_prom_FAC');
+  // Les éléments du DOM sont initialisés seulement si la page contient
+  // l'élément parent `div_gen_EC`. Cela évite que ce script lance des
+  // getElementById() au top-level et retourne `null` quand il est inclus
+  // sur d'autres pages.
+  let cmb_semestre;
+  let cmb_promotion_FAC;
+  let txt_nom_ec;
+  let txt_cmi;
+  let txt_hr_td;
+  let txt_hr_tp;
+  let txt_tpe;
+  let txt_vht;
+  let txt_nb_credit;
+  let boite_form_EC;
+  let boite_alert_SM_EC;
+  let boite_confirmation_action_SM_EC;
 
-
-  const txt_nom_ec=document.getElementById('txt_nom_ec');
-  const txt_cmi=document.getElementById('txt_cmi');
-  const txt_hr_td=document.getElementById('txt_hr_td');
-  const txt_hr_tp=document.getElementById('txt_hr_tp');
-  const txt_tpe=document.getElementById('txt_cmi');
-  const txt_vht=document.getElementById('txt_vht');
-
-  const txt_nb_credit=document.getElementById('txt_nb_credit');
-
-
-
-  const boite_form_EC = document.getElementById('boite_Form_EC');
-  const boite_alert_SM_EC= document.getElementById('boite_alert_SM_EC');
-  const boite_confirmation_action_SM_EC= document.getElementById('boite_confirmaion_action_SM_EC');
-  
-
-  // Ce code permet de capter l'évenement sur le combo_smestre afin d'afficher les UES
-
-  if(cmb_semestre!==null)
+  document.addEventListener("DOMContentLoaded",function(event)
   {
-      cmb_semestre.addEventListener('change',(event)=> {
-        var id_semetre=cmb_semestre.value;
-        Affichage_UEs_FAC(id_semetre);  
-      });
-    
-  }
+    const container = document.getElementById("div_gen_EC");
+    if (container !== null) {
+      // initialiser les éléments en utilisant le conteneur pour éviter
+      // toute sélection hors-contexte lorsque ce script est inclus sur
+      // d'autres pages
+      cmb_semestre = container.querySelector('#id_semestre_FAC') || document.getElementById('id_semestre_FAC');
+      cmb_promotion_FAC = container.querySelector('#code_prom_FAC') || document.getElementById('code_prom_FAC');
+      txt_nom_ec = container.querySelector('#txt_nom_ec') || document.getElementById('txt_nom_ec');
+      txt_cmi = container.querySelector('#txt_cmi') || document.getElementById('txt_cmi');
+      txt_hr_td = container.querySelector('#txt_hr_td') || document.getElementById('txt_hr_td');
+      txt_hr_tp = container.querySelector('#txt_hr_tp') || document.getElementById('txt_hr_tp');
+      txt_tpe = container.querySelector('#txt_cmi') || document.getElementById('txt_cmi');
+      txt_vht = container.querySelector('#txt_vht') || document.getElementById('txt_vht');
+      txt_nb_credit = container.querySelector('#txt_nb_credit') || document.getElementById('txt_nb_credit');
+
+      // boîtes de dialogue peuvent être en dehors du conteneur
+      boite_form_EC = document.getElementById('boite_Form_EC');
+      boite_alert_SM_EC = document.getElementById('boite_alert_SM_EC');
+      boite_confirmation_action_SM_EC = document.getElementById('boite_confirmaion_action_SM_EC');
+
+      // Ce code permet de capter l'évenement sur le combo_smestre afin d'afficher les UES
+      if(cmb_semestre !== null) {
+        cmb_semestre.addEventListener('change',(event)=> {
+          var id_semetre=cmb_semestre.value;
+          Affichage_UEs_FAC(id_semetre);  
+        });
+      }
+    }
+  })
 
 
 
