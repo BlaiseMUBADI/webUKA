@@ -132,7 +132,7 @@
                       style="background-color:#273746;color:white; font-weight:bold;">
               
                 <option value="rien" selected >Selection Catégorie</option>
-                <option value="pratique" >UE patique</option>
+                <option value="pratique" >UE pratique</option>
                 <option value="magistral" >UE magistral</option>
               </select>
             </div>
