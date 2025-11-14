@@ -1,0 +1,106 @@
+
+     
+        .dive_tab
+        {
+            border: 0px solid red;
+            width: 100%;
+            height: 700px;
+            position: relative;
+            left: 0%;
+            z-index: 2;
+            overflow: auto;
+            padding: 10px;
+
+        }
+        .dive_tab2
+        {
+            border: 0px solid red;
+            width: 30%;
+            height: 465px;
+            position: relative;
+            left: 67%;
+            z-index: 2;
+            overflow: auto;
+            padding: 10px;
+
+        }
+        
+          .tab1
+          {
+            border-collapse: collapse;
+            min-width: 200px;            
+            box-shadow: 0 5px 5px rgb(0, 0, 0,15);
+            z-index: 1;
+            box-shadow: 0 5px 5px rgb(0, 0, 0,15);
+            cursor: pointer;
+            margin: auto;
+            border: 1px solid #ddd;
+            position: relative;
+            border-radius: 10px;
+
+          }
+          table tr:hover
+          {
+            background-color:  midnightblue;
+            color: rgb(247, 255, 9);
+            box-shadow: 1px 1px 10px white;
+          }
+          
+          thead tr
+          {
+            background-color: midnightblue;
+            color: #fff;
+            text-align: left;
+            z-index: 0;
+          }
+          thead
+          {
+            background-color: midnightblue;
+            z-index: 1;
+          }
+
+          
+
+          td
+          {
+            
+            padding: 3px 3px 1px 2px;
+          }
+          th
+          {            
+            background-color: midnightblue;
+            color: white;
+            padding: 5px;
+          }
+
+          tr,th,td,a
+          {
+            border: 0px solid #ddd;
+            padding: 7px;
+          }
+          tr:nth-child(even)
+          {
+            background-color: steelblue ;
+            color: white;
+          }
+          tr:nth-child(odd)
+          {
+            background-color: #fff ;
+            color: black;
+          } 
+          
+          a
+          {
+            text-decoration:none;
+          }
+
+          a:nth-child(even)
+          {
+            color: white;
+          }
+          a:nth-child(odd)
+          {
+            color: black;
+          } 
+              
+    

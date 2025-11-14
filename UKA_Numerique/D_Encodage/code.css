@@ -1,0 +1,38 @@
+.btn-effect{
+	position: relative;
+	overflow: hidden;
+}
+.btn-effect:before{
+	content: "";
+	position: absolute;
+	background-color: rgba(255, 255, 255, 0.4);
+	width: 80%;
+	height: 120%;
+	top: -10%;
+	left: 0%;
+	transform: scaleY(0);
+	transform-origin: bottom;
+	transition: transform 0.35 ease-in-out;
+	
+}
+
+.btn-effect:hover:before{
+	transform: scaleY(1);
+}
+
+.table-fixed-header thead {
+   position: sticky;
+   top: 0;
+   z-index: 1;
+}
+
+.table-fixed-header th {
+   background-color: #f8f9fa;
+   /* Autres styles de vos en-têtes de tableau */
+}
+
+
+  .mon_bloc {
+        border: 1px solid #ddd;
+        padding: 20px;
+        margin-bottom: 30px;
