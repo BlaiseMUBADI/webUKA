@@ -23,7 +23,8 @@ let boite_alert_G_jury_UE, boite_Action_G_Jury;
 document.addEventListener("DOMContentLoaded",function(event)
   {
     const container = document.getElementById("div_gen_Jury");
-    if (container !== null) {
+    if (container !== null) 
+    {
       // initialiser les éléments en utilisant le conteneur pour éviter
       // toute sélection hors-contexte lorsque ce script est inclus sur
       // d'autres pages
@@ -38,7 +39,7 @@ document.addEventListener("DOMContentLoaded",function(event)
 
       // boîtes de dialogue peuvent être en dehors du conteneur
       boite_alert_G_jury_UE = document.getElementById('boite_alert_g_jury');
-      boite_Action_G_Jury = document.getElementById('boite_confirmaion_action_SM_UE');
+      boite_Action_G_Jury = document.getElementById('boite_confirmaion_action_Jury');
 
       Affichage_agent();
 
@@ -72,24 +73,6 @@ document.addEventListener("DOMContentLoaded",function(event)
 /*
 
 
-
-
-
-
-
-
-if(cmb_fontion_compte_agent!==null)
-{
-    cmb_fontion_compte_agent.addEventListener('change',(event)=> {
-    var fonction_compte=cmb_fontion_compte_agent.value;
-    
-    if(fonction_compte==="Doyen" 
-    || fonction_compte==="Sécretaire Academique"
-    || fonction_compte==="VD"
-    || fonction_compte==="Sec_facultaire" )Ouvrir_boite_dialog_promotion();
-      
-  });
-}
 
 
 
@@ -201,113 +184,6 @@ function Affichage_agent()
           tab_agent.appendChild(tbody);
           tab_agent.classList.add("table-striped");
 }
-/*****************  FIN DE LA METHODE D'AFFICHAGE DES AGENTS *************************************/
-/*
-function Affichage_agent2(mot_recherche)
-{
-
-   
-    let tab_agent = document.getElementById("table_agent");
-
-    while (tab_agent.firstChild) {
-      tab_agent.removeChild(tab_agent.firstChild);
-    }
-    
-    
-    var thead = document.createElement("thead");
-    thead.classList.add("sticky-sm-top","m-0","fw-bold"); // Pour ajouter la classe à un element HTMl
-
-    var tr1 = document.createElement("tr");
-    tr1.style="background-color:midnightblue; color:white;"
-
-    var td1 = document.createElement("td");      
-    var td2 = document.createElement("td");
-    var td3 = document.createElement("td");
-    var td4 = document.createElement("td");
-      
-
-    td1.textContent = "N°";
-    td2.textContent = "Matricule";
-    td3.textContent = "Agent";
-    td4.textContent = "Sexe";
-
-    tr1.appendChild(td1);
-    tr1.appendChild(td2);
-    tr1.appendChild(td3);
-    tr1.appendChild(td4);
-
-      
-    thead.appendChild(tr1);
-    tab_agent.appendChild(thead);
-      
-    var tbody = document.createElement("tbody");
-    
-    
-
-    var url='API_PHP/Liste_agent.php?mot_recherche='+mot_recherche;
-        
-    var i=1;
-    fetch(url) 
-    .then(response => response.json())
-    .then(data => 
-    {
-      data.forEach(infos =>
-        {
-          // Création de TR
-              var tr = document.createElement("tr");
-
-
-              var tdnum = document.createElement("td");
-              tdnum.textContent = i;
-
-              var tdmatricule= document.createElement("td");
-              var tdagent = document.createElement("td");
-              var tdsexe = document.createElement("td");
-              
-
-              tdmatricule.textContent =infos.mat;
-              //mat_agent=infos.mat;
-
-              tdagent.textContent=infos.identite
-              tdsexe.textContent=infos.sexe;
-
-             
-              
-              tr.appendChild(tdnum);
-              tr.appendChild(tdmatricule);
-              tr.appendChild(tdagent);
-              tr.appendChild(tdsexe);
-              
-              
-              
-              tbody.appendChild(tr);
-              i++;
-
-              // Ajout de l'évenement sur la ligne appellant
-              // Ajouter l'événement de clic pour afficher les infos de la ligne
-              tr.addEventListener("click", function() {
-                var nom_agent=infos.identite;
-                Recuperation_Compte_agent(infos.mat,tr);
-                
-              });
-
-              
-              
-              
-        });
-          
-        }).catch(error => {
-          // Traitez l'erreur ici
-          console.log("Erreur lor de contacte des etudiants "+error);});
-          tab_agent.appendChild(tbody);
-          tab_agent.classList.add("table-striped");
-}
-/*****************  FIN DE LA METHODE D'AFFICHAGE DES AGENTS *************************************
-
-
-
-
-
 
 
 
@@ -432,7 +308,7 @@ function Recuperation_Compte_agent()
           //Ajout de l'évenement au boutton d'impression
           btn_suppression.addEventListener("click", function(event) {
           
-            Ouvrir_Boite_Confirmation_Action_SM_UE("Attention !!! Cette opération est irreversible"+
+            Ouvrir_Boite_Confirmation_Action_Jury("Attention !!! Cette opération est irreversible"+
               "\nVoulez-vous vraiment supprimer ce compte ?",mat_agent,infos.IdCompte_Agent,tr1);
            //Suppression_compte_agent(mat_agent,
              // infos.IdCompte_Agent,tr1);
@@ -496,7 +372,7 @@ function Fermer_Boite_Alert_G_jury() {
 
 
 
-function Ouvrir_Boite_Confirmation_Action_SM_UE(text_a_afficher,mat_agent,id_compte,tr)
+function Ouvrir_Boite_Confirmation_Action_Jury(text_a_afficher,mat_agent,id_compte,tr)
 {
   let btn_action_oui=document.getElementById("btn_action_oui");
   let btn_action_non=document.getElementById("btn_action_non");

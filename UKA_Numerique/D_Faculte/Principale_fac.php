@@ -71,7 +71,7 @@
 
    
   <script type="text/javascript" src="../D_Generale/JavaScript/Fonctions.js"></script>
-  
+    
   <script type="text/javascript" src="../D_Generale/JavaScript/recup_promotion_et_etudiant.js"></script>  
   <script type="text/javascript" src="../D_Generale/JavaScript/Deconnexion_inactiviter.js"></script>
   

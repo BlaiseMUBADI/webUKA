@@ -316,9 +316,7 @@
   <div class="container border">
     <div class="modal-header">
       <h5 class="modal-title ms-3" id="exampleModalLabel">Confirmation (U.KA. @ CIUKA )</h5>
-      <!--button type="button" class="close ms-3" onclick="Confirmation_SM_UE_NON()">
-        <span aria-hidden="true">&times;</span>
-      </button-->
+      
     </div>
     
     <div class="modal-body">

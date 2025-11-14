@@ -406,7 +406,7 @@
 <!------------Ce code permet de faire une boite de dialog au dessus d'une interface----------------------------------------->
 <!-----------    Une boite pour afficher une confirmation d'action ( suppression ou modification ) ------>
 
-<dialog id="boite_confirmaion_action_SM_UE" 
+<dialog id="boite_confirmaion_action_Jury" 
   class="shadow-lg  p-3 rounded bg-gradient-primary"  
   style="background-color:#273746;color:white">
   
