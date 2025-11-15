@@ -6,19 +6,76 @@
 */
 console.log(" Je suis dans JS Transact");
 
-const cmb_filiere_1=document.getElementById("filiere_transact");
-const cmb_promoion_1=document.getElementById("promo_tansact");
-const cmb_annee_acade_1=document.getElementById("Id_an_acad_1");
-const date_paiement_1=document.getElementById("date_paiement_1");
+// DOM nodes: initialize on DOMContentLoaded to avoid errors when script loaded on other pages
+let cmb_filiere_1;
+let cmb_promoion_1;
+let cmb_annee_acade_1;
+let date_paiement_1;
 
+let txt_mat_etudiant_1;
+let txt_zone_recherche_etudiant_1;
 
-const txt_mat_etudiant_1=document.getElementById("mat_etudiant_transact");
-const txt_zone_recherche_etudiant_1=document.getElementById("txt_recherch_etudiant_1");
+document.addEventListener('DOMContentLoaded', function(event) {
+  const container = document.getElementById('div_gen_Transact') || document;
+  cmb_filiere_1 = container.querySelector('#filiere_transact') || document.getElementById('filiere_transact');
+  cmb_promoion_1 = container.querySelector('#promo_tansact') || document.getElementById('promo_tansact');
+  cmb_annee_acade_1 = container.querySelector('#Id_an_acad_1') || document.getElementById('Id_an_acad_1');
+  date_paiement_1 = container.querySelector('#date_paiement_1') || document.getElementById('date_paiement_1');
 
+  txt_mat_etudiant_1 = container.querySelector('#mat_etudiant_transact') || document.getElementById('mat_etudiant_transact');
+  txt_zone_recherche_etudiant_1 = container.querySelector('#txt_recherch_etudiant_1') || document.getElementById('txt_recherch_etudiant_1');
 
+  // Attachements d'événements (seulement si présents)
+  if(cmb_filiere_1!==null)
+  {
+    cmb_filiere_1.addEventListener('change', (event) => {
+      var id_filiere=cmb_filiere_1.value;
+      Affichage_promotion_Transact(id_filiere);
+    });
+  }
 
+  if(cmb_promoion_1!==null)
+  {
+    cmb_promoion_1.addEventListener('change',(event)=> {
+      var code_promo=cmb_promoion_1.value;
+      var Id_annee=cmb_annee_acade_1.value;
+      var date_paiement=date_paiement_1.value;
+      Affichage_etudiant_Transact(code_promo,Id_annee,date_paiement);
+    });
+  }
 
+  if(cmb_annee_acade_1!==null)
+  {
+    cmb_annee_acade_1.addEventListener('change',(event)=> {
+      var code_promo=cmb_promoion_1.value;
+      var Id_annee=cmb_annee_acade_1.value;
+      var date_paiement=date_paiement_1.value;
+      Affichage_etudiant_Transact(code_promo,Id_annee,date_paiement);
+    });
+  }
 
+  if(date_paiement_1!==null)
+  {
+    date_paiement_1.addEventListener('change',(event)=> {
+      var code_promo=cmb_promoion_1.value;
+      var Id_annee=cmb_annee_acade_1.value;
+      var date_paiement=date_paiement_1.value;
+      Affichage_etudiant_Transact(code_promo,Id_annee,date_paiement);
+    });
+  }
+
+  if(txt_zone_recherche_etudiant_1!==null)
+  {
+    txt_zone_recherche_etudiant_1.addEventListener("keyup", function(event) {
+      var code_promo=cmb_promoion_1.value;
+      var Id_annee=cmb_annee_acade_1.value;    
+      var txt_nom=txt_zone_recherche_etudiant_1.value;
+      var date_paiement=date_paiement_1.value;
+      Affichage_etudiant_Transact_2(code_promo,Id_annee,date_paiement,txt_nom)
+    });
+  }
+
+  
 /*
 */
 /*
@@ -99,6 +156,13 @@ if(txt_zone_recherche_etudiant_1!==null)
 
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+});
+
+
 
 
 

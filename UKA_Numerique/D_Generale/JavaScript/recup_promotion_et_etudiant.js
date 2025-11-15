@@ -1,6 +1,6 @@
 
 
-console.log(" Le script recup_promotion_et_etudiant s'est lancé")
+console.log(" je suis dans recup_promotion_et_etudiant ")
 
 
 

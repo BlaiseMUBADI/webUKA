@@ -17,33 +17,38 @@ var id_semestre=" ";
 var tr_selectionner="";
 var verfi=true;
 
-const txt_code_ue=document.getElementById('txt_code_ue');
-const txt_libelle_ue=document.getElementById('txt_libelle_ue');
-const cmb_categorie_ue=document.getElementById('categorie_ue');
+let txt_code_ue;
+let txt_libelle_ue;
+let cmb_categorie_ue;
+
+let boite_form_UEs;
+let boite_alert_SM_UE;
+let boite_confirmation_action_SM_UE;
 
 
-const boite_form_UEs = document.getElementById('boite_Form_UE');
-const boite_alert_SM_UE= document.getElementById('boite_alert_SM_UE');
-const boite_confirmation_action_SM_UE= document.getElementById('boite_confirmaion_action_SM_UE');
-
-
-// Ce code nous permet de mettre en rouge le texte saisi dans la zone de text de code ue si
-// ce dernier est déjà utilisé 
-if(txt_code_ue!==null)
-{
-    txt_code_ue.addEventListener("keyup", function(event)
-    {
-      Verification_code_ue(txt_code_ue.value);        
-    });
-
-}
-
-/************************************************************************************
-******************* CE CODE PERMET D'AFFICHER LES SEMESTRES **************************
-***************************************************************************************/
 document.addEventListener("DOMContentLoaded",function(event)
 {
-  if(document.getElementById("div_gen_UE")!==null) Affichage_semestre();
+  const container = document.getElementById('div_gen_UE') || document;
+
+  txt_code_ue = container.querySelector('#txt_code_ue') || document.getElementById('txt_code_ue');
+  txt_libelle_ue = container.querySelector('#txt_libelle_ue') || document.getElementById('txt_libelle_ue');
+  cmb_categorie_ue = container.querySelector('#categorie_ue') || document.getElementById('categorie_ue');
+
+  boite_form_UEs = container.querySelector('#boite_Form_UE') || document.getElementById('boite_Form_UE');
+  boite_alert_SM_UE = container.querySelector('#boite_alert_SM_UE') || document.getElementById('boite_alert_SM_UE');
+  boite_confirmation_action_SM_UE = container.querySelector('#boite_confirmaion_action_SM_UE') || document.getElementById('boite_confirmaion_action_SM_UE');
+
+  // attach keyup listener when element exists
+  if(txt_code_ue!==null)
+  {
+      txt_code_ue.addEventListener("keyup", function(event)
+      {
+        Verification_code_ue(txt_code_ue.value);        
+      });
+  }
+
+  if (document.getElementById('div_gen_UE') !== null) Affichage_semestre();
+
 })
 
 

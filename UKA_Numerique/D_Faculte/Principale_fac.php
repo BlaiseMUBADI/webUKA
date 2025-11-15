@@ -15,22 +15,18 @@
     <meta content="Login Form Template" name="keywords">
     <meta content="Login Form Template" name="description">
 
+    <!-- CSS Styles de base -->
     <link rel="stylesheet" type="text/css" href="../Styles_CSS/Nos_Tableaux.css">
     <link rel="stylesheet" type="text/css" href="../Styles_CSS/Styles.css" />
     <link rel="stylesheet" type="text/css" href="../Styles_CSS/Styles_specifique.css" />
-    <link rel="stylesheet" type="text/css" href="../bootstrap/dist/css/bootstrap.min.css" >
+    <link rel="stylesheet" type="text/css" href="../bootstrap/dist/css/bootstrap.min.css">
 
-    <!--------------------------ICI ON INTEGRE LES CLASSES QUI APPORTE LES ICONS ------------------------------>
+    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="../fontawesome-6.5.1/css/all.min.css">
-    <!----------------------------------------------------------------------------------------------------->
         
-    <link rel="stylesheet" type="text/css" href="../bootstrap\dist\css\datatables.min.css"/>  
-    <link rel="stylesheet" type="text/css" href="../bootstrap\dist\css\all.min.css"  />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-
-  
-
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" type="text/css" href="../bootstrap/dist/css/datatables.min.css"/>  
+    <link rel="stylesheet" type="text/css" href="../bootstrap/dist/css/all.min.css" />
 
   </head>
   <body">

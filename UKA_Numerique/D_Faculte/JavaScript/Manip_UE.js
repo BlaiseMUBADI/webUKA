@@ -568,8 +568,7 @@ function Ajout_UE() {
 
   function Ajout_EC()
   {
-    console.log(" Regarde retunr "+verification_info_EC());
-
+    
     if(verification_info_EC())
     {
 

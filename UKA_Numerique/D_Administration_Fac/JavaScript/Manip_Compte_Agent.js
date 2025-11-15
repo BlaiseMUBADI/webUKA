@@ -15,58 +15,25 @@ console.log(" je suis dans Ajout compte")
 
 var mat_agent="";
 var tr_selectionner="";
-const txt_login_user=document.getElementById("txt_login_user");
-const txt_password=document.getElementById("password_user");
-const txt_password2=document.getElementById("retapez_password_user");
-const txt_zone_recherce_agent=document.getElementById("txt_recherch_user");
+let txt_login_user;
+let txt_password;
+let txt_password2;
+let txt_zone_recherce_agent;
 
-const cmb_etat_compte=document.getElementById("select_etat_compte");
+let cmb_etat_compte;
 
-const cmb_fontion_compte_agent=document.getElementById("select_fonction_compte");
-const cmb_filiere_compte=document.getElementById("select_filiere");
+let cmb_fontion_compte_agent;
+let cmb_filiere_compte;
 
-
-
-const boite_alert_G_jury_UE= document.getElementById('boite_alert_g_compte');
-const boite_Action_G_Jury= document.getElementById('boite_confirmaion_action_g_compte');
+let boite_alert_G_jury_UE;
+let boite_Action_G_Jury;
 
 
 
 
 
 
-if(cmb_fontion_compte_agent!==null)
-{
-    cmb_fontion_compte_agent.addEventListener('change',(event)=> {
-    var fonction_compte=cmb_fontion_compte_agent.value;
-    
-    if(fonction_compte==="Doyen" 
-    || fonction_compte==="Sécretaire Academique"
-    || fonction_compte==="VD"
-    || fonction_compte==="Sec_facultaire" )Ouvrir_boite_dialog_fliere();
-      
-  });
-}
-
-if(txt_password!==null && txt_password2!==null)
-{
-    txt_password2.addEventListener("keyup", function(event)
-    {
-        
-        if(Verification_password()) txt_password2.style.color = 'red';
-        else txt_password2.style.color = 'white';
-    });
-
-}
-// CE CODE NOUS PERMET DE FAIE UNE RECHERCHE D'UN AGENT 
-if(txt_zone_recherce_agent!==null)
-{
-  txt_zone_recherce_agent.addEventListener("keyup", function(event) {
-    if(txt_zone_recherce_agent.value==="") Affichage_agent();
-    else Affichage_agent2(txt_zone_recherce_agent.value)
-  });
-
-}
+// Event listeners and DOM nodes will be attached/initialized inside DOMContentLoaded
 
 
 /************************************************************************************
@@ -74,7 +41,54 @@ if(txt_zone_recherce_agent!==null)
 ***************************************************************************************/
 document.addEventListener("DOMContentLoaded",function(event)
 {
+  const container = document.getElementById('div_gen_Compte_Agent') || document;
+
+  // initialize nodes (prefer container-scoped selectors)
+  txt_login_user = container.querySelector('#txt_login_user') || document.getElementById('txt_login_user');
+  txt_password = container.querySelector('#password_user') || document.getElementById('password_user');
+  txt_password2 = container.querySelector('#retapez_password_user') || document.getElementById('retapez_password_user');
+  txt_zone_recherce_agent = container.querySelector('#txt_recherch_user') || document.getElementById('txt_recherch_user');
+
+  cmb_etat_compte = container.querySelector('#select_etat_compte') || document.getElementById('select_etat_compte');
+  cmb_fontion_compte_agent = container.querySelector('#select_fonction_compte') || document.getElementById('select_fonction_compte');
+  cmb_filiere_compte = container.querySelector('#select_filiere') || document.getElementById('select_filiere');
+
+  boite_alert_G_jury_UE = container.querySelector('#boite_alert_g_compte') || document.getElementById('boite_alert_g_compte');
+  boite_Action_G_Jury = container.querySelector('#boite_confirmaion_action_g_compte') || document.getElementById('boite_confirmaion_action_g_compte');
+
+  // attach event listeners (only when elements exist)
+  if(cmb_fontion_compte_agent!==null)
+  {
+      cmb_fontion_compte_agent.addEventListener('change',(event)=> {
+        var fonction_compte=cmb_fontion_compte_agent.value;
+        if(fonction_compte==="Doyen" 
+          || fonction_compte==="Sécretaire Academique"
+          || fonction_compte==="VD"
+          || fonction_compte==="Sec_facultaire" ) Ouvrir_boite_dialog_fliere();
+      });
+  }
+
+  if(txt_password!==null && txt_password2!==null)
+  {
+      txt_password2.addEventListener("keyup", function(event)
+      {
+          if(Verification_password()) txt_password2.style.color = 'red';
+          else txt_password2.style.color = 'white';
+      });
+  }
+
+  // CE CODE NOUS PERMET DE FAIRE UNE RECHERCHE D'UN AGENT
+  if(txt_zone_recherce_agent!==null)
+  {
+    txt_zone_recherce_agent.addEventListener("keyup", function(event) {
+      if(txt_zone_recherce_agent.value==="") Affichage_agent();
+      else Affichage_agent2(txt_zone_recherce_agent.value)
+    });
+  }
+
+  // call initial display
   Affichage_agent();
+
 })
 
 

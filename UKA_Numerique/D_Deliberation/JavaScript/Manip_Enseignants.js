@@ -14,26 +14,23 @@ console.log(" je suis dans Manip_Enseignant")
 */
 
 
-const txt_mat_enseignant=document.getElementById('txt_mat_enseignant');
-const txt_nom_enseignant=document.getElementById('txt_nom_enseignant');
-const txt_post_enseignant=document.getElementById('txt_post_nom_enseignant');
-const txt_prenom_enseignant=document.getElementById('txt_prenom_enseignant');
-const txt_telephone_enseignant=document.getElementById('txt_telephone_enseignant');
-const txt_email_enseignant=document.getElementById('txt_email_enseignant');
-const txt_institution_attache=document.getElementById('txt_institution_attache');
-const txt_domaine_enseignant=document.getElementById('txt_domaine_etude');
+let txt_mat_enseignant;
+let txt_nom_enseignant;
+let txt_post_enseignant;
+let txt_prenom_enseignant;
+let txt_telephone_enseignant;
+let txt_email_enseignant;
+let txt_institution_attache;
+let txt_domaine_enseignant;
 
-const btn_sexe_enseignant_F=document.getElementById('sexe_enseignant_M');
-const btn_sexe_enseignant_M=document.getElementById('sexe_enseignant_F');
+let btn_sexe_enseignant_F;
+let btn_sexe_enseignant_M;
 
+let cmb_niveau_etude_enseignant;
+let cmb_titre_academique;
 
-const cmb_niveau_etude_enseignant=document.getElementById('txt_niveau_etude_enseignant');
-const cmb_titre_academique=document.getElementById('txt_titre_academique');
-
-
-
-const boite_Form_Enseignant = document.getElementById('boite_Form_Enseignant');
-const boite_alert_Enseignant= document.getElementById('boite_alert_Enseignant');
+let boite_Form_Enseignant;
+let boite_alert_Enseignant;
 /*const boite_confirmation_action_SM_UE= document.getElementById('boite_confirmaion_action_SM_UE');
 */
 
@@ -55,7 +52,32 @@ const boite_alert_Enseignant= document.getElementById('boite_alert_Enseignant');
 ***************************************************************************************/
 document.addEventListener("DOMContentLoaded",function(event)
 {
-  if(document.getElementById("div_gen_Enseignant")!==null) Affichage_Enseignant();
+  const container = document.getElementById('div_gen_Enseignant') || document;
+
+  // initialize elements (scoped to container when possible)
+  txt_mat_enseignant = container.querySelector('#txt_mat_enseignant') || document.getElementById('txt_mat_enseignant');
+  txt_nom_enseignant = container.querySelector('#txt_nom_enseignant') || document.getElementById('txt_nom_enseignant');
+  txt_post_enseignant = container.querySelector('#txt_post_nom_enseignant') || document.getElementById('txt_post_nom_enseignant');
+  txt_prenom_enseignant = container.querySelector('#txt_prenom_enseignant') || document.getElementById('txt_prenom_enseignant');
+  txt_telephone_enseignant = container.querySelector('#txt_telephone_enseignant') || document.getElementById('txt_telephone_enseignant');
+  txt_email_enseignant = container.querySelector('#txt_email_enseignant') || document.getElementById('txt_email_enseignant');
+  txt_institution_attache = container.querySelector('#txt_institution_attache') || document.getElementById('txt_institution_attache');
+  txt_domaine_enseignant = container.querySelector('#txt_domaine_etude') || document.getElementById('txt_domaine_etude');
+
+  btn_sexe_enseignant_F = container.querySelector('#sexe_enseignant_F') || document.getElementById('sexe_enseignant_F');
+  btn_sexe_enseignant_M = container.querySelector('#sexe_enseignant_M') || document.getElementById('sexe_enseignant_M');
+
+  cmb_niveau_etude_enseignant = container.querySelector('#txt_niveau_etude_enseignant') || document.getElementById('txt_niveau_etude_enseignant');
+  cmb_titre_academique = container.querySelector('#txt_titre_academique') || document.getElementById('txt_titre_academique');
+
+  boite_Form_Enseignant = container.querySelector('#boite_Form_Enseignant') || document.getElementById('boite_Form_Enseignant');
+  boite_alert_Enseignant = container.querySelector('#boite_alert_Enseignant') || document.getElementById('boite_alert_Enseignant');
+
+  // If the page has the container, run initial display
+  if (document.getElementById('div_gen_Enseignant') !== null) {
+    Affichage_Enseignant();
+  }
+
 })
 
 

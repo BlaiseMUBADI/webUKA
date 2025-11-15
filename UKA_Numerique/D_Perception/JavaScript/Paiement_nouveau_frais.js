@@ -12,28 +12,27 @@ console.log(" je suis dans noueau paiement ")
 * ***************************** Déclaration des composants HTML *****************************
 *********************************************************************************************
 */
-const txt_montant=document.getElementById("txt_montant_payer");
-const txt_monte_caractere=document.getElementById("txt_monte_caractere");
-const txt_numero_borderau=document.getElementById("txt_numero_borderau");
+// DOM nodes will be initialized on DOMContentLoaded when present on page
+let txt_montant;
+let txt_monte_caractere;
+let txt_numero_borderau;
 
-const txt_tau_jours=document.getElementById("txt_tau_jours");
+let txt_tau_jours;
 
-const cmb_type_frais=document.getElementById("Select_type_frais");
-const cmb_banque=document.getElementById("Select_banque");
+let cmb_type_frais;
+let cmb_banque;
 
+let case_ems;
+let case_es;
+let case_e2s;
+let case_ERSEM1;
+let case_VC;
 
-const case_ems=document.getElementById("case_ems");
-const case_es=document.getElementById("case_es");
-const case_e2s=document.getElementById("case_e2s");
-const case_ERSEM1=document.getElementById("case_ERSEM1");
-const case_VC=document.getElementById("case_VC");
+let btn_radio_devise; // c'est une constante qui garde l'etat de devise
 
-const btn_radio_devise=document.getElementById("dollar_payer"); // c'est une constatnte qui garde l'etat de devise
+let symbole_devise;
 
-const symbole_devise=document.getElementById("symbole_devise");
-
-
-const date_paie=document.getElementById("date_paiement");
+let date_paie;
 var devise_paye="Franc Congolais";
 var montant_en_franc=0;
 
@@ -45,12 +44,142 @@ var montant_devise_inverse="0"; // c'un montant que l'on met dans la base pour l
 
 var Verfi_num_borde=true; // C'est une variable globale qui nous permet de stocker la verification de numéro de bordereau
 
-// Ici on lance ce script pour selectionner la date du jours dans le composant
-var date_actuelle = new Date();
-// Obtenir la date au format YYYY-MM-DD
-var formattedDate = date_actuelle.toISOString().substr(0, 10);
-// Ici on test si l'élement selectionner est present sur la page html
-if (date_paie !== null) date_paie.value = formattedDate;
+// DOM initialization for elements and event attachments
+document.addEventListener("DOMContentLoaded", function(event) {
+    const container = document.getElementById('div_gen_Paiement') || document;
+
+    txt_montant = container.querySelector('#txt_montant_payer') || document.getElementById('txt_montant_payer');
+    txt_monte_caractere = container.querySelector('#txt_monte_caractere') || document.getElementById('txt_monte_caractere');
+    txt_numero_borderau = container.querySelector('#txt_numero_borderau') || document.getElementById('txt_numero_borderau');
+
+    txt_tau_jours = container.querySelector('#txt_tau_jours') || document.getElementById('txt_tau_jours');
+
+    cmb_type_frais = container.querySelector('#Select_type_frais') || document.getElementById('Select_type_frais');
+    cmb_banque = container.querySelector('#Select_banque') || document.getElementById('Select_banque');
+
+    case_ems = container.querySelector('#case_ems') || document.getElementById('case_ems');
+    case_es = container.querySelector('#case_es') || document.getElementById('case_es');
+    case_e2s = container.querySelector('#case_e2s') || document.getElementById('case_e2s');
+    case_ERSEM1 = container.querySelector('#case_ERSEM1') || document.getElementById('case_ERSEM1');
+    case_VC = container.querySelector('#case_VC') || document.getElementById('case_VC');
+
+    btn_radio_devise = container.querySelector('#dollar_payer') || document.getElementById('dollar_payer');
+    symbole_devise = container.querySelector('#symbole_devise') || document.getElementById('symbole_devise');
+
+    date_paie = container.querySelector('#date_paiement') || document.getElementById('date_paiement');
+
+    // date initialization
+    var date_actuelle = new Date();
+    var formattedDate = date_actuelle.toISOString().substr(0, 10);
+    if (date_paie !== null) date_paie.value = formattedDate;
+
+    // boite dialogs
+    // const boite_form_UEs = document.getElementById('boite_Form_UE');
+    boite_alert_Paiement_banque = container.querySelector('#boite_alert_paiement_banque') || document.getElementById('boite_alert_paiement_banque');
+    boite_alert_Paiement_guichet = container.querySelector('#boite_alert_paiement_guichet') || document.getElementById('boite_alert_paiement_guichet');
+
+    // Attacher l'évenement à la zone de texte qui concerne le numéro de borderau
+    if(txt_numero_borderau!==null)
+    {
+        txt_numero_borderau.addEventListener("keyup", function(event)
+        {
+            var txt_bordereau=txt_numero_borderau.value;
+            Verification_Num_bordereau(txt_bordereau);       
+        });
+
+    }
+
+    // Contrôles montant
+    if(txt_montant!==null)
+    {
+        txt_montant.addEventListener("keyup", function(event)
+        {
+            var devis="";
+            var devise_fa=document.getElementById("devise_fa").innerHTML;
+            
+            // ici verifie pour faire une conversion  lorsqu'il s'agit d'un paiement en dollar
+            if(devise_fa===" $")
+            {
+                
+                if (btn_radio_devise.checked) 
+                {
+                    montnt_argent_dollar_fc=txt_montant.value;
+                    devise_paye="Dollar";
+                    devis=".$.";
+
+                    montant_devise_inverse=0;
+                }
+                else 
+                {
+                    devise_paye="Franc Congolais";
+                    
+                    montnt_argent_dollar_fc=(txt_montant.value/(montant_taux_base/10)).toFixed(2);
+                    div_montant_payer_fc.innerText="Montant en $ : ( "+montnt_argent_dollar_fc+" )";
+                    devis=".Fc."
+
+                    montant_devise_inverse=montnt_argent_dollar_fc;
+
+                }
+            }
+            else
+            {
+                if (btn_radio_devise.checked) 
+                {
+                    montnt_argent_dollar_fc=(txt_montant.value*(montant_taux_base/10)).toFixed(2);
+                    div_montant_payer_fc.innerText="Montant en $ : ( "+montnt_argent_dollar_fc+" )";
+                   
+                    devise_paye="Dollar";
+                    devis=".$."
+
+                    montant_devise_inverse=0;
+                }
+                else 
+                {
+                    devise_paye="Franc Congolais";
+                    devis=".Fc."
+                    montnt_argent_dollar_fc=txt_montant.value;
+
+                    montant_devise_inverse=montnt_argent_dollar_fc;
+                }
+            }
+            
+            
+            symbole_devise.innerHTML=devis;
+            var nombre=txt_montant.value;
+
+            // Convertir le nombre 500000000 en chaîne de caractères
+            const nombreEnChaine =Conversion_Nombre_En_ChaineCaractere(nombre);
+            txt_monte_caractere.innerHTML=nombreEnChaine+" "+devise_paye;
+        });
+
+        txt_montant.addEventListener("blur", function() 
+        {
+            if (!btn_radio_devise.checked) 
+            {
+                //parler("Ton argent en dollar fait , "+(montnt_argent_dollar_fc.toString())) 
+            
+            }
+              
+        });
+
+    }
+
+    // récupération du taux
+    if(txt_tau_jours!==null)
+    {
+      const url='D_Perception/API_PHP/Recup_taux_base.php';
+      fetch(url) 
+      .then(response => response.json())
+      .then(data => {
+        data.forEach(infos => {
+          txt_tau_jours.innerText=infos.montant+" Fc";
+          montant_taux_base=infos.montant;
+        });
+      })
+      .catch(error => console.error('Erreur lors de la récupération des promotions :', error));
+    }
+
+});
 
 
 

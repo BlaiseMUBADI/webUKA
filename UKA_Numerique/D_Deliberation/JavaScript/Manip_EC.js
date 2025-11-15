@@ -15,9 +15,9 @@
 
   if(document.getElementById("div_gen_gestion_SM_ECs")!==null)
   {
-    var code_ue_ec="";
-    var tr_selectionner="";
-    var verfi=true;
+    let code_ue_ec="";
+    let tr_selectionner="";
+    let verfi=true;
 
     const cmb_semestre=document.getElementById('id_semestre_FAC');
     const cmb_promotion_FAC=document.getElementById('code_prom_FAC');
@@ -44,7 +44,7 @@
     if(cmb_semestre!==null)
     {
         cmb_semestre.addEventListener('change',(event)=> {
-          var id_semetre=cmb_semestre.value;
+          let id_semetre=cmb_semestre.value;
           Affichage_UEs_FAC(id_semetre);  
         });
       
@@ -67,15 +67,15 @@
         }
         
         
-        var thead = document.createElement("thead");
+        let thead = document.createElement("thead");
         thead.classList.add("sticky-sm-top","m-0","fw-bold", "text-center"); // Pour ajouter la classe à un element HTMl
 
-        var tr1 = document.createElement("tr");
+        let tr1 = document.createElement("tr");
         tr1.style="background-color:midnightblue; color:white;"
 
-        var td1 = document.createElement("td");      
-        var td2 = document.createElement("td");      
-        var td3 = document.createElement("td");      
+        let td1 = document.createElement("td");      
+        let td2 = document.createElement("td");      
+        let td3 = document.createElement("td");      
 
         td1.textContent = "N°";
         td2.textContent = "UE";
@@ -89,14 +89,14 @@
         thead.appendChild(tr1);
         tab_ue_fac.appendChild(thead);
           
-        var tbody = document.createElement("tbody");
+        let tbody = document.createElement("tbody");
         
         
 
-        var url='API_PHP/Liste_UE_SM_Filiere_donnee.php'+
+        let url='API_PHP/Liste_UE_SM_Filiere_donnee.php'+
         '?id_semestre='+id_semestre_fac;;
             
-        var i=1;
+        let i=1;
         fetch(url) 
         .then(response => response.json())
         .then(data => 
@@ -104,12 +104,12 @@
           data.forEach(infos =>
             {
               // Création de TR
-                  var tr = document.createElement("tr");
+                  let tr = document.createElement("tr");
                   
 
-                  var td_num= document.createElement("td");
-                  var td_ue = document.createElement("td");
-                  var td_categorie = document.createElement("td");
+                  let td_num= document.createElement("td");
+                  let td_ue = document.createElement("td");
+                  let td_categorie = document.createElement("td");
                   
 
                   td_num.textContent =i;
@@ -127,7 +127,7 @@
                   // Ajout de l'évenement sur la ligne appellant
                   // Ajouter l'événement de clic pour afficher les infos de la ligne
                   tr.addEventListener("click", function() {
-                    //var nom_agent=infos.identite;
+                    //let nom_agent=infos.identite;
                     code_ue_ec=infos.Code_ue;
                     Recuperation_ECs(infos.Code_ue,tr);
                     
@@ -155,36 +155,36 @@
     function Recuperation_ECs(code_ue,tr1)
     {
       // Ce bout de code permet de faire une selection de ligne en fixant une couleur de fond
-      var table_ue_fac= document.getElementById("table_ue_fac");
-      var rows = table_ue_fac.getElementsByTagName('tr');  
-      for(var j = 0; j < rows.length; j++) 
+      let table_ue_fac= document.getElementById("table_ue_fac");
+      let rows = table_ue_fac.getElementsByTagName('tr');  
+      for(let j = 0; j < rows.length; j++) 
       {
         if(j!=0) rows[j].style.backgroundColor = '';
       }
       tr1.style.backgroundColor = 'red';
       tr_selectionner=tr1;
       
-      var table_ecs_fac = document.getElementById("table_ecs_fac");
+      let table_ecs_fac = document.getElementById("table_ecs_fac");
 
       while (table_ecs_fac .firstChild) {
         table_ecs_fac.removeChild(table_ecs_fac.firstChild);
       }
       
-      var thead = document.createElement("thead");
+      let thead = document.createElement("thead");
       thead.classList.add("sticky-sm-top","m-0","fw-bold"); // Pour ajouter la classe à un element HTMl
 
-      var tr1 = document.createElement("tr");
+      let tr1 = document.createElement("tr");
       tr1.style="background-color:midnightblue; color:white;"
 
-      var td1 = document.createElement("td");      
-      var td2 = document.createElement("td");
-      var td3 = document.createElement("td");
-      var td4 = document.createElement("td");
-      var td5 = document.createElement("td");
-      var td6 = document.createElement("td");
-      var td7 = document.createElement("td");
-      var td8 = document.createElement("td");
-      var td9 = document.createElement("td");
+      let td1 = document.createElement("td");      
+      let td2 = document.createElement("td");
+      let td3 = document.createElement("td");
+      let td4 = document.createElement("td");
+      let td5 = document.createElement("td");
+      let td6 = document.createElement("td");
+      let td7 = document.createElement("td");
+      let td8 = document.createElement("td");
+      let td9 = document.createElement("td");
         
 
       td1.textContent = "N°";
@@ -212,12 +212,12 @@
       thead.appendChild(tr1);
       table_ecs_fac.appendChild(thead);
         
-      var tbody = document.createElement("tbody");
+      let tbody = document.createElement("tbody");
 
-      var url='API_PHP/Liste_ECs_SM_Filiere_donnee.php'+
+      let url='API_PHP/Liste_ECs_SM_Filiere_donnee.php'+
       '?code_ue='+code_ue+'&code_prom='+cmb_promotion_FAC.value;
 
-        var i=1;
+        let i=1;
         fetch(url) 
         .then(response => response.json())
         .then(data => 
@@ -225,21 +225,21 @@
           data.forEach(infos =>
             {
               // Création de TR
-              var tr = document.createElement("tr");
+              let tr = document.createElement("tr");
               tr.id="tr_"+i;
               
-              var tdnum = document.createElement("td");
+              let tdnum = document.createElement("td");
               tdnum.textContent = i;
               tdnum.classList.add("text-center");
       
-              var td_nom_ec= document.createElement("td");
-              var td_cmi= document.createElement("td");
-              var td_hr_td= document.createElement("td");
-              var td_hr_tp= document.createElement("td");
-              var td_tpe= document.createElement("td");
-              var td_vht= document.createElement("td");
-              var td_credit= document.createElement("td");
-              var td_Action = document.createElement("td"); // La cellule qui contient nos deux btns d'actions
+              let td_nom_ec= document.createElement("td");
+              let td_cmi= document.createElement("td");
+              let td_hr_td= document.createElement("td");
+              let td_hr_tp= document.createElement("td");
+              let td_tpe= document.createElement("td");
+              let td_vht= document.createElement("td");
+              let td_credit= document.createElement("td");
+              let td_Action = document.createElement("td"); // La cellule qui contient nos deux btns d'actions
               
       
               td_nom_ec.textContent =infos.nom_ec;
@@ -254,17 +254,17 @@
               // Ici on crée deux boutons pour l'impressionet la suppression
               // On commence par créer un contenaire qui vas accceuillir nos deux poubont
 
-              var div = document.createElement("div");
+              let div = document.createElement("div");
               div.classList.add("row", "text-center", "p-0", "m-0");
               td_Action.appendChild(div);
 
 
               // Créer le deuxième bouton de la suppression
-              var div2 = document.createElement("div");
+              let div2 = document.createElement("div");
               div2.classList.add("col","p-0", "m-0");
               div.appendChild(div2);
 
-              var btn_suppression = document.createElement("button");
+              let btn_suppression = document.createElement("button");
               btn_suppression.setAttribute("type", "button");
               btn_suppression.classList.add("btn", "btn-primary");
 
@@ -277,7 +277,7 @@
                 infos.Code_ue,tr1);*/
               });
 
-              var i2 = document.createElement("i");
+              let i2 = document.createElement("i");
               i2.classList.add("fas", "fa-trash-alt");
               btn_suppression.appendChild(i2);
 
@@ -320,10 +320,10 @@
       if(verification_info_EC())
       {
       
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", "API_PHP/Ajout_EC.php", true);
-            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-            xhr.onreadystatechange = function() 
+        let xhr = new XMLHttpRequest();
+        xhr.open("POST", "API_PHP/Ajout_EC.php", true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.onreadystatechange = function() 
             {
                 if (xhr.readyState === 4 && xhr.status === 200)
                 {
