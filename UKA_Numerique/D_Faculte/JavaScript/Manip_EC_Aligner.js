@@ -75,41 +75,16 @@
 
   function Affichage_Enseignant_Aligner() {
     let table_aligne_enseignant = document.getElementById("table_aligne_enseignant");
-
-    // Supprimer les enfants existants de la table
-    while (table_aligne_enseignant.firstChild) {
-        table_aligne_enseignant.removeChild(table_aligne_enseignant.firstChild);
+    
+    // NE PAS SUPPRIMER LE THEAD - Seulement vider le tbody
+    let tbody = table_aligne_enseignant.querySelector("tbody");
+    if (!tbody) {
+        tbody = document.createElement("tbody");
+        table_aligne_enseignant.appendChild(tbody);
     }
-
-    // Créer l'en-tête de la table
-    var thead = document.createElement("thead");
-    thead.classList.add("sticky-sm-top", "m-0", "fw-bold", "text-center");
-
-    var tr1 = document.createElement("tr");
-    tr1.style = "background-color:midnightblue; color:white;";
-
-    var td1 = document.createElement("td");
-    var td2 = document.createElement("td");
-    var td3 = document.createElement("td");
-    var td4 = document.createElement("td");
-    var td5 = document.createElement("td");
-
-    td1.textContent = "N°";
-    td2.textContent = "Enseignant";
-    td3.textContent = "Domaine";
-    td4.textContent = "Titre";
-    td5.textContent = "Filière";
-
-    tr1.appendChild(td1);
-    tr1.appendChild(td2);
-    tr1.appendChild(td3);
-    tr1.appendChild(td4);
-    tr1.appendChild(td5);
-
-    thead.appendChild(tr1);
-    table_aligne_enseignant.appendChild(thead);
-
-    var tbody = document.createElement("tbody");
+    
+    // Vider uniquement le tbody
+    tbody.innerHTML = "";
 
     var url = 'API_PHP/Liste_Enseignants.php';
 
@@ -169,7 +144,7 @@
             console.log("Erreur lors de la récupération des enseignants: " + error);
         });
 
-    table_aligne_enseignant.appendChild(tbody);
+    // Le tbody est déjà dans la table, pas besoin de l'ajouter
     table_aligne_enseignant.classList.add("table-striped");
 }
 
@@ -180,38 +155,16 @@
 function Affichage_ECs_Par_Filiere() 
 {
   let table_ecs = document.getElementById("table_aligne_EC");
-
-  // Supprimer les enfants existants de la table
-  while (table_ecs.firstChild) {
-      table_ecs.removeChild(table_ecs.firstChild);
+  
+  // NE PAS SUPPRIMER LE THEAD - Seulement vider le tbody
+  let tbody = table_ecs.querySelector("tbody");
+  if (!tbody) {
+      tbody = document.createElement("tbody");
+      table_ecs.appendChild(tbody);
   }
-
-  // Créer l'en-tête de la table
-  var thead = document.createElement("thead");
-  thead.classList.add("sticky-sm-top", "m-0", "fw-bold", "text-center");
-
-  var tr1 = document.createElement("tr");
-  tr1.style = "background-color:midnightblue; color:white;";
-
-  var td1 = document.createElement("td");
-  var td2 = document.createElement("td");
-  var td3 = document.createElement("td");
-  var td4 = document.createElement("td");
-
-  td1.textContent = "N°";
-  td2.textContent = "Action";
-  td3.textContent = "Intitulé EC";
-  td4.textContent = "Crédits";
-
-  tr1.appendChild(td1);
-  tr1.appendChild(td2);
-  tr1.appendChild(td3);
-  tr1.appendChild(td4);
-
-  thead.appendChild(tr1);
-  table_ecs.appendChild(thead);
-
-  var tbody = document.createElement("tbody");
+  
+  // Vider uniquement le tbody
+  tbody.innerHTML = "";
   var i = 1;
 
   var url = 'API_PHP/Liste_EC_Aligne.php';
@@ -247,15 +200,11 @@ function Affichage_ECs_Par_Filiere()
 
 
         var div = document.createElement("div");
-        div.classList.add("row", "text-center", "p-0", "m-0");
-        div.style.display = "flex";
-        div.style.justifyContent = "center";
-        div.style.alignItems = "center";
+        div.classList.add("d-flex", "justify-content-center", "align-items-center", "p-0", "m-0");
 
-        var case_cocher=document.createElement("input");
-        case_cocher.type="checkbox";
-        case_cocher.style.width = "20px"; // Augmenter la largeur
-        case_cocher.style.height = "20px"; // Augmenter la hauteur
+        var case_cocher = document.createElement("input");
+        case_cocher.type = "checkbox";
+        case_cocher.classList.add("form-check-input", "m-0");
         case_cocher.classList.add("form-check-input")
 
         
@@ -304,7 +253,8 @@ function Affichage_ECs_Par_Filiere()
   {
     console.log("Erreur lors de la récupération des ECs: " + error);
   });
-  table_ecs.appendChild(tbody);
+  
+  // Le tbody est déjà dans la table, pas besoin de l'ajouter
   table_ecs.classList.add("table-striped");
 }
 
@@ -317,14 +267,15 @@ function Affichage_ECs_Par_Filiere()
   */
   function Selectionner_Enseignant(mat_agent,tr1)
   {
-    // Ce bout de code permet de faire une selection de ligne en fixant une couleur de fond
+    // Ce bout de code permet de faire une selection de ligne en utilisant une classe CSS
     var table_aligne_enseignant= document.getElementById("table_aligne_enseignant");
-    var rows = table_aligne_enseignant.getElementsByTagName('tr');  
-    for(var j = 0; j < rows.length; j++) 
-    {
-      if(j!=0) rows[j].style.backgroundColor = '';
-    }
-    tr1.style.backgroundColor = 'RGBA(255,200,1,0.5)';
+    var rows = table_aligne_enseignant.querySelectorAll('tbody tr');  
+    
+    // Retirer la classe 'selected' de toutes les lignes
+    rows.forEach(row => row.classList.remove('selected'));
+    
+    // Ajouter la classe 'selected' à la ligne cliquée
+    tr1.classList.add('selected');
     tr_selectionner=tr1;
     
 

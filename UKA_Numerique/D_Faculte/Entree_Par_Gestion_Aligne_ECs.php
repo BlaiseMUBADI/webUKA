@@ -2,7 +2,7 @@
 
 <section class="home-section" style="height: 100%;">
       <?php
-        require_once '../D_Generale/Profil_User_Connecter.php';
+        require_once '../D_Generale/Profil_Gestion_delibe.php';
       ?>
   <div class="home-content m-0 me-3 ms-3 " id="div_gen_Aligne_Enseignant">
 
@@ -108,54 +108,101 @@
 
 
     <!----------------------------------------------------------------------------------------------->
-    <!-------CE BLOC CONCERNE L'AFFICHAGE DES ETUDIANTS ET AFFICHAGE DE DETAILLE A COTE-------------->
+    <!-------CE BLOC CONCERNE L'AFFICHAGE : ENSEIGNANTS | ASSISTANTS | ECs------------------------->
     <!----------------------------------------------------------------------------------------------->
 
     <div class="home-content text-center m-0 p-3 mt-1 border" 
           style="background-color:rgb(39,55,70);height:500px">
 
-      <div class="container p-0 m-0" style="width: 48%; float: left;height:100%;">
-
-
-        <div class="container table-responsive small p-0 m-0" style="width: 100%; height:100%;">
-        
-          <table  class="tab1 table-bordered table-hover text-center" id="table_aligne_enseignant" style="width:100%;">              
-            <thead class="sticky-sm-top m-0 fw-bold ">
+      <!-- Colonne 1 : ENSEIGNANTS (33%) -->
+      <div class="container p-0 m-0 me-2" style="width: 33%; float: left; height:100%;">
+        <div class="mb-2 p-2 rounded d-flex justify-content-between align-items-center" 
+             style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white;">
+          <div>
+            <i class="fas fa-chalkboard-teacher me-2"></i>
+            <strong>Enseignants</strong>
+          </div>
+          <span class="badge bg-light text-primary" id="badge_enseignants">0</span>
+        </div>
+        <div class="container table-responsive small p-0 m-0" style="width: 100%; height:calc(100% - 50px); overflow-y: auto; overflow-x: hidden;">
+          <table class="tab1 table-bordered table-hover text-center" id="table_aligne_enseignant" style="width:100%;">              
+            <thead>
               <tr>
-                <th>N°</th>
-                <th>Agent</th>
-                <th>Domaine</th>
-                <th>Filière</th>
+                <th style="width: 10%;">N°</th>
+                <th style="width: 50%;">ENSEIGNANT</th>
+                <th style="width: 25%;">DOMAINE</th>
+                <th style="width: 15%;">TITRE</th>
               </tr>
             </thead>
-            
             <tbody>
-              
             </tbody>
           </table> 
         </div>
       </div>
 
-      <div class="container p-0 m-0" style="width: 48%; float:right; height:100%;">
-
-
-        <div class="container table-responsive small p-0 m-0" style="width: 100%;height:100%;">
-          <table  class="tab1  table-bordered table-hover table-striped" id="table_aligne_EC" style="width:100%; ">              
-            <thead class="sticky-sm-top m-0 fw-bold ">
+      <!-- Colonne 2 : ASSISTANTS (33%) -->
+      <div class="container p-0 m-0 me-2" style="width: 33%; float: left; height:100%;">
+        <div class="mb-2 p-2 rounded d-flex justify-content-between align-items-center" 
+             style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: white;">
+          <div>
+            <i class="fas fa-user-graduate me-2"></i>
+            <strong>Assistants</strong>
+          </div>
+          <span class="badge bg-light text-success" id="badge_assistants">0</span>
+        </div>
+        <div class="container table-responsive small p-0 m-0" style="width: 100%; height:calc(100% - 50px); overflow-y: auto; overflow-x: hidden;">
+          <table class="tab1 table-bordered table-hover text-center" id="table_aligne_assistant" style="width:100%;">              
+            <thead>
               <tr>
-                <th>N°</th>
-                <th>EC</th>
-                <th>Crédit</th>
-                <th>Hr TP</th>
-                <th>Hr TD</th>
-                <th>Attribuer</th>
+                <th style="width: 10%;">N°</th>
+                <th style="width: 60%;">ASSISTANT</th>
+                <th style="width: 30%;">STATUT</th>
               </tr>
             </thead>
             <tbody>
+              <tr class="empty-state">
+                <td colspan="3" class="text-center text-muted fst-italic" style="padding: 40px 20px; background: rgba(148, 163, 184, 0.05);">
+                  <div style="font-size: 2rem; opacity: 0.3; margin-bottom: 10px;">
+                    <i class="fas fa-hand-pointer"></i>
+                  </div>
+                  <div style="font-size: 0.9rem;">Sélectionnez un enseignant</div>
+                </td>
+              </tr>
+            </tbody>
+          </table> 
+        </div>
+      </div>
+
+      <!-- Colonne 3 : ECs (30%) -->
+      <div class="container p-0 m-0" style="width: 30%; float: left; height:100%;">
+        <div class="mb-2 p-2 rounded d-flex justify-content-between align-items-center" 
+             style="background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%); color: white;">
+          <div>
+            <i class="fas fa-book-open me-2"></i>
+            <strong>Éléments Constitutifs (ECs)</strong>
+          </div>
+          <span class="badge bg-light text-purple" id="badge_ecs" style="color: #7c3aed;">0</span>
+        </div>
+        <div class="container table-responsive small p-0 m-0" style="width: 100%; height:calc(100% - 50px); overflow-y: auto; overflow-x: hidden;">
+          <table class="tab1 table-bordered table-hover table-striped" id="table_aligne_EC" style="width:100%;">              
+            <thead>
+              <tr>
+                <th style="width: 8%;">N°</th>
+                <th style="width: 10%;">ACTION</th>
+                <th style="width: 35%;">INTITULÉ EC</th>
+                <th style="width: 15%;">CRÉDITS</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td colspan="6" class="text-muted fst-italic" style="padding: 30px;">
+                  <i class="fas fa-hand-pointer me-2"></i>
+                  Sélectionnez un enseignant ou un assistant
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>
-        
       </div>     
     </div>
     <!-------------------------------Fin bloc affichage SM et UEs ---------------------------------------------->

@@ -2,37 +2,11 @@
 
 <section class="home-section" style="height: 100%;">
       <?php
-        require_once '../D_Generale/Profil_User_Connecter.php';
+        require_once '../D_Generale/Profil_Gestion_delibe.php';
       ?>
   <div class="home-content me-3 ms-3"   id="div_gen_Enseignant">
 
-    <!----------------------------- ------------------- -----------------------------
-    <!-------------------------------- ICI LE BLOC POUR RECHERCHE DES UTILISATEURS --------------
-    <div class="container m-0 p-3 mt-1 border"
-      style=" width:100%; margin:0px; background-color:#273746;color:white; font-weight:bold;">
-      <div class="container">
-
-          <div class="input-group p-1 border rounded">
-            
-            <span class="input-group-text p-0 border-0 font-weight-bold" 
-                style="background-color:#273746;color:white;">Recherche user ... </span>
-
-            <input id="txt_recherch_user" type="text" 
-            class="form-control p-0 ps-2 fw-bolder text-s border-0" 
-                                aria-label="Saisir en franc congolais"
-                                style="background-color:#273746;color:white; font-weight:bold;">
-            
-          </div>
-      </div>
-    </div>
-    <!-----------------------------  FIN BLOC RECHERCHE ----------------------------------->
-    <!------------------------------------------------------------------------------------->
-
-
-
-    <!----------------------------------------------------------------------------------------------->
-    <!-------CE BLOC CONCERNE L'AFFICHAGE DES ETUDIANTS ET AFFICHAGE DE DETAILLE A COTE-------------->
-    <!----------------------------------------------------------------------------------------------->
+    ----------------------------------------------------------------------------------------------->
 
     <div class="home-content text-center m-0 p-3 mt-5 border" 
           style="background-color:rgb(39,55,70);height:450px">
