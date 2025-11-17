@@ -277,4 +277,225 @@ const dizaines = [
     speech.text = text;
     window.speechSynthesis.speak(speech);
 }
+ 
+
+
+
+// ICI LA FONCTION POUR LA RECUPERATIONS DES PROMOTIONS EN FONCTION DE LA FILIERE CHOISIE
+// Paramètre optionnel comboId pour spécifier un ID différent (ex: "promo_frais_fixer" pour D_Budget)
+var tr_globale_ligne_select_etudiant=""; // Est une varibale qui doit contenir un objet de la ligne selection sur le tableau qui affiche les étudiants
+
+
+function Affichage_promotion(Idfiliere, comboId = "promo") 
+{
   
+    // Utiliser l'ID spécifié ou l'ID par défaut "promo"
+    var target_combo = document.getElementById(comboId);
+    
+    if(target_combo === null) {
+        console.error("Combo box avec l'ID '" + comboId + "' introuvable");
+        return;
+    }
+
+    target_combo.innerHTML = "";
+  
+    
+    // Contacte de l'API PHP - Chemin absolu depuis la racine pour fonctionner partout
+    const url='../D_Generale/API_PHP/Recup_prom_filiere.php?idFiliere='+Idfiliere;
+          
+    fetch(url) 
+    .then(response => response.json())
+    .then(data => {
+      data.forEach(infos => {
+        
+
+        const option = document.createElement("option");
+        option.value = infos.cd_prom;
+        option.textContent = infos.abv+" - "+infos.lib_mention;
+    
+        // Ajouter l'option à la balise select
+        target_combo.appendChild(option);
+
+        //target_combo.innerHTML += "<option style='width:100%;'value='"+infos.cd_prom+"'>"+infos.abv+" - "+infos.lib_mention+"</option>";
+        //console.log("Code promo est "+infos.cd_prom+" la promo "+infos.abv+" - "+infos.lib_mention);
+        
+      });
+    })
+    .catch(error => console.error('Erreur lors de la récupération des promotions :', error));
+  
+}
+  ////////////////////////////////////////////////////////////////////////////////////////////
+
+
+// LA FONCTION D'AFFIHAGE DES ETUDIANTS D'UNE PROMOTION DANS UNE ANNEE ACADEMIQUE CHOISIE
+function Affichage_etudiant(code_promo,Id_an_acad,tableau)
+{
+
+    // ici on appele la méthode pour l'affichage des modalités
+    Affichage_modalite_paiemnt();
+    
+    // Tableau passé en paramètre au lieu de document.getElementById
+
+    // NE PAS SUPPRIMER LE THEAD - Seulement vider le tbody
+    let tbody = tableau.querySelector("tbody");
+    if (!tbody) {
+        tbody = document.createElement("tbody");
+        tableau.appendChild(tbody);
+    }
+    
+    // Vider uniquement le tbody
+    tbody.innerHTML = "";
+    
+    // Contacter l'API pour avoir les étudiants - Chemin absolu depuis la racine
+    var url='../D_Generale/API_PHP/liste_etudiant.php?Id_annee_acad='+Id_an_acad+'&code_promo='+code_promo;
+        
+    var i=1;
+    fetch(url) 
+    .then(response => response.json())
+    .then(data => 
+    {
+      data.forEach(infos =>
+        {
+          // Création de TR
+              var tr = document.createElement("tr");
+             
+
+
+              var tdnum = document.createElement("td");
+              tdnum.textContent = i;
+
+              var tdmatricule= document.createElement("td");
+              var tdnom = document.createElement("td");
+              var tdpostnom = document.createElement("td");
+              var tdprnom = document.createElement("td");
+              var tdsexe = document.createElement("td");
+              
+
+              tdmatricule.textContent =infos.Matricule;
+              tdnom.textContent=infos.Nom
+              tdpostnom.textContent=infos.Postnom;
+              tdprnom.textContent=infos.Prenom;
+              tdsexe.textContent=infos.Sexe;
+             
+              
+              tr.appendChild(tdnum);
+              tr.appendChild(tdmatricule);
+              tr.appendChild(tdnom);
+              tr.appendChild(tdpostnom);
+              tr.appendChild(tdprnom);
+              tr.appendChild(tdsexe);
+              tr_globale_ligne_select_etudiant=tr;
+              
+              
+              tbody.appendChild(tr);
+              i++;
+
+              // Ajout de l'évenement sur la lign appellant
+              // Ajouter l'événement de clic pour afficher les infos de la ligne
+              //tr.style.backgroundColor = '';
+              tr.addEventListener("click", function() {
+                
+                Recuperation_situation_finaniere(infos.Matricule,infos.Nom,infos.Postnom,
+                infos.Prenom,infos.Sexe,Id_an_acad,tr_globale_ligne_select_etudiant);
+                //tr.style.backgroundColor = 'red';
+                
+              });
+
+              
+              
+              
+        });
+          
+        }).catch(error => {
+          // Traitez l'erreur ici
+          console.log("Erreur lor de contacte des etudiants "+error);});
+          // tbody déjà dans le DOM, pas besoin de l'ajouter
+          tableau.classList.add("table-striped");
+}
+
+
+
+// LA FONCTION D'AFFIHAGE DES ETUDIANTS D'UNE PROMOTION DANS UNE ANNEE ACADEMIQUE CHOISIE
+function Affichage_etudiant_2(code_promo,Id_an_acad,txt_nom,tableau)
+{
+    // Tableau passé en paramètre au lieu de document.getElementById
+
+    // NE PAS SUPPRIMER LE THEAD - Seulement vider le tbody
+    let tbody = tableau.querySelector("tbody");
+    if (!tbody) {
+        tbody = document.createElement("tbody");
+        tableau.appendChild(tbody);
+    }
+    
+    // Vider uniquement le tbody
+    tbody.innerHTML = "";
+    
+    // Contacter l'API pour avoir les étudiants - Chemin absolu depuis la racine
+    var url='../D_Generale/API_PHP/liste_etudiant.php'
+    +'?Id_annee_acad='+Id_an_acad
+    +'&code_promo='+code_promo
+    +'&Mot_recherche='+txt_nom;
+        
+    var i=1;
+    fetch(url) 
+    .then(response => response.json())
+    .then(data => 
+    {
+      data.forEach(infos =>
+        {
+          // Création de TR
+              var tr = document.createElement("tr");
+
+
+              var tdnum = document.createElement("td");
+              tdnum.textContent = i;
+
+              var tdmatricule= document.createElement("td");
+              var tdnom = document.createElement("td");
+              var tdpostnom = document.createElement("td");
+              var tdprnom = document.createElement("td");
+              var tdsexe = document.createElement("td");
+              
+
+              tdmatricule.textContent =infos.Matricule;
+              tdnom.textContent=infos.Nom
+              tdpostnom.textContent=infos.Postnom;
+              tdprnom.textContent=infos.Prenom;
+              tdsexe.textContent=infos.Sexe;
+             
+              
+              tr.appendChild(tdnum);
+              tr.appendChild(tdmatricule);
+              tr.appendChild(tdnom);
+              tr.appendChild(tdpostnom);
+              tr.appendChild(tdprnom);
+              tr.appendChild(tdsexe);
+              
+              
+              tr_globale_ligne_select_etudiant=tr;
+              tbody.appendChild(tr);
+              i++;
+
+              // Ajout de l'évenement sur la lign appellant
+              // Ajouter l'événement de clic pour afficher les infos de la ligne
+              tr.addEventListener("click", function() {
+
+                Recuperation_situation_finaniere(infos.Matricule,infos.Nom,infos.Postnom,
+                  infos.Prenom,infos.Sexe,Id_an_acad,tr_globale_ligne_select_etudiant);
+                
+              });
+
+              
+              
+              
+        });
+          
+        }).catch(error => {
+          // Traitez l'erreur ici
+          console.log("Erreur lor de contacte des etudiants "+error);});
+          // tbody déjà dans le DOM, pas besoin de l'ajouter
+          tableau.classList.add("table-striped");
+}
+//////////////////////////////////////////////////////////////////////////////////////
+
+

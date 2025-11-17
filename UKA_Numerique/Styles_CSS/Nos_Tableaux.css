@@ -1,106 +1,274 @@
 
-     
-        .dive_tab
-        {
-            border: 0px solid red;
-            width: 100%;
-            height: 700px;
-            position: relative;
-            left: 0%;
-            z-index: 2;
-            overflow: auto;
-            padding: 10px;
+/* ===== Conteneurs de tableaux ===== */
+.dive_tab {
+    width: 100%;
+    height: 700px;
+    position: relative;
+    z-index: 2;
+    overflow: auto;
+    padding: 10px;
+}
 
-        }
-        .dive_tab2
-        {
-            border: 0px solid red;
-            width: 30%;
-            height: 465px;
-            position: relative;
-            left: 67%;
-            z-index: 2;
-            overflow: auto;
-            padding: 10px;
+.dive_tab2 {
+    width: 30%;
+    height: 465px;
+    position: relative;
+    left: 67%;
+    z-index: 2;
+    overflow: auto;
+    padding: 10px;
+}
 
-        }
-        
-          .tab1
-          {
-            border-collapse: collapse;
-            min-width: 200px;            
-            box-shadow: 0 5px 5px rgb(0, 0, 0,15);
-            z-index: 1;
-            box-shadow: 0 5px 5px rgb(0, 0, 0,15);
-            cursor: pointer;
-            margin: auto;
-            border: 1px solid #ddd;
-            position: relative;
-            border-radius: 10px;
+/* ===== Conteneurs scrollables pour sticky headers ===== */
+.table-responsive {
+    position: relative;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
 
-          }
-          table tr:hover
-          {
-            background-color:  midnightblue;
-            color: rgb(247, 255, 9);
-            box-shadow: 1px 1px 10px white;
-          }
-          
-          thead tr
-          {
-            background-color: midnightblue;
-            color: #fff;
-            text-align: left;
-            z-index: 0;
-          }
-          thead
-          {
-            background-color: midnightblue;
-            z-index: 1;
-          }
+.home-content .table-responsive {
+    max-height: 100%;
+}
 
-          
+/* ===== Style des tableaux ===== */
+.tab1 {
+    border-collapse: separate;
+    border-spacing: 0;
+    min-width: 200px;
+    width: 100%;
+    margin: 0;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    background: white;
+    position: relative;
+}
 
-          td
-          {
-            
-            padding: 3px 3px 1px 2px;
-          }
-          th
-          {            
-            background-color: midnightblue;
-            color: white;
-            padding: 5px;
-          }
+/* ===== En-têtes de tableaux STICKY (fixes) ===== */
+.tab1 thead {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+}
 
-          tr,th,td,a
-          {
-            border: 0px solid #ddd;
-            padding: 7px;
-          }
-          tr:nth-child(even)
-          {
-            background-color: steelblue ;
-            color: white;
-          }
-          tr:nth-child(odd)
-          {
-            background-color: #fff ;
-            color: black;
-          } 
-          
-          a
-          {
-            text-decoration:none;
-          }
+.tab1 thead tr {
+    background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+    color: white;
+    text-align: center;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
 
-          a:nth-child(even)
-          {
-            color: white;
-          }
-          a:nth-child(odd)
-          {
-            color: black;
-          } 
+.tab1 thead th,
+.tab1 thead td {
+    padding: 12px 15px;
+    border: none;
+    background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%) !important;
+    color: white !important;
+    position: -webkit-sticky !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 1000 !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* ===== Corps des tableaux ===== */
+.tab1 tbody tr {
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.tab1 tbody tr:nth-child(even) {
+    background-color: #f8fafc;
+}
+
+.tab1 tbody tr:nth-child(odd) {
+    background-color: white;
+}
+
+.tab1 tbody tr:hover {
+    background: linear-gradient(90deg, rgba(30, 58, 138, 0.1) 0%, rgba(59, 130, 246, 0.15) 100%);
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+}
+
+.tab1 tbody tr.selected {
+    background: linear-gradient(90deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.1) 100%);
+    border-left: 4px solid #22c55e;
+}
+
+.tab1 tbody td {
+    padding: 10px 15px;
+    color: #1f2937;
+    font-size: 0.9rem;
+}
+
+/* ===== Liens dans les tableaux ===== */
+.tab1 a {
+    text-decoration: none;
+    color: #3b82f6;
+    transition: color 0.2s ease;
+}
+
+.tab1 a:hover {
+    color: #1e40af;
+    text-decoration: underline;
+}
+
+/* ===== En-têtes de colonnes avec dégradés ===== */
+.home-content .mb-2 {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s ease;
+}
+
+.home-content .mb-2:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.home-content .mb-2 h6,
+.home-content .mb-2 strong {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    font-size: 0.95rem;
+    letter-spacing: 0.5px;
+}
+
+/* ===== Conteneurs de tableaux avec effet glassmorphism ===== */
+.home-content .table-responsive {
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+/* ===== Badges de comptage ===== */
+.badge {
+    font-size: 0.75rem;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    min-width: 28px;
+    text-align: center;
+}
+
+/* ===== Message d'attente dans table assistants ===== */
+.tab1 tbody tr.empty-state {
+    background: transparent !important;
+    cursor: default !important;
+}
+
+.tab1 tbody tr.empty-state:hover {
+    background: transparent !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.tab1 tbody tr.empty-state td {
+    border: none !important;
+}
+
+.tab1 tbody .text-muted {
+    color: #94a3b8 !important;
+}
+
+/* ===== Indicateur de sélection avec bordure colorée ===== */
+.tab1 tbody tr.selected {
+    background: linear-gradient(90deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.1) 100%);
+    border-left: 4px solid #22c55e;
+    position: relative;
+}
+
+.tab1 tbody tr.selected::after {
+    content: '✓';
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #22c55e;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+/* ===== Checkboxes personnalisées ===== */
+.tab1 .form-check-input {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    border: 2px solid #cbd5e1;
+    transition: all 0.2s ease;
+}
+
+.tab1 .form-check-input:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.tab1 .form-check-input:checked {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+}
+
+/* ===== Animations d'entrée pour les colonnes ===== */
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.home-content > div:nth-child(1) {
+    animation: slideInLeft 0.4s ease-out;
+}
+
+.home-content > div:nth-child(2) {
+    animation: slideInLeft 0.5s ease-out;
+}
+
+.home-content > div:nth-child(3) {
+    animation: slideInRight 0.6s ease-out;
+}
+
+/* ===== Scrollbar personnalisée ===== */
+.dive_tab::-webkit-scrollbar,
+.dive_tab2::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.dive_tab::-webkit-scrollbar-track,
+.dive_tab2::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+}
+
+.dive_tab::-webkit-scrollbar-thumb,
+.dive_tab2::-webkit-scrollbar-thumb {
+    background: #94a3b8;
+    border-radius: 4px;
+}
+
+.dive_tab::-webkit-scrollbar-thumb:hover,
+.dive_tab2::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+} 
               
     

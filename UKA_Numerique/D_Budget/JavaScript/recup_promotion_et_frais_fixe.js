@@ -6,160 +6,124 @@ console.log(" je suis dans js de fixation de frais");
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 */
 
+// Déclaration des variables globales - seront initialisées dans DOMContentLoaded
+let cmb_filiere_frais;
+let cmb_promotion_frais;
+let cmb_annee_academique_frais;
+let cmb_frais;
+let div_contenaire_taux;
+let div_id_taux;
+let div_taux;
+let div_date_mod;
+let txt_taux;
+let txt_taux_caractere;
+let txt_montant_caractere;
+let txt_montant_frais;
+let txt_tranche;
+let date_modif;
 
-const cmb_filiere_frais=document.getElementById("filiere_frais_fixer");
-const cmb_promotion_frais=document.getElementById("promo_frais_fixer");
-const cmb_annee_academique_frais=document.getElementById("Id_an_acad_frais_fixer");
-const cmb_frais=document.getElementById("select_motif_frais");
-
-const div_contenaire_taux=document.getElementById("div_contenaire_taux");
-
-const div_id_taux=document.getElementById("div_id_taux");
-const div_taux=document.getElementById("div_taux");
-const div_date_mod=document.getElementById("div_date_mod");
-const txt_taux=document.getElementById("txt_taux");
-const txt_taux_caractere=document.getElementById("txt_taux_caractere");
-const txt_montant_caractere=document.getElementById("txt_monte_caractere");
-
-const txt_montant_frais=document.getElementById("txt_montant_frais");
-const txt_tranche=document.getElementById("txt_tranche_frais");
-
-
-
-
-
-
-
-
-
-
-const date_modif=document.getElementById("date_modif_taux");
-
-//nst div
 /*
 *+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 * ++++++++++++++++++++++++ La partie d'ajout des évenements à chaque composant +++++++++++++++++++
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 */
 
- // Lorque le combo box de filiere  change
- // on test si l'élement existe vraiment sur la page html
- if(cmb_filiere_frais!==null)
- {
-  cmb_filiere_frais.addEventListener('change',(event) => {
-    var id_filiere=cmb_filiere_frais.value;
-    Affichage_promotion_fixe(id_filiere);
-  });
+document.addEventListener("DOMContentLoaded", function(event) {
+  // Vérifier si nous sommes sur la page Budget avec ce conteneur spécifique
+  const container = document.getElementById("div_gen_Budget") || document;
 
- }
-
-// Lorsque le combo de promoton change
-// on test si l'élement existe vraiment sur la page html
-if(cmb_promotion_frais!==null)
-{
-  cmb_promotion_frais.addEventListener('change',(event)=> {
-    var code_promo=cmb_promotion_frais.value;
-    var Id_annee=cmb_annee_academique_frais.value;
+  // Initialiser tous les éléments
+  cmb_filiere_frais = container.querySelector("#filiere_frais_fixer") || document.getElementById("filiere_frais_fixer");
+  cmb_promotion_frais = container.querySelector("#promo_frais_fixer") || document.getElementById("promo_frais_fixer");
+  cmb_annee_academique_frais = container.querySelector("#Id_an_acad_frais_fixer") || document.getElementById("Id_an_acad_frais_fixer");
+  cmb_frais = container.querySelector("#select_motif_frais") || document.getElementById("select_motif_frais");
   
-    Affichage_Frais_par_promotion(code_promo,Id_annee);
+  div_contenaire_taux = container.querySelector("#div_contenaire_taux") || document.getElementById("div_contenaire_taux");
+  div_id_taux = container.querySelector("#div_id_taux") || document.getElementById("div_id_taux");
+  div_taux = container.querySelector("#div_taux") || document.getElementById("div_taux");
+  div_date_mod = container.querySelector("#div_date_mod") || document.getElementById("div_date_mod");
   
+  txt_taux = container.querySelector("#txt_taux") || document.getElementById("txt_taux");
+  txt_taux_caractere = container.querySelector("#txt_taux_caractere") || document.getElementById("txt_taux_caractere");
+  txt_montant_caractere = container.querySelector("#txt_monte_caractere") || document.getElementById("txt_monte_caractere");
+  txt_montant_frais = container.querySelector("#txt_montant_frais") || document.getElementById("txt_montant_frais");
+  txt_tranche = container.querySelector("#txt_tranche_frais") || document.getElementById("txt_tranche_frais");
   
-  });
+  date_modif = container.querySelector("#date_modif_taux") || document.getElementById("date_modif_taux");
 
-}
+  // Lorque le combo box de filiere change
+  if(cmb_filiere_frais !== null) {
+    cmb_filiere_frais.addEventListener('change', (event) => {
+      var id_filiere = cmb_filiere_frais.value;
+      // Utilisation de la fonction du fichier D_Generale avec l'ID spécifique "promo_frais_fixer"
+      Affichage_promotion(id_filiere, "promo_frais_fixer");
+    });
+  }
 
-///////////////////////////////////////////////////////////////////////////////////////////////
+  // Lorsque le combo de promotion change
+  if(cmb_promotion_frais !== null) {
+    cmb_promotion_frais.addEventListener('change', (event) => {
+      var code_promo = cmb_promotion_frais.value;
+      var Id_annee = cmb_annee_academique_frais.value;
+      Affichage_Frais_par_promotion(code_promo, Id_annee);
+    });
+  }
 
-// Lorsque le combo de des années academique a changé
-// on test si l'élement existe vraiment sur la page html
-if(cmb_annee_academique_frais!==null)
-{
-  cmb_annee_academique_frais.addEventListener('change',(event)=> {
-    var code_promo=cmb_promotion_frais.value;
-    var Id_annee=cmb_annee_academique_frais.value;
-  
-    console.log("code promo = "
-      +code_promo+" id_annee_academiqe = "+Id_annee);
-    Affichage_Frais_par_promotion(code_promo,Id_annee)
-  
-  });
+  // Lorsque le combo des années académiques a changé
+  if(cmb_annee_academique_frais !== null) {
+    cmb_annee_academique_frais.addEventListener('change', (event) => {
+      var code_promo = cmb_promotion_frais.value;
+      var Id_annee = cmb_annee_academique_frais.value;
+      Affichage_Frais_par_promotion(code_promo, Id_annee);
+    });
+  }
 
-}
-
-// Lorsque on est entrain de sair un text dans la zone de rehecher
-
-
-// on test si l'élement existe vraiment sur la page html
-if(txt_taux!==null)
-{
+  // Lorsque on saisit le taux
+  if(txt_taux !== null) {
     txt_taux.addEventListener("keyup", function(event) {
-    
-    var txt_tau=txt_taux.value;
-    var taux_caracter=Conversion_Nombre_En_ChaineCaractere(txt_tau);
-    txt_taux_caractere.innerHTML=taux_caracter+" Franc Congolais";
-  });
+      var txt_tau = txt_taux.value;
+      var taux_caracter = Conversion_Nombre_En_ChaineCaractere(txt_tau);
+      txt_taux_caractere.innerHTML = taux_caracter + " Franc Congolais";
+    });
+  }
 
-}
-
-
-if(txt_montant_frais!==null)
-{
+  // Lorsque on saisit le montant des frais
+  if(txt_montant_frais !== null) {
     txt_montant_frais.addEventListener("keyup", function(event) {
-    
-
-
-      var devise= "Franc Congolais";//document.querySelector("dollar").value;
-
-      if(document.getElementById("dollar").checked)
-      {
-        devise="Dollar"
-      }
-      var montant=txt_montant_frais.value;
-      var montant_1=Conversion_Nombre_En_ChaineCaractere(montant);
-      txt_montant_caractere.innerHTML=montant_1+" "+devise;
-  });
-
-}
-
-
-
-
-
-
-
-if(div_contenaire_taux!==null)
-{
-  // Contacte de l'API PHP
-    const url='D_Budget/API_PHP/Recup_taux_base.php';
-          
-    fetch(url) 
-    .then(response => response.json())
-    .then(data => {
-      data.forEach(infos => {
-        
-
-        div_id_taux.innerHTML=infos.id_taux;
-        div_taux.innerHTML=infos.montant;
-        div_date_mod.innerHTML=infos.date_mod;
+      var devise = "Franc Congolais";
       
-      });
-    })
-    .catch(error => console.error('Erreur lors de la récupération des promotions :', error));
-  
+      if(document.getElementById("dollar").checked) {
+        devise = "Dollar";
+      }
+      var montant = txt_montant_frais.value;
+      var montant_1 = Conversion_Nombre_En_ChaineCaractere(montant);
+      txt_montant_caractere.innerHTML = montant_1 + " " + devise;
+    });
+  }
 
-}
+  // Chargement du taux de base
+  if(div_contenaire_taux !== null) {
+    const url = '/webUKA/UKA_Numerique/D_Budget/API_PHP/Recup_taux_base.php';
+    
+    fetch(url) 
+      .then(response => response.json())
+      .then(data => {
+        data.forEach(infos => {
+          div_id_taux.innerHTML = infos.id_taux;
+          div_taux.innerHTML = infos.montant;
+          div_date_mod.innerHTML = infos.date_mod;
+        });
+      })
+      .catch(error => console.error('Erreur lors de la récupération du taux :', error));
+  }
 
-
-
-
-if (date_modif !== null) 
-{
-  var date_actuelle = new Date();
-// Obtenir la date au format YYYY-MM-DD
-var formattedDate = date_actuelle.toISOString().substr(0, 10);
-// Ici on test si l'élement selectionner est present sur la page html
-  date_modif.value = formattedDate;
-}
+  // Initialisation de la date de modification
+  if(date_modif !== null) {
+    var date_actuelle = new Date();
+    var formattedDate = date_actuelle.toISOString().substr(0, 10);
+    date_modif.value = formattedDate;
+  }
+});
 
 
 
@@ -169,39 +133,9 @@ var formattedDate = date_actuelle.toISOString().substr(0, 10);
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 */
 
-// ICI LA FONCTION POUR LA RECUPERATIONS DES PROMOTIONS EN FONCTION DE LA FILIERE CHOISIE
-function Affichage_promotion_fixe(Idfiliere ) {
-
-    // Réinitialiser le contenu de la balise select des promotions
-    var cmb_promotion=document.getElementById("promo_frais_fixer");
-    cmb_promotion.innerHTML = "";
-  
-    
-    // Contacte de l'API PHP
-    const url='D_Budget/API_PHP/Recup_prom_filiere.php?idFiliere='+Idfiliere;
-          
-    fetch(url) 
-    .then(response => response.json())
-    .then(data => {
-      data.forEach(infos => {
-        
-
-        const option = document.createElement("option");
-        option.value = infos.cd_prom;
-        option.textContent = infos.abv+" - "+infos.lib_mention;
-    
-        // Ajouter l'option à la balise select
-        cmb_promotion.appendChild(option);
-
-        //cmb_promotion.innerHTML += "<option style='width:100%;'value='"+infos.cd_prom+"'>"+infos.abv+" - "+infos.lib_mention+"</option>";
-        //console.log("Code promo est "+infos.cd_prom+" la promo "+infos.abv+" - "+infos.lib_mention);
-        
-      });
-    })
-    .catch(error => console.error('Erreur lors de la récupération des promotions :', error));
-  
-  }
-  ////////////////////////////////////////////////////////////////////////////////////////////
+// FONCTION SUPPRIMÉE - On utilise Affichage_promotion() du fichier D_Generale/JavaScript/recup_promotion_et_etudiant.js
+// qui fait exactement la même chose et utilise la même API avec des chemins absolus
+////////////////////////////////////////////////////////////////////////////////////////////
 
 
 
@@ -247,7 +181,6 @@ function Affichage_Frais_par_promotion(code_promo,Id_an_acad)
     tr1.appendChild(td4);
     tr1.appendChild(td5);
     tr1.appendChild(td6);
-    tr1.appendChild(td7);
 
       
     thead.appendChild(tr1);
@@ -255,8 +188,8 @@ function Affichage_Frais_par_promotion(code_promo,Id_an_acad)
       
     var tbody = document.createElement("tbody");
     
-    // Contacter l'API pour avoir les étudiants// Contacte de l'API PHP
-    var url='D_Budget/API_PHP/liste_frais_fixer.php?Id_annee_acad='+Id_an_acad+'&code_promo='+code_promo;
+    // Contacter l'API pour avoir les frais fixés - Chemin absolu depuis la racine
+    var url='/webUKA/UKA_Numerique/D_Budget/API_PHP/liste_frais_fixer.php?Id_annee_acad='+Id_an_acad+'&code_promo='+code_promo;
         
     var i=1;
     fetch(url) 
@@ -334,7 +267,6 @@ function Affichage_Frais_par_promotion(code_promo,Id_an_acad)
               tr.appendChild(td_devise);
               
               tr.appendChild(td_action);
-              tr.appendChild(td_id_frais);
               
               
               
@@ -392,7 +324,7 @@ function Nouveau_Frais()
 
 
   var xhr = new XMLHttpRequest();
-  xhr.open("POST", "D_Budget/API_PHP/Nouveau_frais_fixer.php", true);
+  xhr.open("POST", "/webUKA/UKA_Numerique/D_Budget/API_PHP/Nouveau_frais_fixer.php", true);
 
   xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
   xhr.onreadystatechange = function() 
@@ -461,7 +393,7 @@ function Nouveau_Taux()
   
   
   var xhr = new XMLHttpRequest();
-  xhr.open("POST", "D_Budget/API_PHP/Nouveau_taux.php", true);
+  xhr.open("POST", "/webUKA/UKA_Numerique/D_Budget/API_PHP/Nouveau_taux.php", true);
 
   xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
   xhr.onreadystatechange = function() 

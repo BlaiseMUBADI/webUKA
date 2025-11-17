@@ -3,6 +3,7 @@
 <?php
 session_start(); 
 
+
 require('../FPDF/fpdf.php');
 include("../../Fonctions_PHP/Fonctions.php");
 include("../../Code_QR/qrlib.php");
@@ -17,6 +18,8 @@ $nom_etudiant=$_GET['Nom_etudiant'];
 $montant_payer=$_GET['Montant_payer'];
 
 $devise=$_GET['devise'];
+$Mat_agent=$_GET['Mat_agent'];
+$nb_recu=$_GET['numero_recu'];
 
 
 $date_paiement=$_GET['Date_paiement'];
@@ -75,29 +78,6 @@ else
 
 }
 $lieupaiement=mb_convert_encoding($lieupaiement, 'ISO-8859-1', 'UTF-8');
-
-
-
-// ICI ON COMPTE LE NOMBRE D4ENREGISTREMENT QU'UN PERCEPTEUR A EFFECTUER LA JOURNE
-
-$nb_recu="";
-$sql_nb_recu="select count(payer_frais.Id_payer_frais) as nb_recu
-from payer_frais 
-where payer_frais.Mat_agent=:mat_agent
-and payer_frais.Date_paie=DATE(:date_paie) 
-GROUP BY payer_frais.Date_paie";
-
-$stmt=$con->prepare($sql_nb_recu);    
-$stmt->bindParam(':mat_agent',$_SESSION['MatriculeAgent']);
-$stmt->bindParam(':date_paie',$date_base);
-$stmt->execute();
-
-while($ligne = $stmt->fetch()) $nb_recu=$ligne['nb_recu'];
-
-
-//echo" regarde mat ".$_SESSION['MatriculeAgent']." Et date est ".$date_paiement."format base ".$date_base;
-// Calcul de rest à payé
-
 
 
 /**************************************************************************************************
@@ -372,7 +352,8 @@ $code_QR=Generation_QR(
     $mat_etuiant,
     $montant_payer,
     $date_paiement,
-    $motif_paiement);
+    $motif_paiement,
+    devise_:$devise);
 
 
 
@@ -392,14 +373,8 @@ $pdf->AddPage();
 
 
 
-// Insertion de l'image du code QR
-// Position de l'image sur la page PDF
-$x = 180;  // Coordonnée X
-$y = 3;  // Coordonnée Y
-$width = 20;  // Largeur de l'image
-$height = 20;  // Hauteur de l'image
-// Ajouter l'image à la page PDF
-$pdf->Image($code_QR, $x, $y, $width, $height);
+// Insertion de l'image du code QR sera faite après la ligne de l'étudiant
+// pour être positionnée au niveau de la mention (carré jaune)
 
 
 
@@ -421,6 +396,12 @@ $pdf->SetFont('Times','B',10);
 $text="Filière : ".$filiere;
 $text=mb_convert_encoding($text, 'ISO-8859-1', 'UTF-8');
 $pdf->Cell(0,10,$text,0,1,'L');
+
+// Affichage de numro du reçu
+$pdf->SetXY(20,28);
+$pdf->SetFont('Times','B',13);
+$text=mb_convert_encoding(" Reçu N° :", 'ISO-8859-1', 'UTF-8')." ".($nb_recu);
+$pdf->Cell(0,10,$text,0,1,'C');
 
 
 
@@ -444,19 +425,14 @@ $pdf->SetFont('Times','B',13);
 $text=" ".$montant_payer." ".$devise;
 $pdf->Cell(0,10,$text,0,1,'C');
 
-// Affichage de numro du reçu
-$pdf->SetXY(20,28);
-$pdf->SetFont('Times','B',13);
-$text=mb_convert_encoding(" Reçu N° :", 'ISO-8859-1', 'UTF-8')." ".($nb_recu);
-$pdf->Cell(0,10,$text,0,1,'C');
-
-
-
-
-
-
-
-
+// Insertion de l'image du code QR dans l'espace libre à droite
+// Position calculée pour occuper l'espace libre sans superposition
+$qr_x = 175;  // Coordonnée X - dans l'espace libre à droite
+$qr_y = 37;   // Coordonnée Y - aligné avec la ligne étudiant
+$qr_width = 25;  // Largeur optimale pour scanner
+$qr_height = 25; // Hauteur optimale pour scanner
+// Ajouter l'image à la page PDF
+$pdf->Image($code_QR, $qr_x, $qr_y, $qr_width, $qr_height);
 
 
 // Affichage de montant en toutes lettres
@@ -467,14 +443,16 @@ $text="Etudiant(e) : ".$nom_etudiant." (de ".$promtoion.")";
 $text=mb_convert_encoding($text, 'ISO-8859-1', 'UTF-8');
 $pdf->Cell(0,8,$text,0,1,'L');
 
-// Puis on trace les traits
+// Puis on trace les traits (AVANT le code QR pour qu'ils ne se chevauchent pas)
 $pdf->SetDrawColor(20,200, 200);
-$pdf->Line(45, 53, 200, 53);
-$pdf->Line(45, 54, 200, 54);
-$pdf->Line(45, 55, 200, 55);
-$pdf->Line(45, 56, 200, 56);
-$pdf->Line(45, 57, 200, 57);
-$pdf->Line(45, 58, 200, 58);
+// Limiter les lignes jusqu'à X=160 pour laisser place au QR code
+$pdf->Line(45, 53, 172, 53);
+$pdf->Line(45, 54, 172, 54);
+$pdf->Line(45, 55, 172, 55);
+$pdf->Line(45, 56, 172, 56);
+$pdf->Line(45, 57, 172, 57);
+$pdf->Line(45, 58, 172, 58);
+
 
 //Puis ici on affiche le montant 
 $pdf->SetY(50);
@@ -501,6 +479,7 @@ $pdf->Cell(0,10,$text,0,1,'L');
 
 // affichage de rest à payer
 
+/*
 $pdf->SetY(65);
 $pdf->SetFont('Times','B',11);
 $text=mb_convert_encoding("Reste à payer", 'ISO-8859-1', 'UTF-8');
@@ -509,7 +488,7 @@ $pdf->Cell(0,5,$text,0,1,'C');
 $pdf->SetY(70);
 $pdf->SetFont('Times','B',11);
 $text="(FA: $reste_FA ) "." (E.M.S./E-1-Sem : $reste_EMS) "." (E-Rat-Sem_1 : $reste_RatSem1) "." (E.G.S/E-2-Sem : $reste_ES) "." (E.2.S/E-Ratt : $reste_E2S)";
-$pdf->Cell(0,5,$text,0,1,'C');
+$pdf->Cell(0,5,$text,0,1,'C');*/
 
 
 

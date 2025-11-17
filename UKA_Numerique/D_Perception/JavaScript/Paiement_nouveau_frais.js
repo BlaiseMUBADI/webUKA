@@ -33,6 +33,9 @@ let btn_radio_devise; // c'est une constante qui garde l'etat de devise
 let symbole_devise;
 
 let date_paie;
+
+let boite_alert_Paiement_banque;
+let boite_alert_Paiement_guichet;
 var devise_paye="Franc Congolais";
 var montant_en_franc=0;
 
@@ -167,7 +170,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
     // récupération du taux
     if(txt_tau_jours!==null)
     {
-      const url='D_Perception/API_PHP/Recup_taux_base.php';
+      const url='API_PHP/Recup_taux_base.php';
       fetch(url) 
       .then(response => response.json())
       .then(data => {
@@ -179,148 +182,13 @@ document.addEventListener("DOMContentLoaded", function(event) {
       .catch(error => console.error('Erreur lors de la récupération des promotions :', error));
     }
 
-});
+}); // FIN DOMContentLoaded
 
 
-
-const btn_valider_paie_guichet= document.getElementById("btn_valider_paie_guichet");
-const btn_valider_paie_banque= document.getElementById("btn_valider_paie_banque");
-
-
-
-//const boite_form_UEs = document.getElementById('boite_Form_UE');
-const boite_alert_Paiement_banque= document.getElementById('boite_alert_paiement_banque');
-const boite_alert_Paiement_guichet= document.getElementById('boite_alert_paiement_guichet');
-//const boite_confirmation_Transaction= document.getElementById('boite_confirmaion_Transactions');
-
-
-
-
-
-
-// Attacher l'évenement à la zone de texte qui concerne le numéro de borderau
-// on test si l'élement existe vraiment sur la page html
-// Puis on appel la fonction qui verifie si le numero de borderau
-if(txt_numero_borderau!==null)
-{
-    txt_numero_borderau.addEventListener("keyup", function(event)
-    {
-        var txt_bordereau=txt_numero_borderau.value;
-        Verification_Num_bordereau(txt_bordereau);       
-        //Affichage_etudiant_2(code_promo,Id_annee,txt_nom);
-    });
-
-}
 
 /*************************************************************************************
- * *************** ICI ON ATTACHE UN EVEMENT A GROUPE DE RADIO POUR CHANGER LA DEVISE
- * ***********************************************************************************/
-
-/****************************************************************************************
- ****** ICI ON CONTROLA LA SAISI DANS LA ZONE DE TEXTE **********************************
-*/
-if(txt_montant!==null)
-{
-    txt_montant.addEventListener("keyup", function(event)
-    {
-        var devis="";
-        var devise_fa=document.getElementById("devise_fa").innerHTML;
-        
-        // ici verifie pour faire une conversion  lorsqu'il s'agit d'un paiement en dollar
-        // c-a-d la devise fixée dans la modalité est en dollar
-        if(devise_fa===" $")
-        {
-            
-            if (btn_radio_devise.checked) 
-            {
-                montnt_argent_dollar_fc=txt_montant.value;
-                devise_paye="Dollar";
-                devis=".$."
-
-                montant_devise_inverse=0;
-            }
-            else 
-            {
-                devise_paye="Franc Congolais";
-                
-                montnt_argent_dollar_fc=(txt_montant.value/(montant_taux_base/10)).toFixed(2);
-                div_montant_payer_fc.innerText="Montant en $ : ( "+montnt_argent_dollar_fc+" )";
-                devis=".Fc."
-
-                montant_devise_inverse=montnt_argent_dollar_fc;
-
-            }
-        }
-        // Ici nous ce test ce pour le paiement en Fc
-        // C'est à dire la devise fixée dans la modalité est Franc Congolais
-        else
-        {
-            //console.log(" Attention le paiement s'effetue en Fc");
-
-            if (btn_radio_devise.checked) 
-            {
-                montnt_argent_dollar_fc=(txt_montant.value*(montant_taux_base/10)).toFixed(2);
-                div_montant_payer_fc.innerText="Montant en $ : ( "+montnt_argent_dollar_fc+" )";
-               
-                devise_paye="Dollar";
-                devis=".$."
-
-                montant_devise_inverse=0;
-            }
-            else 
-            {
-                devise_paye="Franc Congolais";
-                devis=".Fc."
-                montnt_argent_dollar_fc=txt_montant.value;
-
-                montant_devise_inverse=montnt_argent_dollar_fc;
-            }
-        }
-        
-        
-        symbole_devise.innerHTML=devis;
-        var nombre=txt_montant.value;
-
-        // Convertir le nombre 500000000 en chaîne de caractères
-        const nombreEnChaine =Conversion_Nombre_En_ChaineCaractere(nombre);
-        txt_monte_caractere.innerHTML=nombreEnChaine+" "+devise_paye;
-    });
-
-    txt_montant.addEventListener("blur", function() 
-    {
-        if (!btn_radio_devise.checked) 
-        {
-            //parler("Ton argent en dollar fait , "+(montnt_argent_dollar_fc.toString())) 
-        
-        }
-          
-    });
-
-}
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-if(txt_tau_jours!==null)
-{
-  // Contacte de l'API PHP
-    const url='D_Perception/API_PHP/Recup_taux_base.php';
-          
-    fetch(url) 
-    .then(response => response.json())
-    .then(data => {
-      data.forEach(infos => {
-        
-
-        txt_tau_jours.innerText=infos.montant+" Fc";
-        montant_taux_base=infos.montant;
-      
-      });
-    })
-    .catch(error => console.error('Erreur lors de la récupération des promotions :', error));
-     
-
-}
+ * *************** CODE DUPLIQUÉ SUPPRIMÉ - TOUT EST DANS DOMContentLoaded **********
+ *************************************************************************************/
 
 /***********************************************************************************************************
  ************** ICI , CETTE FONCTION NOUS PERMET DE FAIRE LA VERIFICATION DE NUMERO DE BBORDEREAU **********
@@ -331,7 +199,7 @@ function Verification_Num_bordereau(Num_bordereau)
 {
     
     // Contacte de l'API PHP
-    const url='D_Perception/API_PHP/Verification_num_bordereau.php?num_bordereau='+Num_bordereau;
+    const url='API_PHP/Verification_num_bordereau.php?num_bordereau='+Num_bordereau;
           
     fetch(url) 
     .then(response => response.json())
@@ -459,6 +327,8 @@ function Verification_avant_paiement(type_frais)
     if(t>0) return true;
     else return false;
 }
+
+
 function Paiement_frais_guichet()
 {
     var type_frais=cmb_type_frais.value;
@@ -546,53 +416,61 @@ function Paiement_frais_guichet()
         var json_motif_paiement = JSON.stringify(motif_paiement);// Ce Json est très important car il permet d'envoyé les données du Javascript vers PHP
                 
         var xhr = new XMLHttpRequest();
-        xhr.open("POST", "D_Perception/API_PHP/Nouveau_paiement_guichet.php", true);
+        xhr.open("POST", "API_PHP/Nouveau_paiement_guichet.php", true);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xhr.onreadystatechange = function() 
         {
             if (xhr.readyState === 4 && xhr.status === 200)
             {
                 console.log(xhr.responseText)
-                // Réponse du serveur
-                if(xhr.responseText!="Ok") 
-                {
-                
-                    let nom_etudiant=document.getElementById("nom_etudiant_1").value+" "+
-                    document.getElementById("postnom_etudiant").value+" "+
-                    document.getElementById("prenom_etudiant").value;
-
-                    //t mat_etuiant=document.getElementById("mat_etudiant").value;
-
-                    var url="Impression/Docs_a_imprimer/recu.php"
-                    +"?Mat_etudiant="+mat_etudiant
-                    +"&Nom_etudiant="+nom_etudiant
-                    +"&Montant_payer="+montant
-                    +"&Date_paiement="+date_paiement                
-                    +"&Code_promo="+code_promo
-                    +"&Type_frais="+type_frais              
-                    +"&Tab_motif_paiement="+json_motif_paiement
-                    +"&Id_banque=-1"
-                    +"&Id_an_acad="+Id_an_acad
-                    +"&devise="+devise_fa.trim();
-
-                    let parametres = "left=20,top=20,width=700,height=500";
-                
-                    let fenetre_recu=window.open(
-                        url,
-                        "Impression Réçu",
-                        parametres
-                    );
-
-                    fenetre_recu.onload = function() {
-                        //alert("Enregistrment effectuer avec succès");
-                        Intialisation_zone_paiement_guichet();
-                    };                  
+                // Réponse du serveur - Parser la réponse JSON
+                try {
+                    var response = JSON.parse(xhr.responseText);
                     
-                }
+                    if(response.success && response.numeros_recus && response.numeros_recus.length > 0) 
+                    {
+                        // Utiliser le premier numéro de reçu (ou le dernier si ensemble FA+Enrol)
+                        var numero_recu = response.numeros_recus[response.numeros_recus.length - 1];
+                        
+                        let nom_etudiant=document.getElementById("nom_etudiant_1").value+" "+
+                        document.getElementById("postnom_etudiant").value+" "+
+                        document.getElementById("prenom_etudiant").value;
+
+                        //t mat_etuiant=document.getElementById("mat_etudiant").value;
+
+                        var url="../Impression/Docs_a_imprimer/recu.php"
+                        +"?Mat_etudiant="+mat_etudiant
+                        +"&Nom_etudiant="+nom_etudiant
+                        +"&Montant_payer="+montant
+                        +"&Date_paiement="+date_paiement                
+                        +"&Code_promo="+code_promo
+                        +"&Type_frais="+type_frais              
+                        +"&Tab_motif_paiement="+json_motif_paiement
+                        +"&Id_banque=-1"
+                        +"&Id_an_acad="+Id_an_acad
+                        +"&devise="+devise_fa.trim()
+                        +"&numero_recu="+numero_recu;
+
+                        let parametres = "left=20,top=20,width=700,height=500";
                     
-                else 
-                {
-                    Ouvrir_Boite_Alert_Paiement_Guichet( " Echec d'eregistrement ");
+                        let fenetre_recu=window.open(
+                            url,
+                            "Impression Réçu",
+                            parametres
+                        );
+
+                        fenetre_recu.onload = function() {
+                            //alert("Enregistrment effectuer avec succès");
+                            Intialisation_zone_paiement_guichet();
+                        };                  
+                    }
+                    else 
+                    {
+                        Ouvrir_Boite_Alert_Paiement_Guichet("Erreur: " + (response.error || "Impossible de générer le reçu"));
+                    }
+                } catch(e) {
+                    console.error("Erreur parsing JSON:", e);
+                    Ouvrir_Boite_Alert_Paiement_Guichet("Erreur lors du traitement de la réponse");
                 }
             }
         /*  else
@@ -708,56 +586,60 @@ function Paiement_frais_banque()
         if(Verfi_num_borde)
         {
             var xhr = new XMLHttpRequest();
-            xhr.open("POST", "D_Perception/API_PHP/Nouveau_paiement_banque.php", true);
+            xhr.open("POST", "API_PHP/Nouveau_paiement_banque.php", true);
             xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
             xhr.onreadystatechange = function() 
             {
                 if (xhr.readyState === 4 && xhr.status === 200)
                 {
                     console.log(xhr.responseText)
-                    // Réponse du serveur
-                    if(xhr.responseText!="Ok") 
-                    {
-                    
+                    // Réponse du serveur - Parser la réponse JSON
+                    try {
+                        var response = JSON.parse(xhr.responseText);
                         
-                        let nom_etudiant=document.getElementById("nom_etudiant_1").value+" "+
-                        document.getElementById("postnom_etudiant").value+" "+
-                        document.getElementById("prenom_etudiant").value;
+                        if(response.success && response.numeros_recus && response.numeros_recus.length > 0) 
+                        {
+                            // Utiliser le dernier numéro de reçu
+                            var numero_recu = response.numeros_recus[response.numeros_recus.length - 1];
+                            
+                            let nom_etudiant=document.getElementById("nom_etudiant_1").value+" "+
+                            document.getElementById("postnom_etudiant").value+" "+
+                            document.getElementById("prenom_etudiant").value;
 
-                        //t mat_etuiant=document.getElementById("mat_etudiant").value;
+                            //t mat_etuiant=document.getElementById("mat_etudiant").value;
 
-                        var url="Impression/Docs_a_imprimer/recu.php"
-                        +"?Mat_etudiant="+mat_etudiant
-                        +"&Nom_etudiant="+nom_etudiant
-                        +"&Montant_payer="+montant
-                        +"&Date_paiement="+date_paiement                
-                        +"&Code_promo="+code_promo
-                        +"&Type_frais="+type_frais              
-                        +"&Tab_motif_paiement="+json_motif_paiement
-                        +"&Id_banque="+idbanque
-                        +"&Id_an_acad="+Id_an_acad
-                        +"&devise="+devise;
+                            var url="../Impression/Docs_a_imprimer/recu.php"
+                            +"?Mat_etudiant="+mat_etudiant
+                            +"&Nom_etudiant="+nom_etudiant
+                            +"&Montant_payer="+montant
+                            +"&Date_paiement="+date_paiement                
+                            +"&Code_promo="+code_promo
+                            +"&Type_frais="+type_frais              
+                            +"&Tab_motif_paiement="+json_motif_paiement
+                            +"&Id_banque="+idbanque
+                            +"&Id_an_acad="+Id_an_acad
+                            +"&devise="+devise
+                            +"&numero_recu="+numero_recu;
 
-                        let parametres = "left=20,top=20,width=700,height=500"; // Les dimensions de la fenetres d'impression et la position                
-                        let fenetre_recu=window.open(
-                            url,
-                            "Impression Réçu",
-                            parametres
-                        );
+                            let parametres = "left=20,top=20,width=700,height=500"; // Les dimensions de la fenetres d'impression et la position                
+                            let fenetre_recu=window.open(
+                                url,
+                                "Impression Réçu",
+                                parametres
+                            );
 
-                        fenetre_recu.onload = function() {
-                            //alert("Enregistrment effectuer avec succès");
-                            Intialisation_zone_paiement_banque();
-                        };
-
-
-                        
-                        
-                    }
-                        
-                    else 
-                    {
-                        alert( " Echec d'eregistrement ");
+                            fenetre_recu.onload = function() {
+                                //alert("Enregistrment effectuer avec succès");
+                                Intialisation_zone_paiement_banque();
+                            };
+                        }
+                        else 
+                        {
+                            alert("Erreur: " + (response.error || "Impossible de générer le reçu"));
+                        }
+                    } catch(e) {
+                        console.error("Erreur parsing JSON:", e);
+                        alert("Erreur lors du traitement de la réponse");
                     }
                 }
             /* else

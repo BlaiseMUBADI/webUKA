@@ -2,7 +2,7 @@
 
 <section class="home-section" style="height: 100%;">
       <?php
-        require_once 'D_Generale/Profil_Guichet.php';
+        require_once 'Profil_Guichet.php';
       ?>
   <div class="home-content me-3 ms-3">
     <!---------------------------------------------------------------------------------------------------------------->
@@ -136,7 +136,7 @@
         <!---------------------------------------------------------------------------------------------------------------->
       
         <div class="container table-responsive small p-0 m-0" 
-          style="width:48%; float:left;" >
+          style="width:48%; float:left; height:100%; overflow-y:auto; overflow-x:auto;" >
 
           <table  class="tab1" id="table_etudiant1" style="width:100%; height:100%;">              
             <thead class="sticky-sm-top m-0 fw-bold">
@@ -161,7 +161,7 @@
         <!---------------------------------------------------------------------------------------------------------------->
       
         <div class="container table-responsive small p-0 m-0" 
-          style="width:51%; float:right;" >
+          style="width:51%; float:right; height:100%; overflow-y:auto; overflow-x:auto;" >
 
           <table  class="tab1" id="table_transact" style="width:100%; height:100%;">              
             <thead class="sticky-sm-top m-0 fw-bold">

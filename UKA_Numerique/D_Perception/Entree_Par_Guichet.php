@@ -2,7 +2,7 @@
 
 <section class="home-section" style="height: auto;">
       <?php
-        require_once 'D_Generale/Profil_Guichet.php';
+        require_once 'Profil_Guichet.php';
       ?>
   <div class="home-content me-3 ms-3">
 
@@ -177,7 +177,7 @@
           style="background-color:rgb(39,55,70);">
       
       <div class="container table-responsive small p-0 m-0" 
-          style="width: 60%; float: left; height:400px">
+          style="width: 60%; float: left; height:650px; overflow-y:auto; overflow-x:auto;">
 
         <table  class="tab1" id="table_paiement" style="width:100%; height:100%;">              
           <thead class="sticky-sm-top m-0 fw-bold">

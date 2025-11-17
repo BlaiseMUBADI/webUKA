@@ -1,73 +1,67 @@
 
+console.log("je suis dans inscription"); 
 
+// Variables globales
+let combo_filiere;
+let promo_filiere;
+let anne_acad_filiere;
 
-console.log("nous sommes dans select promo inscription"); 
-const combo_filiere=document.getElementById("filiereInscription");
-const promo_filiere=document.getElementById("promoInscription");
-const anne_acad_filiere=document.getElementById("Id_an_acadInscription");
+document.addEventListener("DOMContentLoaded", function(event) {
+  const container = document.getElementById("div_inscription") || document;
+  
+  combo_filiere = container.querySelector('#filiereInscription') || document.getElementById("filiereInscription");
+  promo_filiere = container.querySelector('#promoInscription') || document.getElementById("promoInscription");
+  anne_acad_filiere = container.querySelector('#Id_an_acadInscription') || document.getElementById("Id_an_acadInscription");
 
-
-if(combo_filiere!==null)
+  if(combo_filiere !== null)
   {
-   combo_filiere.addEventListener('change',(event) => {
-     var id_filiere=combo_filiere.value;
-     Affichage_promo(id_filiere);
-     Affichage_nombre_etudiant();
-    
-    //console.log("le code promotion est "+promo_filie);
-   });
- 
+     combo_filiere.addEventListener('change',(event) => {
+       var id_filiere = combo_filiere.value;
+       Affichage_promotion(id_filiere, "promoInscription");
+       Affichage_nombre_etudiant();
+     });
   }
 
-  document.getElementById('promoInscription').addEventListener('change', function() {
+  if(promo_filiere !== null)
+  {
+    promo_filiere.addEventListener('change', function() {
+      Affichage_nombre_etudiant();
+    });
+  }
 
-    
-    Affichage_nombre_etudiant();
-});
-//affichage du matricule apres changement de l'annee
-document.getElementById('Id_an_acadInscription').addEventListener('change', function() {
-var promo_filiere=document.getElementById("promoInscription").value;
-    
-  console.log("le code promotion est "+promo_filiere);
-  Affichage_nombre_etudiant()
-});
+  if(anne_acad_filiere !== null)
+  {
+    anne_acad_filiere.addEventListener('change', function() {
+      var promo_val = promo_filiere ? promo_filiere.value : "";
+      console.log("le code promotion est " + promo_val);
+      Affichage_nombre_etudiant();
+    });
+  }
+
+  // Bouton enregistrer
+  const btn_enregistrer = container.querySelector('#enregistrer') || document.getElementById('enregistrer');
+  if(btn_enregistrer !== null)
+  {
+    btn_enregistrer.addEventListener('click', function() {
+      var promo_filier = promo_filiere ? promo_filiere.value : "";
+      var annee_acad = anne_acad_filiere ? anne_acad_filiere.value : "";
+      EnregistrementCandidat(promo_filier, annee_acad);
+    });
+  }
+
+  // Select choix pour montant à payer
+  const select_choix = container.querySelector('#choix') || document.getElementById('choix');
+  if(select_choix !== null)
+  {
+    select_choix.addEventListener('change', function() {
+      Affichage_Montant_a_payer();
+    });
+  }
+
+}); // FIN DOMContentLoaded
  
    
   
-
-  // ICI LA FONCTION POUR LA RECUPERATIONS DES PROMOTIONS EN FONCTION DE LA FILIERE CHOISIE
-function Affichage_promo(Idfiliere ) {
-
-  // Réinitialiser le contenu de la balise select des promotions
-  var cmb_promotion=document.getElementById("promoInscription");
-
-
-  cmb_promotion.innerHTML = "";
-
-  
-  // Contacte de l'API PHP
-  const url='D_Generale/API_PHP/Recup_prom_filiere_inscription.php?idFiliere='+Idfiliere;
-        
-  fetch(url) 
-  .then(response => response.json())
-  .then(data => {
-    // Créer et ajouter l'option "faites le choix"
-    const defaultOption = document.createElement("option");
-    defaultOption.value = "";
-    defaultOption.textContent = "faites le choix";
-    cmb_promotion.appendChild(defaultOption);
-
-    // Ajouter les options provenant de la base de données
-    data.forEach(infos => {
-      const option = document.createElement("option");
-      option.value = infos.cd_prom;
-      option.textContent = infos.abv + " - " + infos.lib_mention;
-      cmb_promotion.appendChild(option);
-    });
-  })
-  .catch(error => console.error('Erreur lors de la récupération des promotions :', error));
-
-}
 
 // AFFICHAGE NOMBRE ETUDIANT
 function Affichage_nombre_etudiant()
@@ -76,7 +70,7 @@ function Affichage_nombre_etudiant()
   var Id_an_acad=anne_acad_filiere.value;
   Affichage_Candidat(code_promo,Id_an_acad);
     // Contacter l'API pour avoir les étudiants// Contacte de l'API PHP
-    var url='D_Generale/API_PHP/API_Select_Nombre_Etudiant.php?Id_annee_acad='+Id_an_acad+'&code_promo='+code_promo;
+    var url='../D_Generale/API_PHP/API_Select_Nombre_Etudiant.php?Id_annee_acad='+Id_an_acad+'&code_promo='+code_promo;
         
 
     fetch(url) 
@@ -145,7 +139,7 @@ function Affichage_Candidat(code_promo,Id_an_acad)
     var tbody = document.createElement("tbody");
     
     // Contacter l'API pour avoir les étudiants// Contacte de l'API PHP
-    var url='D_Generale/API_PHP/Liste_de_Candidats.php?Id_annee_acad='+Id_an_acad+'&code_promo='+code_promo;
+    var url='../D_Generale/API_PHP/Liste_de_Candidats.php?Id_annee_acad='+Id_an_acad+'&code_promo='+code_promo;
         
     var i=1;
     fetch(url) 
@@ -157,8 +151,6 @@ function Affichage_Candidat(code_promo,Id_an_acad)
           // Création de TR
               var tr = document.createElement("tr");
              
-
-
               var tdnum = document.createElement("td");
               tdnum.textContent = i;
 
@@ -262,18 +254,7 @@ function SuppressionCandidats(MatEtudiant) {
 }
 
 
-//ENREGISTREMENT DES CANDIDAT ETUDIANTS, DE LEUR PAIEMENT AINSI QUE DANS D'AUTRES TABLES
-
-document.getElementById('enregistrer').addEventListener('click', function() {
-  var promo_filier=promo_filiere.value;
-  var annee_acad=anne_acad_filiere.value;
-
-  //Affichage_Montant_a_payer();
-  EnregistrementCandidat(promo_filier,annee_acad);
- 
-
-
-});
+//ENREGISTREMENT DES CANDIDAT ETUDIANTS - CODE DÉPLACÉ DANS DOMContentLoaded
 
 function  EnregistrementCandidat(promo_filier,annee_acad)
 {  
@@ -360,11 +341,7 @@ function Affichage_Montant_a_payer()
           console.log("Erreur lor de contacte des etudiants "+error);});
         
 }
-//AFFICHAGE DU MONTANT A PAYE SELON LE CRITERE
-document.getElementById('choix').addEventListener('change', function() {
-  
-  Affichage_Montant_a_payer();
-});
+//AFFICHAGE DU MONTANT A PAYE SELON LE CRITERE - CODE DÉPLACÉ DANS DOMContentLoaded
 
 function imprimer_reçu(){
   var contenu = document.getElementById('bloc-imp-recu').innerHTML;

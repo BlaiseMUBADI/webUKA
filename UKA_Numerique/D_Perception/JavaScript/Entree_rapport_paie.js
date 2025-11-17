@@ -1,4 +1,4 @@
-
+console.log("je suis dans entree rapport paie");
 
 /*
 *++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -101,7 +101,7 @@ function Impression_rapport()
     if (btn_radio_devise_percu.checked)
     {
         devise_argent_percu="$";
-        var url="Impression/Docs_a_imprimer/Rapport_argent_en_$.php"
+        var url="../Impression/Docs_a_imprimer/Rapport_argent_en_$.php"
             +"?Id_annee_acad="+id_annee_acad
             +"&Id_filiere="+id_filiere
             +"&Date_debut="+date_d             
@@ -126,7 +126,7 @@ function Impression_rapport()
     else
     {
         devise_argent_percu="Fc";
-        var url="Impression/Docs_a_imprimer/Rapport_argent_en_Fc.php"
+        var url="../Impression/Docs_a_imprimer/Rapport_argent_en_Fc.php"
             +"?Id_annee_acad="+id_annee_acad
             +"&Id_filiere="+id_filiere
             +"&Date_debut="+date_d             

@@ -15,7 +15,10 @@ select
     lieu_paiement.idLieu_paiement as Id_lieu,
     lieu_paiement.Libelle_lieu as Libelle_lieu,
     CONCAT(agent.Nom_agent,' ',agent.Post_agent) as nom_agent,
-    frais.Devise as devise
+    frais.Devise as devise,
+    payer_frais.Mat_agent as Mat_agent,
+    payer_frais.numero_recu as numero_recu
+
 
     from etudiant,payer_frais,annee_academique,frais,promotion,lieu_paiement,agent
 

@@ -198,7 +198,7 @@ fenetreImpression.close();
 
 <section class="home-section" style="height: 100%;"style="display:bloc;"id="identite">
       <?php
-        require_once 'D_Generale/Profil_Guichet.php';
+        require_once 'Profil_Guichet.php';
       ?>
        <script>
         function convertirEnMajuscule(element) {

@@ -18,12 +18,12 @@ function nombreEnTexte($nombre)
  * ********* C'est une fontion qui permet de generer le code QR sur le reçu *********************************
  * **********************************************************************************************
  */
-function Generation_QR($nom_agent,$promotion,$annee_acade,$mat_etudiant,$montant,$date_paie,$motif)
+function Generation_QR($nom_agent,$promotion,$annee_acade,$mat_etudiant,$montant,$date_paie,$motif,$devise_)
 {
     
 
     // Texte à encoder en code QR
-    $text =$mat_etudiant." / ".$promotion." / ".$montant."Fc / ".$motif.
+    $text =$mat_etudiant." / ".$promotion." / ".$montant." ".$devise_." / ".$motif.
     " / ".$date_paie." / ".$annee_acade." / ".$nom_agent;
     
     $image_code_QR = "CodeQR.png";

@@ -1,10 +1,10 @@
-
+console.log(" Je suis dans JS Transact");
 /*
 *+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 * ++++++++++++++++++++++++ LA PARTIE DE LA DECLARATIONS DE COMPOSANT HTML  +++++++++++++++++++++++
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 */
-console.log(" Je suis dans JS Transact");
+
 
 // DOM nodes: initialize on DOMContentLoaded to avoid errors when script loaded on other pages
 let cmb_filiere_1;
@@ -30,7 +30,8 @@ document.addEventListener('DOMContentLoaded', function(event) {
   {
     cmb_filiere_1.addEventListener('change', (event) => {
       var id_filiere=cmb_filiere_1.value;
-      Affichage_promotion_Transact(id_filiere);
+      // Utilisation de la fonction globale avec l'ID spécifique
+      Affichage_promotion(id_filiere, "promo_tansact");
     });
   }
 
@@ -75,92 +76,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
     });
   }
 
-  
-/*
-*/
-/*
-*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-* ++++++++++++++++++++++++ La partie d'ajout des évenements à chaque composant +++++++++++++++++++
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-*/
-
- // Lorque le combo box de filiere  change
- // on test si l'élement existe vraiment sur la page html
- if(cmb_filiere_1!==null)
- {
-  
-  cmb_filiere_1.addEventListener('change',(event) => {
-    var id_filiere=cmb_filiere_1.value;
-    Affichage_promotion_Transact(id_filiere);
-  });
- }
-
-
-
-
-
-// Lorsque le combo de promoton change
-// on test si l'élement existe vraiment sur la page html
-if(cmb_promoion_1!==null)
-{
-  cmb_promoion_1.addEventListener('change',(event)=> {
-    var code_promo=cmb_promoion_1.value;
-    var Id_annee=cmb_annee_acade_1.value;
-    var date_paiement=date_paiement_1.value;
-    Affichage_etudiant_Transact(code_promo,Id_annee,date_paiement);
-  
-  
-  });
-
-}
-
-
-// Lorsque le combo de des années academique a changé
-// on test si l'élement existe vraiment sur la page html
-if(cmb_annee_acade_1!==null)
-{
-  cmb_annee_acade_1.addEventListener('change',(event)=> {
-    var code_promo=cmb_promoion_1.value;
-    var Id_annee=cmb_annee_acade_1.value;
-    var date_paiement=date_paiement_1.value;
-    Affichage_etudiant_Transact(code_promo,Id_annee,date_paiement);
-  
-  });
-
-}
-if(date_paiement_1!==null)
-{
-  date_paiement_1.addEventListener('change',(event)=> {
-    var code_promo=cmb_promoion_1.value;
-    var Id_annee=cmb_annee_acade_1.value;
-    var date_paiement=date_paiement_1.value;
-    Affichage_etudiant_Transact(code_promo,Id_annee,date_paiement);
-  
-  });
-}
-
-
-// Lorsque on est entrain de sair un text dans la zone de rehecher
-
-
-// on test si l'élement existe vraiment sur la page html
-if(txt_zone_recherche_etudiant_1!==null)
-{
-  txt_zone_recherche_etudiant_1.addEventListener("keyup", function(event) {
-    var code_promo=cmb_promoion_1.value;
-    var Id_annee=cmb_annee_acade_1.value;    
-    var txt_nom=txt_zone_recherche_etudiant_1.value;
-    var date_paiement=date_paiement_1.value;
-    Affichage_etudiant_Transact_2(code_promo,Id_annee,date_paiement,txt_nom)
-  });
-
-}
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-
-});
+}); // FIN DOMContentLoaded
 
 
 
@@ -173,39 +89,8 @@ if(txt_zone_recherche_etudiant_1!==null)
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 */
 
-// ICI LA FONCTION POUR LA RECUPERATIONS DES PROMOTIONS EN FONCTION DE LA FILIERE CHOISIE
-function Affichage_promotion_Transact(Idfiliere ) {
-
-    // Réinitialiser le contenu de la balise select des promotions
-    //var cmb_promoion_1=document.getElementById("promo_1");
-    cmb_promoion_1.innerHTML = "";
-  
-    //console.log(" je suis dans la fonctin Affich_prom_tansact");
-    
-    // Contacte de l'API PHP
-    const url='D_Generale/API_PHP/Recup_prom_filiere.php?idFiliere='+Idfiliere;
-          
-    fetch(url) 
-    .then(response => response.json())
-    .then(data => {
-      data.forEach(infos => {
-        
-
-        const option = document.createElement("option");
-        option.value = infos.cd_prom;
-        option.textContent = infos.abv+" - "+infos.lib_mention;
-    
-        // Ajouter l'option à la balise select
-        cmb_promoion_1.appendChild(option);
-
-        //cmb_promoion_1.innerHTML += "<option style='width:100%;'value='"+infos.cd_prom+"'>"+infos.abv+" - "+infos.lib_mention+"</option>";
-        //console.log("Code promo est "+infos.cd_prom+" la promo "+infos.abv+" - "+infos.lib_mention);
-        
-      });
-    })
-    .catch(error => console.error('Erreur lors de la récupération des promotions :', error));
-  
-  }
+// FONCTION SUPPRIMÉE - On utilise Affichage_promotion() du fichier D_Generale/JavaScript/recup_promotion_et_etudiant.js
+// Appeler avec: Affichage_promotion(idFiliere, "promo_1")
   ////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -215,49 +100,16 @@ function Affichage_promotion_Transact(Idfiliere ) {
 // LA FONCTION D'AFFIHAGE DES ETUDIANTS D'UNE PROMOTION DANS UNE ANNEE ACADEMIQUE CHOISIE
 function Affichage_etudiant_Transact(code_promo,Id_an_acad,date_paiement)
 {
-
-   
     let tab_etudiant = document.getElementById("table_etudiant1");
     let tab_transact = document.getElementById("table_transact");
 
-    while (tab_etudiant.firstChild) {
-      tab_etudiant.removeChild(tab_etudiant.firstChild);
+    // Préserver le thead, ne modifier que tbody
+    let tbody = tab_etudiant.querySelector("tbody");
+    if (!tbody) {
+        tbody = document.createElement("tbody");
+        tab_etudiant.appendChild(tbody);
     }
-    
-    
-    var thead = document.createElement("thead");
-    thead.classList.add("sticky-sm-top","m-0","fw-bold"); // Pour ajouter la classe à un element HTMl
-
-    var tr1 = document.createElement("tr");
-    tr1.style="background-color:midnightblue; color:white;"
-
-    var td1 = document.createElement("td");      
-    var td2 = document.createElement("td");
-    var td3 = document.createElement("td");
-    var td4 = document.createElement("td");
-    var td5 = document.createElement("td");
-    var td6 = document.createElement("td");
-      
-
-    td1.textContent = "N°";
-    td2.textContent = "Matricule";
-    td3.textContent = "Nom";
-    td4.textContent = "Postnom";
-    td5.textContent = "Prenom";
-    td6.textContent = "Sexe";
-
-    tr1.appendChild(td1);
-    tr1.appendChild(td2);
-    tr1.appendChild(td3);
-    tr1.appendChild(td4);
-    tr1.appendChild(td5);
-    tr1.appendChild(td6);
-
-      
-    thead.appendChild(tr1);
-    tab_etudiant.appendChild(thead);
-      
-    var tbody = document.createElement("tbody");
+    tbody.innerHTML = "";
     
     // Contacter l'API pour avoir les étudiants// Contacte de l'API PHP
     var date_actuelle = new Date();
@@ -269,7 +121,7 @@ function Affichage_etudiant_Transact(code_promo,Id_an_acad,date_paiement)
       verifi_date_transact=true;
     else verifi_date_transact=false;
 
-    var url='D_Perception/API_PHP/liste_etudiant_transact.php?Id_annee_acad='+Id_an_acad+'&code_promo='+code_promo+'&verifi_date='+verifi_date_transact;
+    var url='API_PHP/liste_etudiant_transact.php?Id_annee_acad='+Id_an_acad+'&code_promo='+code_promo+'&verifi_date='+verifi_date_transact;
         
     var i=1;
     fetch(url) 
@@ -318,25 +170,96 @@ function Affichage_etudiant_Transact(code_promo,Id_an_acad,date_paiement)
                 Recuperation_Transactions(infos.Matricule,Id_an_acad,code_promo,nom_etudiant,tr);
                 
               });
-
-              
-              
-              
         });
           
         }).catch(error => {
           // Traitez l'erreur ici
           console.log("Erreur lor de contacte des etudiants "+error);});
-          tab_etudiant.appendChild(tbody);
+          // tbody déjà dans le DOM, pas besoin de l'ajouter
           tab_etudiant.classList.add("table-striped");
 }
 
 
 
 // LA FONCTION D'AFFIHAGE DES ETUDIANTS D'UNE PROMOTION DANS UNE ANNEE ACADEMIQUE CHOISIE
-function Affichage_etudiant_Transact_2(code_promo,Id_an_acad,txt_nom)
+// AVEC RECHERCHE PAR NOM
+function Affichage_etudiant_Transact_2(code_promo,Id_an_acad,date_paiement,txt_nom)
 {
+    let tab_etudiant = document.getElementById("table_etudiant1");
+    let tab_transact = document.getElementById("table_transact");
+
+    // Préserver le thead, ne modifier que tbody
+    let tbody = tab_etudiant.querySelector("tbody");
+    if (!tbody) {
+        tbody = document.createElement("tbody");
+        tab_etudiant.appendChild(tbody);
+    }
+    tbody.innerHTML = "";
     
+    // Vérification de la date
+    var date_actuelle = new Date();
+    var formattedDate = date_actuelle.toISOString().substr(0, 10);
+    var verifi_date_transact = false;
+
+    if(date_paiement !== formattedDate)
+      verifi_date_transact = true;
+    else 
+      verifi_date_transact = false;
+
+    // Contacter l'API avec le paramètre de recherche
+    var url = 'API_PHP/liste_etudiant_transact.php?Id_annee_acad=' + Id_an_acad + 
+              '&code_promo=' + code_promo + 
+              '&verifi_date=' + verifi_date_transact + 
+              '&Mot_recherche=' + encodeURIComponent(txt_nom);
+        
+    var i = 1;
+    fetch(url) 
+    .then(response => response.json())
+    .then(data => 
+    {
+      data.forEach(infos =>
+        {
+          // Création de TR
+          var tr = document.createElement("tr");
+
+          var tdnum = document.createElement("td");
+          tdnum.textContent = i;
+
+          var tdmatricule = document.createElement("td");
+          var tdnom = document.createElement("td");
+          var tdpostnom = document.createElement("td");
+          var tdprnom = document.createElement("td");
+          var tdsexe = document.createElement("td");
+
+          tdmatricule.textContent = infos.Matricule;
+          tdnom.textContent = infos.Nom;
+          tdpostnom.textContent = infos.Postnom;
+          tdprnom.textContent = infos.Prenom;
+          tdsexe.textContent = infos.Sexe;
+         
+          tr.appendChild(tdnum);
+          tr.appendChild(tdmatricule);
+          tr.appendChild(tdnom);
+          tr.appendChild(tdpostnom);
+          tr.appendChild(tdprnom);
+          tr.appendChild(tdsexe);
+          
+          tbody.appendChild(tr);
+          i++;
+
+          // Ajout de l'événement de clic pour afficher les transactions
+          tr.addEventListener("click", function() {
+            var nom_etudiant = infos.Nom + " " + infos.Postnom + " " + infos.Prenom;
+            Recuperation_Transactions(infos.Matricule, Id_an_acad, code_promo, nom_etudiant, tr);
+          });
+        });
+          
+    }).catch(error => {
+      console.log("Erreur lors de la recherche des étudiants " + error);
+    });
+    
+    // tbody déjà dans le DOM, pas besoin de l'ajouter
+    tab_etudiant.classList.add("table-striped");
 }
 //////////////////////////////////////////////////////////////////////////////////////
 
@@ -356,57 +279,23 @@ function Recuperation_Transactions(mat_etudiant,Id_an_acad,code_promo,nom_etudia
 {
   // Ce bout de code permet de faire une selection de ligne en fixant une couleur de fond
   var tableau = document.getElementById("table_etudiant1");
-  var rows = tableau.getElementsByTagName('tr');  
-  for(var j = 0; j < rows.length; j++) 
-  {
-    if(j!=0) rows[j].style.backgroundColor = '';
-  }
-  tr1.style.backgroundColor = 'red';
+  var rows = tableau.querySelectorAll('tbody tr');  
+  rows.forEach(row => row.classList.remove('selected'));
+  tr1.classList.add('selected');
 
 
   txt_mat_etudiant_1.value=mat_etudiant; // Ici on met dans la zone cachée hidden pour s'en servir ulterieuement
   var tab_etudiant_transact = document.getElementById("table_transact");
 
-  while (tab_etudiant_transact .firstChild) {
-    tab_etudiant_transact .removeChild(tab_etudiant_transact .firstChild);
+  // Préserver le thead, ne modifier que tbody
+  let tbody = tab_etudiant_transact.querySelector("tbody");
+  if (!tbody) {
+      tbody = document.createElement("tbody");
+      tab_etudiant_transact.appendChild(tbody);
   }
-  
-  var thead = document.createElement("thead");
-  thead.classList.add("sticky-sm-top","m-0","fw-bold"); // Pour ajouter la classe à un element HTMl
+  tbody.innerHTML = "";
 
-  var tr1 = document.createElement("tr");
-  tr1.style="background-color:midnightblue; color:white;"
-
-  var td1 = document.createElement("td");      
-  var td2 = document.createElement("td");
-  var td3 = document.createElement("td");
-  var td4 = document.createElement("td");
-  var td5 = document.createElement("td");
-  var td6 = document.createElement("td");
-    
-
-  td1.textContent = "N°";
-  td2.textContent = "Date Transact";
-  td3.textContent = "Motifs";
-  td4.textContent = "Montant";  
-  td5.textContent = "Lieu paie";  
-  td6.textContent = "Actions";
-
-  tr1.appendChild(td1);
-  tr1.appendChild(td2);
-  tr1.appendChild(td3);
-  tr1.appendChild(td4);
-  tr1.appendChild(td5);
-  tr1.appendChild(td6);
-  
-
-    
-  thead.appendChild(tr1);
-  tab_etudiant_transact.appendChild(thead);
-    
-  var tbody = document.createElement("tbody");
-
-  var url='D_Perception/API_PHP/Recup_Transact_etudiant.php'+
+  var url='API_PHP/Recup_Transact_etudiant.php'+
   '?matricule='+mat_etudiant
   +'&id_annee_acad='+Id_an_acad
   +'&code_promo='+code_promo;
@@ -474,7 +363,9 @@ function Recuperation_Transactions(mat_etudiant,Id_an_acad,code_promo,nom_etudia
               ,infos.motif
               ,infos.Id_lieu
               ,infos.nom_agent
-              ,infos.devise);
+              ,infos.devise
+              ,infos.Mat_agent,
+              infos.numero_recu);
           });
 
           var i1 = document.createElement("i");
@@ -522,7 +413,7 @@ function Recuperation_Transactions(mat_etudiant,Id_an_acad,code_promo,nom_etudia
       }).catch(error => {
           // Traitez l'erreur ici
           console.log("Erreur lors de la selection des transactions "+error);});
-          tab_etudiant_transact.appendChild(tbody);
+          // tbody déjà dans le DOM, pas besoin de l'ajouter
 
 
 
@@ -551,7 +442,7 @@ function Ree_Impression_Recu(
   montant_paie,
   motif,
   id_lieu,
-  nom_agent,devise)
+  nom_agent,devise,mat_agent,numero_recu)
 {
   
   devi="Fc";
@@ -578,7 +469,7 @@ function Ree_Impression_Recu(
     //Intialisation_zone_paiement_banque();
   };*/
    
-  var url = "Impression/Docs_a_imprimer/recu_ree_imprimer.php" +
+  var url = "../Impression/Docs_a_imprimer/recu_ree_imprimer.php" +
             "?Mat_etudiant=" + encodeURIComponent(mat_etudiant) +
             "&Nom_etudiant=" + encodeURIComponent(nom_etudiant) +
             "&Montant_payer="+encodeURIComponent(montant_paie) +
@@ -588,7 +479,9 @@ function Ree_Impression_Recu(
             "&Id_banque=" +encodeURIComponent(id_lieu)+
             "&Id_an_acad=" + encodeURIComponent(Id_an_acad) +
             "&nom_agent="+encodeURIComponent(nom_agent)+
-            "&devise=" + encodeURIComponent(devi);
+            "&devise=" + encodeURIComponent(devi)+
+            "&Mat_agent=" + encodeURIComponent(mat_agent)+
+            "&numero_recu="+encodeURIComponent(numero_recu);
             
   // Paramètres de la fenêtre
   let parametres = "left=20,top=20,width=700,height=500";

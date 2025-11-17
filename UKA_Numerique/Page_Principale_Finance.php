@@ -76,7 +76,7 @@
             elseif($_GET['page']=="Afficher")require_once 'D_Finance/Saisie_Bon.php';
             elseif($_GET['page']=="Modif")require_once 'D_Finance/Mise_a_jour_Autoriz.php';
             
-            else if($_GET['page']=="non_acces")require_once 'D_Generale/Entree_Erreur.php';
+           
             
 
             //ERICK
@@ -87,6 +87,8 @@
             elseif($_GET['page']=="rubriques")require_once 'D_Comptable_ERP/rubrique.php';
             elseif($_GET['page']=="repartition")require_once 'D_Comptable_ERP/repartition.php';
             elseif($_GET['page']=="imputation")require_once 'D_Comptable_ERP/compte.php';
+
+            else if($_GET['page']=="non_acces")require_once 'D_Generale/Entree_Erreur.php';
         
             
           }

@@ -27,7 +27,47 @@
     $type_frais=$_POST['type_frais'];
     $date_paiement=$_POST['date_paiement'];
 
+    // FONCTION DE GENERATION DU NUMERO DE RECU
+    // Format: AAMMJJ-XXXX (date + séquence journalière par agent)
+    function generer_numero_recu($con, $date_paiement, $mat_agent) {
+        // IMPORTANT: Extraire uniquement la partie DATE (sans l'heure) de $date_paiement
+        // car $date_paiement peut contenir datetime complet : "2025-03-27 09:38:48"
+        $date_only = date('Y-m-d', strtotime($date_paiement)); // Résultat: 2025-03-27
+        
+        // 1. Extraire la partie date au format AAMMJJ (Année-Mois-Jour sur 2 chiffres)
+        $date_partie = date('ymd', strtotime($date_paiement)); // Format: 251116 pour 2025-11-16
+        
+        // 2. Compter le nombre de reçus déjà émis pour cette date et cet agent
+        // Note: Date_paie est de type DATETIME dans MySQL
+        $nb_recu_jour = 0;
+        $sql_nb_recu = "SELECT COUNT(payer_frais.Id_payer_frais) as nb_recu
+        FROM payer_frais 
+        WHERE DATE(payer_frais.Date_paie) = ? AND payer_frais.Mat_agent = ?";
+        
+        $stmt = $con->prepare($sql_nb_recu);    
+        $stmt->execute([$date_only, $mat_agent]);
+        
+        $ligne = $stmt->fetch();
+        if($ligne) {
+            $nb_recu_jour = $ligne['nb_recu'];
+        }
+        
+        // 3. Incrémenter pour obtenir le numéro du reçu actuel
+        $numero_sequence = $nb_recu_jour + 1;
+        
+        // 4. Formater le numéro de séquence sur 4 chiffres (0001, 0002, etc.)
+        $numero_sequence_format = str_pad($numero_sequence, 4, '0', STR_PAD_LEFT);
+        
+        // 5. Construire le numéro de reçu final: AAMMJJ-XXXX
+        $numero_recu = $date_partie . "-" . $numero_sequence_format;
+        
+        return $numero_recu;
+    }
+
     $con->beginTransaction();
+
+    // Tableau pour stocker les numéros de reçu générés
+    $numeros_recus = array();
 
 try
 {
@@ -178,13 +218,16 @@ try
 
         $motif_paiement="Frais Académiques";
         
+        // Génération du numéro de reçu
+        $numero_recu = generer_numero_recu($con, $date_paiement, $mat_agent);
+        
         if($devise_paie==="Franc Congolais")
         {
 
             $montant_paie_en_fc=$motant_inverse*$taux_dollar;
             $sql_insert_paiement = "INSERT INTO  payer_frais(Matricule,idFrais,Date_paie,idLieu_paiement,
-            Mat_agent,Montant_paie,Motif_paie,Ensemble,Fc) VALUES (:mat_etudiant,:idFrais,:Date_paie,:idLieu_paiement,
-            :Mat_agent,:Montant_paier,:Motif_paie,:ensemnle,:montant_en_fc)";
+            Mat_agent,Montant_paie,Motif_paie,Ensemble,Fc,numero_recu) VALUES (:mat_etudiant,:idFrais,:Date_paie,:idLieu_paiement,
+            :Mat_agent,:Montant_paier,:Motif_paie,:ensemnle,:montant_en_fc,:numero_recu)";
             $stmt = $con->prepare($sql_insert_paiement);
             $stmt->bindParam(':mat_etudiant', $mat_etudiant);
             $stmt->bindParam(':idFrais', $idFrais);
@@ -195,15 +238,18 @@ try
             $stmt->bindParam(':Motif_paie', $motif_paiement);
             $stmt->bindParam(':ensemnle', $ensemble);
             $stmt->bindParam(':montant_en_fc',$montant_paie_en_fc);
+            $stmt->bindParam(':numero_recu', $numero_recu);
 
-            if($stmt->execute()) echo "\n\nOk\n\n";
+            if($stmt->execute()) {
+                $numeros_recus[] = $numero_recu;
+            }
             else echo "\n\nimpossible de faire cet enregistrment \n\n";
         }
         else
         {
             $sql_insert_paiement = "INSERT INTO  payer_frais(Matricule,idFrais,Date_paie,idLieu_paiement,
-            Mat_agent,Montant_paie,Motif_paie,Ensemble) VALUES (:mat_etudiant,:idFrais,:Date_paie,:idLieu_paiement,
-            :Mat_agent,:Montant_paier,:Motif_paie,:ensemnle)";
+            Mat_agent,Montant_paie,Motif_paie,Ensemble,numero_recu) VALUES (:mat_etudiant,:idFrais,:Date_paie,:idLieu_paiement,
+            :Mat_agent,:Montant_paier,:Motif_paie,:ensemnle,:numero_recu)";
             $stmt = $con->prepare($sql_insert_paiement);
             $stmt->bindParam(':mat_etudiant', $mat_etudiant);
             $stmt->bindParam(':idFrais', $idFrais);
@@ -213,8 +259,11 @@ try
             $stmt->bindParam(':Montant_paier', $motant_inverse);
             $stmt->bindParam(':Motif_paie', $motif_paiement);
             $stmt->bindParam(':ensemnle', $ensemble);
+            $stmt->bindParam(':numero_recu', $numero_recu);
 
-            if($stmt->execute()) echo "\n\nOk\n\n";
+            if($stmt->execute()) {
+                $numeros_recus[] = $numero_recu;
+            }
             else echo "\n\nimpossible de faire cet enregistrment \n\n";
         }
 
@@ -258,6 +307,9 @@ try
             $motif_paiement=$tab_motif_paiement[0];
             $motant_inverse=$montant_payer;
 
+            // Génération du numéro de reçu pour l'enrôlement
+            $numero_recu_enrol = generer_numero_recu($con, $date_paiement, $mat_agent);
+
             if($devise_paie==="Franc Congolais")
             {
                 
@@ -265,8 +317,8 @@ try
                 
 
                 $sql_insert_paiement = "INSERT INTO  payer_frais(Matricule,idFrais,Date_paie,idLieu_paiement,
-                    Mat_agent,Montant_paie,Motif_paie,Ensemble,Fc) VALUES (:mat_etudiant,:idFrais,:Date_paie,:idLieu_paiement,
-                    :Mat_agent,:Montant_paier,:Motif_paie,'Ensemble',:montant_en_fc)";
+                    Mat_agent,Montant_paie,Motif_paie,Ensemble,Fc,numero_recu) VALUES (:mat_etudiant,:idFrais,:Date_paie,:idLieu_paiement,
+                    :Mat_agent,:Montant_paier,:Motif_paie,'Ensemble',:montant_en_fc,:numero_recu)";
                 $stmt = $con->prepare($sql_insert_paiement);
                 $stmt->bindParam(':mat_etudiant', $mat_etudiant);
                 $stmt->bindParam(':idFrais', $idFrais);
@@ -276,13 +328,18 @@ try
                 $stmt->bindParam(':Montant_paier', $motant_inverse);
                 $stmt->bindParam(':Motif_paie', $motif_paiement);
                 $stmt->bindParam(':montant_en_fc', $montant_paye_en_fc);
-
+                $stmt->bindParam(':numero_recu', $numero_recu_enrol);
+                
+                if($stmt->execute()) {
+                    $numeros_recus[] = $numero_recu_enrol;
+                }
+                else echo "\n\nimpossible de faire cet enregistrment \n\n";
             }
             else
             {
                 $sql_insert_paiement = "INSERT INTO  payer_frais(Matricule,idFrais,Date_paie,idLieu_paiement,
-                    Mat_agent,Montant_paie,Motif_paie,Ensemble) VALUES (:mat_etudiant,:idFrais,:Date_paie,:idLieu_paiement,
-                    :Mat_agent,:Montant_paier,:Motif_paie,'Ensemble')";
+                    Mat_agent,Montant_paie,Motif_paie,Ensemble,numero_recu) VALUES (:mat_etudiant,:idFrais,:Date_paie,:idLieu_paiement,
+                    :Mat_agent,:Montant_paier,:Motif_paie,'Ensemble',:numero_recu)";
                 $stmt = $con->prepare($sql_insert_paiement);
                 $stmt->bindParam(':mat_etudiant', $mat_etudiant);
                 $stmt->bindParam(':idFrais', $idFrais);
@@ -291,12 +348,14 @@ try
                 $stmt->bindParam(':Mat_agent', $mat_agent);
                 $stmt->bindParam(':Montant_paier', $motant_inverse);
                 $stmt->bindParam(':Motif_paie', $motif_paiement);
-
+                $stmt->bindParam(':numero_recu', $numero_recu_enrol);
+                
+                if($stmt->execute()) {
+                    $numeros_recus[] = $numero_recu_enrol;
+                }
+                else echo "\n\nimpossible de faire cet enregistrment \n\n";
 
             }
-            
-            if($stmt->execute()) echo "\n\nOk\n\n";
-            else echo "\n\nimpossible de faire cet enregistrment \n\n";
         }
 
         
@@ -359,11 +418,14 @@ try
 
 
 
+            // Génération du numéro de reçu pour chaque enrôlement
+            $numero_recu = generer_numero_recu($con, $date_paiement, $mat_agent);
+
             if($devise_paie==="Franc Congolais")
             {
                 $sql_insert_paiement = "INSERT INTO  payer_frais(Matricule,idFrais,Date_paie,idLieu_paiement,
-                Mat_agent,Montant_paie,Motif_paie,Fc) VALUES (:mat_etudiant,:idFrais,:Date_paie,:idLieu_paiement,
-                :Mat_agent,:Montant_paier,:Motif_paie,:montant_en_fc)";
+                Mat_agent,Montant_paie,Motif_paie,Fc,numero_recu) VALUES (:mat_etudiant,:idFrais,:Date_paie,:idLieu_paiement,
+                :Mat_agent,:Montant_paier,:Motif_paie,:montant_en_fc,:numero_recu)";
                 $stmt = $con->prepare($sql_insert_paiement);
                 $stmt->bindParam(':mat_etudiant', $mat_etudiant);
                 $stmt->bindParam(':idFrais', $idFrais);
@@ -373,15 +435,20 @@ try
                 $stmt->bindParam(':Montant_paier', $motant_inverse);
                 $stmt->bindParam(':Motif_paie', $motif_paiement);
                 $stmt->bindParam(':montant_en_fc', $montant_en_fc);
-            
+                $stmt->bindParam(':numero_recu', $numero_recu);
+                
+                if($stmt->execute()) {
+                    $numeros_recus[] = $numero_recu;
+                }
+                else echo "\n\nimpossible de faire cet enregistrment \n\n";
 
             }
             else
             {
 
                 $sql_insert_paiement = "INSERT INTO  payer_frais(Matricule,idFrais,Date_paie,idLieu_paiement,
-                Mat_agent,Montant_paie,Motif_paie) VALUES (:mat_etudiant,:idFrais,:Date_paie,:idLieu_paiement,
-                :Mat_agent,:Montant_paier,:Motif_paie)";
+                Mat_agent,Montant_paie,Motif_paie,numero_recu) VALUES (:mat_etudiant,:idFrais,:Date_paie,:idLieu_paiement,
+                :Mat_agent,:Montant_paier,:Motif_paie,:numero_recu)";
                 $stmt = $con->prepare($sql_insert_paiement);
                 $stmt->bindParam(':mat_etudiant', $mat_etudiant);
                 $stmt->bindParam(':idFrais', $idFrais);
@@ -390,11 +457,14 @@ try
                 $stmt->bindParam(':Mat_agent', $mat_agent);
                 $stmt->bindParam(':Montant_paier', $motant_inverse);
                 $stmt->bindParam(':Motif_paie', $motif_paiement);
+                $stmt->bindParam(':numero_recu', $numero_recu);
+                
+                if($stmt->execute()) {
+                    $numeros_recus[] = $numero_recu;
+                }
+                else echo "\n\nimpossible de faire cet enregistrment \n\n";
             
             }
-                
-            if($stmt->execute()) echo "\n\nOk\n\n";
-            else echo "\n\nimpossible de faire cet enregistrment \n\n";
 
 
 
@@ -439,13 +509,16 @@ try
         $motif_paiement=$type_frais;
         $motant_inverse=$montant_payer;
 
+        // Génération du numéro de reçu
+        $numero_recu = generer_numero_recu($con, $date_paiement, $mat_agent);
+
         // Ici on test pour specfier l'insertion afin de savoir si l'argent est percu en fr ou en dollar
 
         if($devise_paie==="Franc Congolais")
         {
             $sql_insert_paiement = "INSERT INTO  payer_frais(Matricule,idFrais,Date_paie,idLieu_paiement,
-            Mat_agent,Montant_paie,Motif_paie,Fc) VALUES (:mat_etudiant,:idFrais,:Date_paie,:idLieu_paiement,
-            :Mat_agent,:Montant_paier,:Motif_paie,:montant_en_fc)";
+            Mat_agent,Montant_paie,Motif_paie,Fc,numero_recu) VALUES (:mat_etudiant,:idFrais,:Date_paie,:idLieu_paiement,
+            :Mat_agent,:Montant_paier,:Motif_paie,:montant_en_fc,:numero_recu)";
 
 
             $stmt = $con->prepare($sql_insert_paiement);
@@ -457,13 +530,19 @@ try
             $stmt->bindParam(':Montant_paier', $motant_inverse);
             $stmt->bindParam(':Motif_paie', $motif_paiement);
             $stmt->bindParam(':montant_en_fc', $montant_en_fc);
+            $stmt->bindParam(':numero_recu', $numero_recu);
+            
+            if($stmt->execute()) {
+                $numeros_recus[] = $numero_recu;
+            }
+            else echo "\n\nimpossible de faire cet enregistrment \n\n";
 
         }
         else
         {
             $sql_insert_paiement = "INSERT INTO  payer_frais(Matricule,idFrais,Date_paie,idLieu_paiement,
-            Mat_agent,Montant_paie,Motif_paie) VALUES (:mat_etudiant,:idFrais,:Date_paie,:idLieu_paiement,
-            :Mat_agent,:Montant_paier,:Motif_paie)";
+            Mat_agent,Montant_paie,Motif_paie,numero_recu) VALUES (:mat_etudiant,:idFrais,:Date_paie,:idLieu_paiement,
+            :Mat_agent,:Montant_paier,:Motif_paie,:numero_recu)";
 
             $stmt = $con->prepare($sql_insert_paiement);
             $stmt->bindParam(':mat_etudiant', $mat_etudiant);
@@ -473,10 +552,13 @@ try
             $stmt->bindParam(':Mat_agent', $mat_agent);
             $stmt->bindParam(':Montant_paier', $motant_inverse);
             $stmt->bindParam(':Motif_paie', $motif_paiement);
+            $stmt->bindParam(':numero_recu', $numero_recu);
+            
+            if($stmt->execute()) {
+                $numeros_recus[] = $numero_recu;
+            }
+            else echo "\n\nimpossible de faire cet enregistrment \n\n";
         }
-        
-        if($stmt->execute()) echo "\n\nOk\n\n";
-        else echo "\n\nimpossible de faire cet enregistrment \n\n";
 
 
     }
@@ -489,11 +571,20 @@ try
         
 
     $con->commit();
+    
+    // Retourner les numéros de reçu générés en JSON
+    echo json_encode(array(
+        'success' => true,
+        'numeros_recus' => $numeros_recus
+    ));
 } 
 catch(PDOException $e) {
     // Annuler la transaction en cas d'erreur
     $con->rollback();
-    echo "Erreur lors de l'insertion: " . $e->getMessage();
+    echo json_encode(array(
+        'success' => false,
+        'error' => $e->getMessage()
+    ));
 }
 
 

@@ -33,7 +33,8 @@ const zone_sommeEnrol_Deuxime_Session=document.getElementById("sommeEnrolement_D
  {
   cmb_filiere_frais.addEventListener('change',(event) => {
     var id_filiere=cmb_filiere_frais.value;
-    Affichage_promotion_fixe(id_filiere);
+    // Utilisation de la fonction globale avec l'ID spécifique
+    Affichage_promotion(id_filiere, "promo_frais_fixer");
   });
 
  }
@@ -80,38 +81,8 @@ if(cmb_annee_academique_frais!==null)
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 */
 
-// ICI LA FONCTION POUR LA RECUPERATIONS DES PROMOTIONS EN FONCTION DE LA FILIERE CHOISIE
-function Affichage_promotion_fixe(Idfiliere ) {
-
-    // Réinitialiser le contenu de la balise select des promotions
-    var cmb_promotion=document.getElementById("promo_frais_fixer");
-    cmb_promotion.innerHTML = "";
-  
-    
-    // Contacte de l'API PHP
-    const url='D_Budget/API_PHP/Recup_prom_filiere?idFiliere='+Idfiliere;
-          
-    fetch(url) 
-    .then(response => response.json())
-    .then(data => {
-      data.forEach(infos => {
-        
-
-        const option = document.createElement("option");
-        option.value = infos.cd_prom;
-        option.textContent = infos.abv+" - "+infos.lib_mention;
-    
-        // Ajouter l'option à la balise select
-        cmb_promotion.appendChild(option);
-
-        //cmb_promotion.innerHTML += "<option style='width:100%;'value='"+infos.cd_prom+"'>"+infos.abv+" - "+infos.lib_mention+"</option>";
-        //console.log("Code promo est "+infos.cd_prom+" la promo "+infos.abv+" - "+infos.lib_mention);
-        
-      });
-    })
-    .catch(error => console.error('Erreur lors de la récupération des promotions :', error));
-  
-  }
+// FONCTION SUPPRIMÉE - On utilise Affichage_promotion() du fichier D_Generale/JavaScript/recup_promotion_et_etudiant.js
+// Appeler avec: Affichage_promotion(idFiliere, "promo_frais_fixer")
   ////////////////////////////////////////////////////////////////////////////////////////////
 
 

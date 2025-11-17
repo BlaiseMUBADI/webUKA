@@ -30,7 +30,7 @@
 
 
   <div class="profile-details ms-5 me-3 " style="height: 80%; "style="display:bloc"id="profiluser">
-    <img src="<?php echo $_SESSION['Photo_profil'];?>" alt="Image" style="width: 90%; height: 100%;"/>
+    <img src="../Fonctions_PHP/Fonctions.php?id=<?php echo $_SESSION['MatriculeAgent']; ?>" alt="Image" style="width: 90%; height: 100%;"/>
     <span class="admin_name" > 
       Matricule : <?php echo $_SESSION['MatriculeAgent'];?>  <br>
       Nom: <?php echo $_SESSION['Nom_user']; ?><br>

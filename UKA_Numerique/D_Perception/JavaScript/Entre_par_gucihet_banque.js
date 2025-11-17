@@ -1,39 +1,33 @@
-
-
-console.log(" je suis dans recup_promotion_et_etudiant ")
-
-
-
+console.log(" Je suis dans Entre_par_guichet_banque");
+/*
+*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+* ++++++++++++++++++++++++ LA PARTIE DE LA DECLARATIONS DE COMPOSANT HTML  +++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*/
 /*
 *+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 * ++++++++++++++++++++++++ LA PARTIE DE LA DECLARATIONS DE COMPOSANT HTML  +++++++++++++++++++++++
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 */
 
-const txt_mat_etudiant=document.getElementById("mat_etudiant");
-const txt_nom_etudiant=document.getElementById("nom_etudiant_1");
-const txt_postnom_etudiant=document.getElementById("postnom_etudiant");
-const txt_prenom_etudiant=document.getElementById("prenom_etudiant");
-const txt_sexe_etudiant=document.getElementById("sexe_etudiant");
-const txt_zone_recherche_etudiant=document.getElementById('txt_recherch_etudiant');
+let txt_mat_etudiant;
+let txt_nom_etudiant;
+let txt_postnom_etudiant;
+let txt_prenom_etudiant;
+let txt_sexe_etudiant;
+let txt_zone_recherche_etudiant;
 
+let cmb_filiere;
+let cmb_promotion;
+let cmb_annee_academique;
+let zone_etudiant;
 
-const cmb_filiere=document.getElementById("filiere");
-const cmb_promotion=document.getElementById("promo");
-const cmb_annee_academique=document.getElementById("Id_an_acad");
-const zone_etudiant=document.getElementById("nom_etudiant");
-
-const zone_sommeFA=document.getElementById("sommeFA");
-const zone_sommeEnrol_Mi_session=document.getElementById("sommeEnrolement_mi_session");
-const zone_sommeEnrol_Session=document.getElementById("sommeEnrolement_Session");
-const zone_sommeEnrol_Deuxime_Session=document.getElementById("sommeEnrolement_Deuxieme_session");
-const zone_sommeEnrol_Rattrapage_Sem_1=document.getElementById("sommeRattrapage_Sem_1");
-const zone_sommeEnrol_Validation_Credit=document.getElementById("sommeValidation_Credit");
-
-
-var tr_globale_ligne_select_etudiant=""; // Est une varibale qui doit contenir un objet de la ligne selection sur le tableau qui affiche les étudiants
-
-
+let zone_sommeFA;
+let zone_sommeEnrol_Mi_session;
+let zone_sommeEnrol_Session;
+let zone_sommeEnrol_Deuxime_Session;
+let zone_sommeEnrol_Rattrapage_Sem_1;
+let zone_sommeEnrol_Validation_Credit;
 
 
 /*
@@ -42,13 +36,36 @@ var tr_globale_ligne_select_etudiant=""; // Est une varibale qui doit contenir u
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 */
 
+document.addEventListener("DOMContentLoaded", function(event) {
+  const container = document.getElementById("div_gen_paiement") || document;
+
+  txt_mat_etudiant = container.querySelector("#mat_etudiant") || document.getElementById("mat_etudiant");
+  txt_nom_etudiant = container.querySelector("#nom_etudiant_1") || document.getElementById("nom_etudiant_1");
+  txt_postnom_etudiant = container.querySelector("#postnom_etudiant") || document.getElementById("postnom_etudiant");
+  txt_prenom_etudiant = container.querySelector("#prenom_etudiant") || document.getElementById("prenom_etudiant");
+  txt_sexe_etudiant = container.querySelector("#sexe_etudiant") || document.getElementById("sexe_etudiant");
+  txt_zone_recherche_etudiant = container.querySelector('#txt_recherch_etudiant') || document.getElementById('txt_recherch_etudiant');
+
+  cmb_filiere = container.querySelector("#filiere") || document.getElementById("filiere");
+  cmb_promotion = container.querySelector("#promo") || document.getElementById("promo");
+  cmb_annee_academique = container.querySelector("#Id_an_acad") || document.getElementById("Id_an_acad");
+  zone_etudiant = container.querySelector("#nom_etudiant") || document.getElementById("nom_etudiant");
+
+  zone_sommeFA = container.querySelector("#sommeFA") || document.getElementById("sommeFA");
+  zone_sommeEnrol_Mi_session = container.querySelector("#sommeEnrolement_mi_session") || document.getElementById("sommeEnrolement_mi_session");
+  zone_sommeEnrol_Session = container.querySelector("#sommeEnrolement_Session") || document.getElementById("sommeEnrolement_Session");
+  zone_sommeEnrol_Deuxime_Session = container.querySelector("#sommeEnrolement_Deuxieme_session") || document.getElementById("sommeEnrolement_Deuxieme_session");
+  zone_sommeEnrol_Rattrapage_Sem_1 = container.querySelector("#sommeRattrapage_Sem_1") || document.getElementById("sommeRattrapage_Sem_1");
+  zone_sommeEnrol_Validation_Credit = container.querySelector("#sommeValidation_Credit") || document.getElementById("sommeValidation_Credit");
+
  // Lorque le combo box de filiere  change
  // on test si l'élement existe vraiment sur la page html
  if(cmb_filiere!==null)
  {
   cmb_filiere.addEventListener('change',(event) => {
     var id_filiere=cmb_filiere.value;
-    Affichage_promotion(id_filiere);
+    // Appel avec l'ID du combo box de promotion (par défaut "promo")
+    Affichage_promotion(id_filiere, "promo");
   });
 
  }
@@ -64,7 +81,8 @@ if(cmb_promotion!==null)
   cmb_promotion.addEventListener('change',(event)=> {
     var code_promo=cmb_promotion.value;
     var Id_annee=cmb_annee_academique.value;
-    Affichage_etudiant(code_promo,Id_annee);
+    var tableau = document.getElementById("table_paiement");
+    Affichage_etudiant(code_promo,Id_annee,tableau);
   
   
   });
@@ -79,8 +97,8 @@ if(cmb_annee_academique!==null)
   cmb_annee_academique.addEventListener('change',(event)=> {
     var code_promo=cmb_promotion.value;
     var Id_annee=cmb_annee_academique.value;
-  
-    Affichage_etudiant(code_promo,Id_annee)
+    var tableau = document.getElementById("table_paiement");
+    Affichage_etudiant(code_promo,Id_annee,tableau)
   
   });
 
@@ -96,56 +114,14 @@ if(txt_zone_recherche_etudiant!==null)
   txt_zone_recherche_etudiant.addEventListener("keyup", function(event) {
     var code_promo=cmb_promotion.value;
     var Id_annee=cmb_annee_academique.value;
-    
+    var tableau = document.getElementById("table_paiement");
     var txt_nom=txt_zone_recherche_etudiant.value;
-    Affichage_etudiant_2(code_promo,Id_annee,txt_nom)
+    Affichage_etudiant_2(code_promo,Id_annee,txt_nom,tableau)
   });
 
 }
 
-
-
-
-/*
-*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-* ++++++++++++++++++++++++ LA PARTIE DE LA DEFINITION DE FONCTIONS +++++++++++++++++++++++++++++++
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-*/
-
-// ICI LA FONCTION POUR LA RECUPERATIONS DES PROMOTIONS EN FONCTION DE LA FILIERE CHOISIE
-function Affichage_promotion(Idfiliere ) {
-
-    // Réinitialiser le contenu de la balise select des promotions
-    var cmb_promotion=document.getElementById("promo");
-    cmb_promotion.innerHTML = "";
-  
-    
-    // Contacte de l'API PHP
-    const url='D_Generale/API_PHP/Recup_prom_filiere.php?idFiliere='+Idfiliere;
-          
-    fetch(url) 
-    .then(response => response.json())
-    .then(data => {
-      data.forEach(infos => {
-        
-
-        const option = document.createElement("option");
-        option.value = infos.cd_prom;
-        option.textContent = infos.abv+" - "+infos.lib_mention;
-    
-        // Ajouter l'option à la balise select
-        cmb_promotion.appendChild(option);
-
-        //cmb_promotion.innerHTML += "<option style='width:100%;'value='"+infos.cd_prom+"'>"+infos.abv+" - "+infos.lib_mention+"</option>";
-        //console.log("Code promo est "+infos.cd_prom+" la promo "+infos.abv+" - "+infos.lib_mention);
-        
-      });
-    })
-    .catch(error => console.error('Erreur lors de la récupération des promotions :', error));
-  
-  }
-  ////////////////////////////////////////////////////////////////////////////////////////////
-
+}); // FIN DOMContentLoaded
 
 
 
@@ -171,8 +147,8 @@ function Affichage_modalite_paiemnt() {
   bloc_frais_tranche.textContent="";
 
   
-  // Contacte de l'API PHP
-  const url='D_Perception/API_PHP/modalite_paiement.php?code_promo='+code_promo+'&Id_annee_acad='+Id_an_acad;
+  // Contacte de l'API PHP - Chemin absolu depuis la racine
+  const url='API_PHP/modalite_paiement.php?code_promo='+code_promo+'&Id_annee_acad='+Id_an_acad;
         
   fetch(url) 
   .then(response => response.json())
@@ -212,245 +188,11 @@ function Affichage_modalite_paiemnt() {
 
 
 
-
-// LA FONCTION D'AFFIHAGE DES ETUDIANTS D'UNE PROMOTION DANS UNE ANNEE ACADEMIQUE CHOISIE
-function Affichage_etudiant(code_promo,Id_an_acad)
-{
-
-    // ici on appele la méthode pour l'affichage des modalités
-    Affichage_modalite_paiemnt();
-    
-    var tableau = document.getElementById("table_paiement");
-
-    while (tableau .firstChild) {
-      tableau .removeChild(tableau .firstChild);
-    }
-    
-    var thead = document.createElement("thead");
-    thead.classList.add("sticky-sm-top","m-0","fw-bold"); // Pour ajouter la classe à un element HTMl
-
-    var tr1 = document.createElement("tr");
-    tr1.style="background-color:midnightblue; color:white;"
-
-    var td1 = document.createElement("td");      
-    var td2 = document.createElement("td");
-    var td3 = document.createElement("td");
-    var td4 = document.createElement("td");
-    var td5 = document.createElement("td");
-    var td6 = document.createElement("td");
-      
-
-    td1.textContent = "N°";
-    td2.textContent = "Matricule";
-    td3.textContent = "Nom";
-    td4.textContent = "Postnom";
-    td5.textContent = "Prenom";
-    td6.textContent = "Sexe";
-
-    tr1.appendChild(td1);
-    tr1.appendChild(td2);
-    tr1.appendChild(td3);
-    tr1.appendChild(td4);
-    tr1.appendChild(td5);
-    tr1.appendChild(td6);
-
-      
-    thead.appendChild(tr1);
-    tableau.appendChild(thead);
-      
-    var tbody = document.createElement("tbody");
-    
-    // Contacter l'API pour avoir les étudiants// Contacte de l'API PHP
-    var url='D_Generale/API_PHP/liste_etudiant.php?Id_annee_acad='+Id_an_acad+'&code_promo='+code_promo;
-        
-    var i=1;
-    fetch(url) 
-    .then(response => response.json())
-    .then(data => 
-    {
-      data.forEach(infos =>
-        {
-          // Création de TR
-              var tr = document.createElement("tr");
-             
-
-
-              var tdnum = document.createElement("td");
-              tdnum.textContent = i;
-
-              var tdmatricule= document.createElement("td");
-              var tdnom = document.createElement("td");
-              var tdpostnom = document.createElement("td");
-              var tdprnom = document.createElement("td");
-              var tdsexe = document.createElement("td");
-              
-
-              tdmatricule.textContent =infos.Matricule;
-              tdnom.textContent=infos.Nom
-              tdpostnom.textContent=infos.Postnom;
-              tdprnom.textContent=infos.Prenom;
-              tdsexe.textContent=infos.Sexe;
-             
-              
-              tr.appendChild(tdnum);
-              tr.appendChild(tdmatricule);
-              tr.appendChild(tdnom);
-              tr.appendChild(tdpostnom);
-              tr.appendChild(tdprnom);
-              tr.appendChild(tdsexe);
-              tr_globale_ligne_select_etudiant=tr;
-              
-              
-              tbody.appendChild(tr);
-              i++;
-
-              // Ajout de l'évenement sur la lign appellant
-              // Ajouter l'événement de clic pour afficher les infos de la ligne
-              //tr.style.backgroundColor = '';
-              tr.addEventListener("click", function() {
-                
-                Recuperation_situation_finaniere(infos.Matricule,infos.Nom,infos.Postnom,
-                infos.Prenom,infos.Sexe,Id_an_acad,tr_globale_ligne_select_etudiant);
-                //tr.style.backgroundColor = 'red';
-                
-              });
-
-              
-              
-              
-        });
-          
-        }).catch(error => {
-          // Traitez l'erreur ici
-          console.log("Erreur lor de contacte des etudiants "+error);});
-          tableau.appendChild(tbody);
-}
-
-
-
-// LA FONCTION D'AFFIHAGE DES ETUDIANTS D'UNE PROMOTION DANS UNE ANNEE ACADEMIQUE CHOISIE
-function Affichage_etudiant_2(code_promo,Id_an_acad,txt_nom)
-{
-    var tableau = document.getElementById("table_paiement");
-
-    while (tableau .firstChild) {
-      tableau .removeChild(tableau .firstChild);
-    }
-    
-    var thead = document.createElement("thead");
-    thead.classList.add("sticky-sm-top","m-0","fw-bold"); // Pour ajouter la classe à un element HTMl
-
-    var tr1 = document.createElement("tr");
-    tr1.style="background-color:midnightblue; color:white;"
-
-    var td1 = document.createElement("td");      
-    var td2 = document.createElement("td");
-    var td3 = document.createElement("td");
-    var td4 = document.createElement("td");
-    var td5 = document.createElement("td");
-    var td6 = document.createElement("td");
-      
-
-    td1.textContent = "N°";
-    td2.textContent = "Matricule";
-    td3.textContent = "Nom";
-    td4.textContent = "Postnom";
-    td5.textContent = "Prenom";
-    td6.textContent = "Sexe";
-
-    tr1.appendChild(td1);
-    tr1.appendChild(td2);
-    tr1.appendChild(td3);
-    tr1.appendChild(td4);
-    tr1.appendChild(td5);
-    tr1.appendChild(td6);
-
-      
-    thead.appendChild(tr1);
-    tableau.appendChild(thead);
-      
-    var tbody = document.createElement("tbody");
-    
-    // Contacter l'API pour avoir les étudiants// Contacte de l'API PHP
-    var url='D_Generale/API_PHP/liste_etudiant.php'
-    +'?Id_annee_acad='+Id_an_acad
-    +'&code_promo='+code_promo
-    +'&Mot_recherche='+txt_nom;
-        
-    var i=1;
-    fetch(url) 
-    .then(response => response.json())
-    .then(data => 
-    {
-      data.forEach(infos =>
-        {
-          // Création de TR
-              var tr = document.createElement("tr");
-
-
-              var tdnum = document.createElement("td");
-              tdnum.textContent = i;
-
-              var tdmatricule= document.createElement("td");
-              var tdnom = document.createElement("td");
-              var tdpostnom = document.createElement("td");
-              var tdprnom = document.createElement("td");
-              var tdsexe = document.createElement("td");
-              
-
-              tdmatricule.textContent =infos.Matricule;
-              tdnom.textContent=infos.Nom
-              tdpostnom.textContent=infos.Postnom;
-              tdprnom.textContent=infos.Prenom;
-              tdsexe.textContent=infos.Sexe;
-             
-              
-              tr.appendChild(tdnum);
-              tr.appendChild(tdmatricule);
-              tr.appendChild(tdnom);
-              tr.appendChild(tdpostnom);
-              tr.appendChild(tdprnom);
-              tr.appendChild(tdsexe);
-              
-              
-              tr_globale_ligne_select_etudiant=tr;
-              tbody.appendChild(tr);
-              i++;
-
-              // Ajout de l'évenement sur la lign appellant
-              // Ajouter l'événement de clic pour afficher les infos de la ligne
-              tr.addEventListener("click", function() {
-
-                Recuperation_situation_finaniere(infos.Matricule,infos.Nom,infos.Postnom,
-                  infos.Prenom,infos.Sexe,Id_an_acad,tr_globale_ligne_select_etudiant);
-                
-              });
-
-              
-              
-              
-        });
-          
-        }).catch(error => {
-          // Traitez l'erreur ici
-          console.log("Erreur lor de contacte des etudiants "+error);});
-          tableau.appendChild(tbody);
-}
-//////////////////////////////////////////////////////////////////////////////////////
-
-
-
-
-
-
-
-
       /*
       * la méthode pour récupere la situation financière de l'étudiant passer
       * en parametre
       */
-function Recuperation_situation_finaniere(mat_etudiant,Nom,Postnom,
-        Prenom,Sexe,Id_an_acad,tr)
+function Recuperation_situation_finaniere(mat_etudiant,Nom,Postnom,Prenom,Sexe,Id_an_acad,tr)
 {
 
 
@@ -500,7 +242,7 @@ function Recuperation_situation_finaniere(mat_etudiant,Nom,Postnom,
   const xhr=new XMLHttpRequest();
   $type_frais="Frais Académiques";
 
-  var url='D_Perception/API_PHP/Recup_situation_paie_etudiant.php'+
+  var url='API_PHP/Recup_situation_paie_etudiant.php'+
         '?matricule='+mat_etudiant
         +'&id_annee_acad='+Id_an_acad
         +'&type_frais='+$type_frais;
@@ -532,7 +274,7 @@ function Recuperation_situation_finaniere(mat_etudiant,Nom,Postnom,
    // Cette partie lance contacte uniquement l'API pour le frais d' Enrôlement à la Mi-Session
    const xhr1=new XMLHttpRequest();
    $type_frais="Enrôlement à la Mi-Session";
-   const url1='D_Perception/API_PHP/Recup_situation_paie_etudiant.php'+
+   const url1='API_PHP/Recup_situation_paie_etudiant.php'+
          '?matricule='+mat_etudiant
          +'&id_annee_acad='+Id_an_acad
          +'&type_frais='+$type_frais;
@@ -559,7 +301,7 @@ function Recuperation_situation_finaniere(mat_etudiant,Nom,Postnom,
    // Cette partie lance contacte uniquement l'API pour le frais d' Enrôlement à la Grande-Session
    const xhr2=new XMLHttpRequest();
    $type_frais="Enrôlement à la Grande-Session";
-   const url2='D_Perception/API_PHP/Recup_situation_paie_etudiant.php'+
+   const url2='API_PHP/Recup_situation_paie_etudiant.php'+
          '?matricule='+mat_etudiant
          +'&id_annee_acad='+Id_an_acad
          +'&type_frais='+$type_frais;
@@ -585,7 +327,7 @@ function Recuperation_situation_finaniere(mat_etudiant,Nom,Postnom,
    // Cette partie lance contacte uniquement l'API pour le frais d' Enrôlement à la Grande-Session
    const xhr3=new XMLHttpRequest();
    var $type_frais="Enrôlement à la Deuxième-Session";
-   const url3='D_Perception/API_PHP/Recup_situation_paie_etudiant.php'+
+   const url3='API_PHP/Recup_situation_paie_etudiant.php'+
          '?matricule='+mat_etudiant
          +'&id_annee_acad='+Id_an_acad
          +'&type_frais='+$type_frais;
@@ -610,7 +352,7 @@ function Recuperation_situation_finaniere(mat_etudiant,Nom,Postnom,
    // Cette partie lance contacte uniquement l'API pour le frais d' Enrôlement pour la validation des crédits
    const xhr5=new XMLHttpRequest();
    var $type_frais="Enrôlement validation crédits";
-   const url5='D_Perception/API_PHP/Recup_situation_paie_etudiant.php'+
+   const url5='API_PHP/Recup_situation_paie_etudiant.php'+
          '?matricule='+mat_etudiant
          +'&id_annee_acad='+Id_an_acad
          +'&type_frais='+$type_frais;
@@ -636,7 +378,7 @@ function Recuperation_situation_finaniere(mat_etudiant,Nom,Postnom,
 // Cette partie lance contacte uniquement l'API pour le frais d' Enrôlement pour la validation des crédits
    const xhr6=new XMLHttpRequest();
    var $type_frais="Enrôlement aux rattrapages sem 1";
-   const url6='D_Perception/API_PHP/Recup_situation_paie_etudiant.php'+
+   const url6='API_PHP/Recup_situation_paie_etudiant.php'+
          '?matricule='+mat_etudiant
          +'&id_annee_acad='+Id_an_acad
          +'&type_frais='+$type_frais;
@@ -663,7 +405,7 @@ function Recuperation_situation_finaniere(mat_etudiant,Nom,Postnom,
    var code_promo=cmb_promotion.value;
    const xhr4=new XMLHttpRequest();
    $type_frais="Enrôlement à la Deuxième-Session";
-   const url4='D_Perception/API_PHP/Recup_reste_paie.php'+
+   const url4='API_PHP/Recup_reste_paie.php'+
          '?matricule='+mat_etudiant
          +'&id_annee_acad='+Id_an_acad
          +'&code_promo='+code_promo;

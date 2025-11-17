@@ -2,7 +2,7 @@
 
 <section class="home-section" style="height: 100%;">
       <?php
-        require_once 'D_Generale/Profil_Guichet.php';
+        require_once '../D_Perception/Profil_Guichet.php';
       ?>
   <div class="home-content me-3 ms-3">
 
@@ -89,7 +89,6 @@
               <th>Tranche</th> 
               <th>Devise</th>
               <th>Actions</th>
-              <th>Id frais</th>
             </tr>
           </thead>
           <tbody>
@@ -98,19 +97,6 @@
         </table>
       </div>
     
-      <!-- Ici c'est le bloc pour léffichage en détail et faire un paiement-->
-      
-      <!-- Ici c'est pour stocker les infos de l'utilisateurs 
-          (matricul,nom et autres) est qu'il soit invisible-->
-      <form action="">
-        <input type="hidden"  id="mat_etudiant" value="">
-        <input type="hidden"  id="nom_etudiant_1" value="">
-        <input type="hidden"  id="postnom_etudiant" value="">
-        <input type="hidden"  id="prenom_etudiant" value="">  
-        <input type="hidden"  id="sexe_etudiant" value=""> 
-      </form>
-      
-
 
       <div class="bloc2 shadow-lg bg-body-tertiary rounded border m-0 p-3 m-0" style="color:white; float: right; width: 39%;margin-left:7px;">
         
