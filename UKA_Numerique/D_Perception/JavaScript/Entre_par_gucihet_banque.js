@@ -213,8 +213,7 @@ function Recuperation_situation_finaniere(mat_etudiant,Nom,Postnom,Prenom,Sexe,I
 
 
 
-  zone_etudiant.textContent = Nom
-        +" - "+Postnom+" - "+Prenom;
+  zone_etudiant.textContent = Nom + " - " + Postnom + " - " + Prenom;
   
   txt_mat_etudiant.value=mat_etudiant; // Ici on met dans la zone cachée hidden pour s'en servir ulterieuement
   txt_nom_etudiant.value=Nom; // Ici on met dans la zone cachée hidden pour s'en servir ulterieuement
