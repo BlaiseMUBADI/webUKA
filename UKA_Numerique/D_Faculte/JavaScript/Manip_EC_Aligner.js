@@ -91,7 +91,11 @@
     var i = 1;
     fetch(url)
         .then(response => response.json())
-        .then(data => {
+        .then(response => {
+            // Extraire l'ID de la filière de l'utilisateur et la liste des enseignants
+            const idFiliereUser = response.id_filiere_user;
+            const data = response.enseignants;
+            
             data.forEach(infos => {
                 // Création de TR
                 var tr = document.createElement("tr");
@@ -104,29 +108,15 @@
                 td_enseignant.classList.add("text-center", "w-auto");
                 var td_domaine = document.createElement("td");
                 var td_titre_academique = document.createElement("td");
-                var td_filire = document.createElement("td");
 
                 td_enseignant.textContent = infos.enseignant;
                 td_titre_academique.textContent = infos.titre_academique;
                 td_domaine.textContent = infos.domaine;
-                td_filire.textContent = infos.filiere;
 
                 tr.appendChild(tdnum);
                 tr.appendChild(td_enseignant);
                 tr.appendChild(td_titre_academique);
                 tr.appendChild(td_domaine);
-                tr.appendChild(td_filire);
-
-               /* tr.addEventListener('mouseenter', function() {
-                  tr.style.cursor = 'pointer'; // Change le curseur au survol
-                  tr.style.backgroundColor = 'rgba(9, 241, 160, 0.5)'; // Optionnel: changer la couleur de fond
-                });
-
-                tr.addEventListener('mouseleave', function() {
-                    tr.style.cursor = ''; // Réinitialise le curseur à sa valeur par défaut
-                    tr.style.backgroundColor = ''; // Réinitialise la couleur de fond
-                    
-                });*/
 
                 tbody.appendChild(tr);
 
@@ -136,8 +126,29 @@
                     Selectionner_Enseignant(infos.mat_agent, tr);
                     Affichage_ECs_Par_Filiere() ;
                 });
+                
+                // Ajouter l'événement de clic droit pour afficher le menu contextuel
+                tr.addEventListener("contextmenu", function (event) {
+                  afficherMenuContextuel(event, infos);
+                });
+                
                 i++;
             });
+            
+            // Mettre à jour le badge avec le nombre d'enseignants de la filière
+            const badgeEnseignants = document.getElementById('badge_enseignants');
+            if (badgeEnseignants) {
+                // Compter les enseignants dont l'id_filiere correspond à la filière de l'utilisateur
+                let enseignantsFiliere = data.filter(e => e.id_filiere == idFiliereUser);
+                
+                badgeEnseignants.textContent = enseignantsFiliere.length + ' / ' + data.length;
+                
+                // Message console pour information
+                console.log(`📊 Statistiques Enseignants:`);
+                console.log(`   - Filière actuelle: ${enseignantsFiliere.length}`);
+                console.log(`   - Total université: ${data.length}`);
+                console.log(`   - ID Filière: ${idFiliereUser}`);
+            }
         })
         .catch(error => {
             // Traitez l'erreur ici
@@ -145,7 +156,7 @@
         });
 
     // Le tbody est déjà dans la table, pas besoin de l'ajouter
-    table_aligne_enseignant.classList.add("table-striped");
+    //table_aligne_enseignant.classList.add("table-striped");
 }
 
 
@@ -360,4 +371,189 @@ function Affichage_ECs_Par_Filiere()
         console.error('Erreur:', error);
         console.log('Erreur lors de la suppression de l\'élément constitutif aligné.');
     });
+}
+
+/*
+*********************************************************************************************
+* ******************** Menu contextuel et affichage des infos enseignant *******************
+*********************************************************************************************
+*/
+
+let contextMenu;
+let selectedEnseignant = null;
+
+// Initialiser le menu contextuel une fois le DOM chargé
+document.addEventListener("DOMContentLoaded", function() {
+  contextMenu = document.getElementById('contextMenu');
+  
+  // Masquer le menu contextuel lors d'un clic ailleurs
+  document.addEventListener('click', function(e) {
+    if (contextMenu && !contextMenu.contains(e.target)) {
+      contextMenu.style.display = 'none';
+    }
+  });
+  
+  // Empêcher le menu contextuel du navigateur sur le tableau
+  const tableEnseignant = document.getElementById('table_aligne_enseignant');
+  if (tableEnseignant) {
+    tableEnseignant.addEventListener('contextmenu', function(e) {
+      e.preventDefault();
+    });
+  }
+});
+
+// Fonction pour afficher le menu contextuel
+function afficherMenuContextuel(event, enseignantData) {
+  event.preventDefault();
+  event.stopPropagation();
+  
+  selectedEnseignant = enseignantData;
+  
+  console.log('🖱️ Menu contextuel ouvert pour l\'enseignant:', enseignantData.enseignant, '- Matricule:', enseignantData.mat_agent);
+  
+  if (contextMenu) {
+    contextMenu.style.display = 'block';
+    contextMenu.style.left = event.pageX + 'px';
+    contextMenu.style.top = event.pageY + 'px';
+  }
+}
+
+// Fonction pour afficher les informations de l'enseignant
+function afficherInfosEnseignant() {
+  if (!selectedEnseignant) {
+    console.error('❌ Aucun enseignant sélectionné');
+    return;
+  }
+  
+  // Masquer le menu contextuel
+  if (contextMenu) {
+    contextMenu.style.display = 'none';
+  }
+  
+  console.log('📋 Affichage des informations pour:', selectedEnseignant.enseignant);
+  console.log('✅ Données complètes:', selectedEnseignant);
+  
+  // Remplir les champs de la boîte de dialogue avec les données déjà disponibles
+  document.getElementById('info_mat_agent').textContent = selectedEnseignant.mat_agent || '-';
+  document.getElementById('info_nom_complet').textContent = selectedEnseignant.enseignant || '-';
+  document.getElementById('info_sexe').textContent = selectedEnseignant.sexe === 'M' ? 'Masculin' : (selectedEnseignant.sexe === 'F' ? 'Féminin' : '-');
+  document.getElementById('info_telephone').textContent = selectedEnseignant.phone || '-';
+  document.getElementById('info_email').textContent = selectedEnseignant.email || '-';
+  document.getElementById('info_adresse').textContent = selectedEnseignant.adresse || '-';
+  document.getElementById('info_titre_academique').textContent = selectedEnseignant.titre_academique || '-';
+  document.getElementById('info_domaine').textContent = selectedEnseignant.domaine || '-';
+  document.getElementById('info_categorie').textContent = selectedEnseignant.categorie || '-';
+  document.getElementById('info_niveau_etude').textContent = selectedEnseignant.niveau_etude || '-';
+  document.getElementById('info_institut_attache').textContent = selectedEnseignant.institut_attache || '-';
+  document.getElementById('info_filiere').textContent = selectedEnseignant.filiere || '-';
+  
+  // Afficher la boîte de dialogue
+  const dialog = document.getElementById('boite_Infos_Enseignant');
+  if (dialog) {
+    dialog.showModal();
+  }
+}
+
+// Fonction pour modifier un enseignant (à développer)
+function modifierEnseignant() {
+  if (!selectedEnseignant) {
+    console.error('❌ Aucun enseignant sélectionné');
+    return;
+  }
+  
+  // Masquer le menu contextuel
+  if (contextMenu) {
+    contextMenu.style.display = 'none';
+  }
+  
+  console.log('✏️ Modification de l\'enseignant:', selectedEnseignant.enseignant);
+  console.log('📋 Données:', selectedEnseignant);
+  console.log('⚠️ Fonctionnalité à développer: Modification des données de l\'enseignant');
+  
+  // TODO: Implémenter la fonctionnalité de modification
+}
+
+// Fonction pour afficher l'historique des cours (à développer)
+function afficherHistoriqueCours() {
+  if (!selectedEnseignant) {
+    console.error('❌ Aucun enseignant sélectionné');
+    return;
+  }
+  
+  // Masquer le menu contextuel
+  if (contextMenu) {
+    contextMenu.style.display = 'none';
+  }
+  
+  console.log('📚 Affichage de l\'historique des cours pour:', selectedEnseignant.enseignant);
+  console.log('📋 Matricule:', selectedEnseignant.mat_agent);
+  console.log('⚠️ Fonctionnalité à développer: Historique des cours attribués');
+  
+  // TODO: Implémenter la fonctionnalité d'historique des cours
+}
+
+// Fonction pour attribuer un nouveau cours (à développer)
+function attribuerNouveauCours() {
+  if (!selectedEnseignant) {
+    console.error('❌ Aucun enseignant sélectionné');
+    return;
+  }
+  
+  // Masquer le menu contextuel
+  if (contextMenu) {
+    contextMenu.style.display = 'none';
+  }
+  
+  console.log('➕ Attribution d\'un nouveau cours à:', selectedEnseignant.enseignant);
+  console.log('📋 Matricule:', selectedEnseignant.mat_agent);
+  console.log('⚠️ Fonctionnalité à développer: Attribution de cours');
+  
+  // TODO: Implémenter la fonctionnalité d'attribution de cours
+}
+
+// Fonction pour générer la fiche de l'enseignant en PDF (à développer)
+function genererFicheEnseignant() {
+  if (!selectedEnseignant) {
+    console.error('❌ Aucun enseignant sélectionné');
+    return;
+  }
+  
+  // Masquer le menu contextuel
+  if (contextMenu) {
+    contextMenu.style.display = 'none';
+  }
+  
+  console.log('📄 Génération de la fiche PDF pour:', selectedEnseignant.enseignant);
+  console.log('📋 Données complètes:', selectedEnseignant);
+  console.log('⚠️ Fonctionnalité à développer: Génération de fiche PDF');
+  
+  // TODO: Implémenter la génération de PDF
+}
+
+// Fonction pour envoyer un email à l'enseignant (à développer)
+function envoyerEmailEnseignant() {
+  if (!selectedEnseignant) {
+    console.error('❌ Aucun enseignant sélectionné');
+    return;
+  }
+  
+  // Masquer le menu contextuel
+  if (contextMenu) {
+    contextMenu.style.display = 'none';
+  }
+  
+  console.log('📧 Envoi d\'email à:', selectedEnseignant.enseignant);
+  console.log('📧 Email:', selectedEnseignant.email);
+  console.log('⚠️ Fonctionnalité à développer: Envoi d\'email à l\'enseignant');
+  
+  // TODO: Implémenter l'envoi d'email
+}
+
+// Fonction utilitaire pour formater les dates
+function formatDate(dateString) {
+  if (!dateString) return '-';
+  
+  const date = new Date(dateString);
+  const options = { year: 'numeric', month: 'long', day: 'numeric' };
+  return date.toLocaleDateString('fr-FR', options);
 }

@@ -2,7 +2,7 @@
 
 <section class="home-section" style="height: 100%;">
       <?php
-        require_once '../D_Generale/Profil_Gestion_delibe.php';
+        require_once 'Profil_Gestion_delibe.php';
       ?>
   <div class="home-content me-3 ms-3"   id="div_gen_UE">
 
@@ -17,16 +17,15 @@
       <div class="container p-0 m-0" 
           style="width: 48%; float: left; height:650px;">
         
-        <div class="table-responsive small p-0 m-0" 
-            style="width: 100%; height:590px; overflow-y:auto; overflow-x:auto;">
+        <div class="table-responsive small p-0 m-0" style="width: 100%; height:590px; overflow-y:auto; overflow-x:auto;">
           <table  class="tab1 table-hover table-striped" id="table_ues" style="width:100%; border-collapse: collapse;">              
-            <thead class="sticky-sm-top m-0 fw-bold" style="background-color:midnightblue; color:white;">
+            <thead>
               <tr style="border-bottom: 2px solid white;">
-                <th style="border: none; padding: 8px;">N°</th>
-                <th style="border: none; padding: 8px;">Code UE</th>
-                <th style="border: none; padding: 8px;">Nom UE</th>
-                <th style="border: none; padding: 8px;">Categorie</th>
-                <th style="border: none; padding: 8px;">Action</th>
+                <th style="border: none; ">N°</th>
+                <th style="border: none; ">Code UE</th>
+                <th style="border: none; ">Nom UE</th>
+                <th style="border: none; ">Categorie</th>
+                <th style="border: none; ">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -95,69 +94,68 @@
 <!-----------    La boite qui permet d'afficher un formulaire ------------------------------>
 
 <dialog id="boite_Form_UE" 
-  class="shadow-lg  p-3 rounded bg-gradient-primary"  
-  style="background-color:#273746;color:white">
+  style="border: none; border-radius: 20px; padding: 0; box-shadow: 0 10px 40px rgba(0,0,0,0.3); max-width: 550px; animation: slideDown 0.3s ease-out;">
   
-  <div class="container border">
-    <div class="modal-header">
-      <h5 class="modal-title ms-3" id="exampleModalLabel">Ajouter des UEs</h5>
-      <button type="button" class="close ms-3" onclick="Fermer_Form_UE()">
-        <span aria-hidden="true">&times;</span>
-      </button>
-    </div>
-    <div class="modal-body">
-      <form>
-        <div class="form-group">
-          <div class="row m-0 p-0">
-            <div class="col-5 text-end">
-              <label for="txt_code_ue">Code UE : </label>
-            </div>
-            <div class="col-7">
-              <div class="input-group mb-1"style="color:white;background-color:#273746;">
-                <input id="txt_code_ue" type="text" class="form-control p-1 pe-2  ms-2 
-                      fw-bolder text-center" 
-                    placeholder="Math01"
-                    style="background-color:#273746;color:white; font-weight:bold;">
-
-              </div>
-            </div>           
-          </div>
-          <div class="row m-0 p-0 mt-2">
-            <div class="col-5 text-end">
-              <label for="txt_code_ue">Intitulé UE : </label>
-            </div>
-            <div class="col-7">
-              <div class="input-group mb-1"style="color:white;background-color:#273746;">
-                <input id="txt_libelle_ue" type="text" class="form-control p-1 pe-2  ms-2 
-                      fw-bolder text-center" 
-                      placeholder="Mathématique"
-                      style="background-color:#273746;color:white; font-weight:bold;">
-
-              </div>
-            </div>           
-          </div>
-          <div class="row m-0 p-0 mt-2">
-            <div class="col-5 text-end">
-                <label for="categorie_ue">Catégorie UE : </label>
-            </div>              
-            <div class="col-7">
-            <div class="input-group mb-1"style="color:white;background-color:#273746;">
-              <select id="categorie_ue"  class="form-control p-0 pe-2 fw-bolder text-center border ms-2"
-                      style="background-color:#273746;color:white; font-weight:bold;">
-              
-                <option value="rien" selected >Selection Catégorie</option>
-                <option value="pratique" >UE pratique</option>
-                <option value="magistral" >UE magistral</option>
-              </select>
-            </div>
-          </div>           
+  <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 25px; border-radius: 20px 20px 0 0; display: flex; justify-content: space-between; align-items: center;">
+    <h5 style="margin: 0; color: white; font-weight: 600; display: flex; align-items: center; gap: 10px;">
+      <i class="fas fa-graduation-cap"></i>
+      Ajouter des UEs
+    </h5>
+    <button type="button" onclick="Fermer_Form_UE()" 
+      style="background: rgba(255,255,255,0.2); border: none; color: white; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center; transition: all 0.3s;"
+      onmouseover="this.style.background='rgba(255,255,255,0.3)'; this.style.transform='rotate(90deg)'"
+      onmouseout="this.style.background='rgba(255,255,255,0.2)'; this.style.transform='rotate(0deg)'">
+      <span>&times;</span>
+    </button>
+  </div>
+  
+  <div style="background: white; padding: 30px; border-radius: 0 0 20px 20px;">
+    <form>
+      <div class="form-group">
+        <div style="margin-bottom: 20px;">
+          <label for="txt_code_ue" style="display: block; color: #4a5568; font-weight: 600; margin-bottom: 8px; font-size: 14px;">
+            <i class="fas fa-tag" style="color: #667eea; margin-right: 8px;"></i>Code UE
+          </label>
+          <input id="txt_code_ue" type="text" class="form-control" 
+            placeholder="Math01"
+            style="border: 2px solid #e2e8f0; border-radius: 10px; padding: 12px; font-size: 14px; transition: all 0.3s; width: 100%;"
+            onfocus="this.style.borderColor='#667eea'; this.style.boxShadow='0 0 0 3px rgba(102,126,234,0.1)'"
+            onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none'">
         </div>
-      </form>
-    </div>
-    <div class="modal-footer">
-      <button type="button" class="btn btn-primary"onclick="Ajout_UE()"
-        style="width:100%;">Valider</button>
-    </div>
+
+        <div style="margin-bottom: 20px;">
+          <label for="txt_libelle_ue" style="display: block; color: #4a5568; font-weight: 600; margin-bottom: 8px; font-size: 14px;">
+            <i class="fas fa-book" style="color: #667eea; margin-right: 8px;"></i>Intitulé UE
+          </label>
+          <input id="txt_libelle_ue" type="text" class="form-control" 
+            placeholder="Mathématique"
+            style="border: 2px solid #e2e8f0; border-radius: 10px; padding: 12px; font-size: 14px; transition: all 0.3s; width: 100%;"
+            onfocus="this.style.borderColor='#667eea'; this.style.boxShadow='0 0 0 3px rgba(102,126,234,0.1)'"
+            onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none'">
+        </div>
+
+        <div style="margin-bottom: 0;">
+          <label for="categorie_ue" style="display: block; color: #4a5568; font-weight: 600; margin-bottom: 8px; font-size: 14px;">
+            <i class="fas fa-folder-open" style="color: #667eea; margin-right: 8px;"></i>Catégorie UE
+          </label>
+          <select id="categorie_ue" class="form-control"
+            style="border: 2px solid #e2e8f0; border-radius: 10px; padding: 12px; font-size: 14px; transition: all 0.3s; width: 100%; cursor: pointer;"
+            onfocus="this.style.borderColor='#667eea'; this.style.boxShadow='0 0 0 3px rgba(102,126,234,0.1)'"
+            onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none'">
+            <option value="rien" selected>Selection Catégorie</option>
+            <option value="pratique">UE pratique</option>
+            <option value="magistral">UE magistral</option>
+          </select>
+        </div>
+      </div>
+    </form>
+    
+    <button type="button" onclick="Ajout_UE()" 
+      style="width: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 14px; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 25px; transition: all 0.3s; box-shadow: 0 4px 15px rgba(102,126,234,0.4);"
+      onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(102,126,234,0.5)'"
+      onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(102,126,234,0.4)'">
+      <i class="fas fa-check-circle" style="margin-right: 8px;"></i>Valider
+    </button>
   </div>
 </dialog>
 
@@ -168,128 +166,118 @@
 <!-----------    La boite qui permet d'afficher un formulaire pour la saisie de donnée ----------------------------->
 
 <dialog id="boite_Form_EC" 
-  class="shadow-lg  p-3 rounded bg-gradient-primary"  
-  style="background-color:#273746;color:white">
+  style="border: none; border-radius: 20px; padding: 0; box-shadow: 0 10px 40px rgba(0,0,0,0.3); max-width: 600px; animation: slideDown 0.3s ease-out;">
   
-  <div class="container border">
-    <div class="modal-header">
-      <h5 class="modal-title ms-3" id="exampleModalLabel">Ajouter des ECs</h5>
-      <button type="button" class="close ms-3" onclick="Fermer_Form_EC()">
-        <span aria-hidden="true">&times;</span>
-      </button>
-    </div>
-    <div class="modal-body">
-      <form>
-        <div class="form-group">
-          <div class="row m-0 p-0">
-            <div class="col-4 text-end">
-              <label for="txt_nom_ec">Nom EC : </label>
-            </div>
-            <div class="col-8">
-              <div class="input-group mb-1"style="color:white;background-color:#273746;">
-                <input id="txt_nom_ec" type="text" class="form-control p-1 pe-2  ms-2 
-                      fw-bolder text-center" 
-                    placeholder="Math01"
-                    style="background-color:#273746;color:white; font-weight:bold;">
-
-              </div>
-            </div>
-          </div>
-          <div class="row m-0 p-0 mt-2">
-            <div class="col-4 text-end">
-                <label for="txt_nb_credit">NB. Crédit : </label>
-            </div>
-            <div class="col-8">
-              <div class="input-group mb-1"style="color:white;background-color:#273746;">
-               <input id="txt_nb_credit" type="numeric" class="form-control p-1 pe-2  ms-2 
-                      fw-bolder text-center" 
-                      placeholder="5"
-                      style="background-color:#273746;color:white; font-weight:bold;">
-
-              </div>
-            </div> 
-          </div>
-
-          <div class="row m-0 p-0 mt-2">
-            <div class="col-4 text-end">
-                <label for="txt_cmi">CMI : </label>
-            </div>
-            <div class="col-8">
-              <div class="input-group mb-1"style="color:white;background-color:#273746;">
-               <input id="txt_cmi" type="numeric" class="form-control p-1 pe-2  ms-2 
-                      fw-bolder text-center" 
-                      placeholder="5"
-                      style="background-color:#273746;color:white; font-weight:bold;">
-
-              </div>
-            </div> 
-          </div>
-          <div class="row m-0 p-0 mt-2">
-            <div class="col-4 text-end">
-                  <label for="txt_hr_td">NB. HR. TD. : </label>
-            </div>
-            <div class="col-8">
-              <div class="input-group mb-1"style="color:white;background-color:#273746;">
-                <input id="txt_hr_td" type="numeric" class="form-control p-1 pe-2  ms-2 
-                        fw-bolder text-center" 
-                        placeholder="20"
-                        style="background-color:#273746;color:white; font-weight:bold;">
-
-              </div>
-            </div>           
-          </div>
-          <div class="row m-0 p-0 mt-2">
-            <div class="col-4 text-end">
-                <label for="txt_hr_tp">NB. HR. TP. : </label>
-            </div>
-            <div class="col-8">
-              <div class="input-group mb-1"style="color:white;background-color:#273746;">
-                <input id="txt_hr_tp" type="numeric" class="form-control p-1 pe-2  ms-2 
-                        fw-bolder text-center" 
-                        placeholder="20"
-                        style="background-color:#273746;color:white; font-weight:bold;">
-
-              </div>
-            </div>           
-          </div>
-
-          <div class="row m-0 p-0 mt-2">
-            <div class="col-4 text-end">
-                <label for="txt_tpe">NB. HR. TPE. : </label>
-            </div>
-            <div class="col-8">
-              <div class="input-group mb-1"style="color:white;background-color:#273746;">
-                <input id="txt_tpe" type="numeric" class="form-control p-1 pe-2  ms-2 
-                        fw-bolder text-center" 
-                        placeholder="20"
-                        style="background-color:#273746;color:white; font-weight:bold;">
-
-              </div>
-            </div>           
-          </div>
-
-          <div class="row m-0 p-0 mt-2">
-            <div class="col-4 text-end">
-                <label for="txt_vht">NB. HR. VHT : </label>
-            </div>
-            <div class="col-8">
-              <div class="input-group mb-1"style="color:white;background-color:#273746;">
-                <input id="txt_vht" type="numeric" class="form-control p-1 pe-2  ms-2 
-                        fw-bolder text-center" 
-                        placeholder="20"
-                        style="background-color:#273746;color:white; font-weight:bold;">
-
-              </div>
-            </div>           
-          </div>
-
-
+  <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 25px; border-radius: 20px 20px 0 0; display: flex; justify-content: space-between; align-items: center;">
+    <h5 style="margin: 0; color: white; font-weight: 600; display: flex; align-items: center; gap: 10px;">
+      <i class="fas fa-book-open"></i>
+      Ajouter des ECs
+    </h5>
+    <button type="button" onclick="Fermer_Form_EC()" 
+      style="background: rgba(255,255,255,0.2); border: none; color: white; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center; transition: all 0.3s;"
+      onmouseover="this.style.background='rgba(255,255,255,0.3)'; this.style.transform='rotate(90deg)'"
+      onmouseout="this.style.background='rgba(255,255,255,0.2)'; this.style.transform='rotate(0deg)'">
+      <span>&times;</span>
+    </button>
+  </div>
+  
+  <div style="background: white; padding: 30px; border-radius: 0 0 20px 20px; max-height: 70vh; overflow-y: auto;">
+    <form>
+      <div class="form-group">
+        <div style="margin-bottom: 20px;">
+          <label for="txt_nom_ec" style="display: block; color: #4a5568; font-weight: 600; margin-bottom: 8px; font-size: 14px;">
+            <i class="fas fa-pencil-alt" style="color: #667eea; margin-right: 8px;"></i>Nom EC
+          </label>
+          <input id="txt_nom_ec" type="text" class="form-control" 
+            placeholder="Math01"
+            style="border: 2px solid #e2e8f0; border-radius: 10px; padding: 12px; font-size: 14px; transition: all 0.3s; width: 100%;"
+            onfocus="this.style.borderColor='#667eea'; this.style.boxShadow='0 0 0 3px rgba(102,126,234,0.1)'"
+            onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none'">
         </div>
-      </form>
-    </div>
-    <div class="modal-footer">
-      <button type="button" class="btn btn-primary"onclick="Ajout_EC()" style="width:100%;">Valider</button>
-    </div>
+
+        <div style="margin-bottom: 20px;">
+          <label for="txt_nb_credit" style="display: block; color: #4a5568; font-weight: 600; margin-bottom: 8px; font-size: 14px;">
+            <i class="fas fa-award" style="color: #667eea; margin-right: 8px;"></i>NB. Crédit
+          </label>
+          <input id="txt_nb_credit" type="number" class="form-control" 
+            placeholder="5"
+            style="border: 2px solid #e2e8f0; border-radius: 10px; padding: 12px; font-size: 14px; transition: all 0.3s; width: 100%;"
+            onfocus="this.style.borderColor='#667eea'; this.style.boxShadow='0 0 0 3px rgba(102,126,234,0.1)'"
+            onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none'">
+        </div>
+
+        <div style="background: #f7fafc; padding: 20px; border-radius: 15px; margin-bottom: 20px;">
+          <h6 style="color: #667eea; font-weight: 600; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-clock"></i>
+            Volume Horaire
+          </h6>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div>
+              <label for="txt_cmi" style="display: block; color: #4a5568; font-weight: 600; margin-bottom: 8px; font-size: 13px;">
+                CMI
+              </label>
+              <input id="txt_cmi" type="number" class="form-control" 
+                placeholder="5"
+                style="border: 2px solid #e2e8f0; border-radius: 10px; padding: 10px; font-size: 14px; transition: all 0.3s; width: 100%;"
+                onfocus="this.style.borderColor='#667eea'; this.style.boxShadow='0 0 0 3px rgba(102,126,234,0.1)'"
+                onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none'">
+            </div>
+
+            <div>
+              <label for="txt_hr_td" style="display: block; color: #4a5568; font-weight: 600; margin-bottom: 8px; font-size: 13px;">
+                NB. HR. TD
+              </label>
+              <input id="txt_hr_td" type="number" class="form-control" 
+                placeholder="20"
+                style="border: 2px solid #e2e8f0; border-radius: 10px; padding: 10px; font-size: 14px; transition: all 0.3s; width: 100%;"
+                onfocus="this.style.borderColor='#667eea'; this.style.boxShadow='0 0 0 3px rgba(102,126,234,0.1)'"
+                onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none'">
+            </div>
+
+            <div>
+              <label for="txt_hr_tp" style="display: block; color: #4a5568; font-weight: 600; margin-bottom: 8px; font-size: 13px;">
+                NB. HR. TP
+              </label>
+              <input id="txt_hr_tp" type="number" class="form-control" 
+                placeholder="20"
+                style="border: 2px solid #e2e8f0; border-radius: 10px; padding: 10px; font-size: 14px; transition: all 0.3s; width: 100%;"
+                onfocus="this.style.borderColor='#667eea'; this.style.boxShadow='0 0 0 3px rgba(102,126,234,0.1)'"
+                onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none'">
+            </div>
+
+            <div>
+              <label for="txt_tpe" style="display: block; color: #4a5568; font-weight: 600; margin-bottom: 8px; font-size: 13px;">
+                NB. HR. TPE
+              </label>
+              <input id="txt_tpe" type="number" class="form-control" 
+                placeholder="20"
+                style="border: 2px solid #e2e8f0; border-radius: 10px; padding: 10px; font-size: 14px; transition: all 0.3s; width: 100%;"
+                onfocus="this.style.borderColor='#667eea'; this.style.boxShadow='0 0 0 3px rgba(102,126,234,0.1)'"
+                onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none'">
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 0;">
+          <label for="txt_vht" style="display: block; color: #4a5568; font-weight: 600; margin-bottom: 8px; font-size: 14px;">
+            <i class="fas fa-calculator" style="color: #667eea; margin-right: 8px;"></i>NB. HR. VHT
+          </label>
+          <input id="txt_vht" type="number" class="form-control" 
+            placeholder="20"
+            style="border: 2px solid #e2e8f0; border-radius: 10px; padding: 12px; font-size: 14px; transition: all 0.3s; width: 100%;"
+            onfocus="this.style.borderColor='#667eea'; this.style.boxShadow='0 0 0 3px rgba(102,126,234,0.1)'"
+            onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none'">
+        </div>
+      </div>
+    </form>
+    
+    <button type="button" onclick="Ajout_EC()" 
+      style="width: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 14px; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 25px; transition: all 0.3s; box-shadow: 0 4px 15px rgba(102,126,234,0.4);"
+      onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(102,126,234,0.5)'"
+      onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(102,126,234,0.4)'">
+      <i class="fas fa-check-circle" style="margin-right: 8px;"></i>Valider
+    </button>
   </div>
 </dialog>
 
@@ -301,20 +289,26 @@
 <!-----------    Une boite pour afficher un message de confirmation d'enregistrement ou d'échec ------>
 
 <dialog id="boite_alert_SM_UE" 
-  class="shadow-lg  p-3 rounded bg-gradient-primary"  
-  style="background-color:#273746;color:white">
+  style="border: none; border-radius: 20px; padding: 0; box-shadow: 0 10px 40px rgba(0,0,0,0.3); max-width: 500px; animation: slideDown 0.3s ease-out;">
   
-  <div class="container border">
-    <div class="modal-header">
-      <h5 class="modal-title ms-3" id="exampleModalLabel">Message (U.KA. @ CIUKA )</h5>
-      <button type="button" class="close ms-3" onclick="Fermer_Boite_Alert_SM_UE()">
-        <span aria-hidden="true">&times;</span>
-      </button>
+  <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 25px; border-radius: 20px 20px 0 0; display: flex; justify-content: space-between; align-items: center;">
+    <h5 style="margin: 0; color: white; font-weight: 600; display: flex; align-items: center; gap: 10px;">
+      <i class="fas fa-info-circle"></i>
+      Message (U.KA. @ CIUKA)
+    </h5>
+    <button type="button" onclick="Fermer_Boite_Alert_SM_UE()" 
+      style="background: rgba(255,255,255,0.2); border: none; color: white; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center; transition: all 0.3s;"
+      onmouseover="this.style.background='rgba(255,255,255,0.3)'; this.style.transform='rotate(90deg)'"
+      onmouseout="this.style.background='rgba(255,255,255,0.2)'; this.style.transform='rotate(0deg)'">
+      <span>&times;</span>
+    </button>
+  </div>
+  
+  <div style="background: white; padding: 40px 30px; border-radius: 0 0 20px 20px; text-align: center;">
+    <div style="width: 70px; height: 70px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: 0 4px 15px rgba(102,126,234,0.3);">
+      <i class="fas fa-bell" style="color: white; font-size: 32px;"></i>
     </div>
-    
-    <div class="modal-body">
-      <h5 class="modal-title  text-center" id="text_alert_boite">Connexion Réussier</h5>
-    </div>
+    <h5 id="text_alert_boite" style="color: #2d3748; font-weight: 600; font-size: 18px; line-height: 1.6; margin: 0;">Connexion Réussie</h5>
   </div>
 </dialog>
 
@@ -324,42 +318,37 @@
 <!-----------    Une boite pour afficher une confirmation d'action ( suppression ou modification ) ------>
 
 <dialog id="boite_confirmaion_action_SM_UE" 
-  class="shadow-lg  p-3 rounded bg-gradient-primary"  
-  style="background-color:#273746;color:white">
+  style="border: none; border-radius: 20px; padding: 0; box-shadow: 0 10px 40px rgba(0,0,0,0.3); max-width: 500px; animation: slideDown 0.3s ease-out;">
   
-  <div class="container border">
-    <div class="modal-header">
-      <h5 class="modal-title ms-3" id="exampleModalLabel">Confirmation (U.KA. @ CIUKA )</h5>
-      
+  <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 25px; border-radius: 20px 20px 0 0; display: flex; justify-content: space-between; align-items: center;">
+    <h5 style="margin: 0; color: white; font-weight: 600; display: flex; align-items: center; gap: 10px;">
+      <i class="fas fa-exclamation-triangle"></i>
+      Confirmation (U.KA. @ CIUKA)
+    </h5>
+  </div>
+  
+  <div style="background: white; padding: 40px 30px; border-radius: 0 0 20px 20px; text-align: center;">
+    <div style="width: 70px; height: 70px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: 0 4px 15px rgba(245,87,108,0.3);">
+      <i class="fas fa-question" style="color: white; font-size: 32px;"></i>
     </div>
     
-    <div class="modal-body">
-      <h7 class="modal-title  text-center" id="text_confirm_afficher">Connexion Réussier</h7>
+    <h6 id="text_confirm_afficher" style="color: #2d3748; font-weight: 600; font-size: 16px; line-height: 1.6; margin: 0 0 30px 0;">Connexion Réussie</h6>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+      <button type="button" id="btn_action_oui" 
+        style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 15px rgba(102,126,234,0.3);"
+        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(102,126,234,0.4)'"
+        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(102,126,234,0.3)'">
+        <i class="fas fa-check" style="margin-right: 6px;"></i>OUI
+      </button>
       
+      <button type="button" id="btn_action_non" 
+        style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; border: none; padding: 12px; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 15px rgba(245,87,108,0.3);"
+        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(245,87,108,0.4)'"
+        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(245,87,108,0.3)'">
+        <i class="fas fa-times" style="margin-right: 6px;"></i>NON
+      </button>
     </div>
-
-
-    <div class="modal-footer p-0 m-0">
-
-      <div class="container">
-
-        <div class="row  ">
-
-          <div class="col text-center">
-            <button type="button" id="btn_action_oui" class="btn btn-primary"
-            style="width:100%;">OUI </button>
-          </div>
-
-          <div class="col text-center">
-            <button type="button" id="btn_action_non" class="btn btn-primary"
-            style="width:100%;">NON</button>
-          </div>
-
-        </div>
-      </div>        
-    </div>
-
-
   </div>
 </dialog>
 

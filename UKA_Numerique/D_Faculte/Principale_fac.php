@@ -30,6 +30,55 @@
     <link rel="stylesheet" type="text/css" href="../Styles_CSS/Styles_specifique.css" />
     <link rel="stylesheet" type="text/css" href="../Styles_CSS/Nos_Tableaux.css">
 
+    <style>
+      /* Animation pour les dialogs */
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Style du backdrop pour les dialogs */
+      dialog::backdrop {
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(8px);
+        animation: fadeIn 0.3s ease-out;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      /* Scroll personnalisé pour les dialogs */
+      dialog ::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      dialog ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+      }
+
+      dialog ::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 10px;
+      }
+
+      dialog ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+      }
+    </style>
+
   </head>
   <body">
       <?php

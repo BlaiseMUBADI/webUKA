@@ -44,7 +44,14 @@ try {
         $agents[] = $ligne;
         
     }
-    echo json_encode($agents);
+    
+    // Retourner les données avec l'ID de la filière de l'utilisateur
+    $response = array(
+        'id_filiere_user' => $id_filiere,
+        'enseignants' => $agents
+    );
+    
+    echo json_encode($response);
 } catch (PDOException $e) {
     echo json_encode(["status" => "error", "message" => "Erreur lors de la récupération des agents: " . $e->getMessage()]);
 }

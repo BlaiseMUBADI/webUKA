@@ -3,7 +3,7 @@
 
 if(!isset($_SESSION['MatriculeAgent']))
 {
-    header('location:../Index.php');
+    header('location:../index.php');
     exit;
 }
 if(isset($_POST['Decon'])) 

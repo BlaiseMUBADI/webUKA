@@ -247,7 +247,7 @@ function Affichage_UEs()
         {
           // Création de TR
           var tr = document.createElement("tr");
-          tr.id="tr_"+i;
+          //tr.id="tr_"+i;
           
           var tdnum = document.createElement("td");
           tdnum.textContent = i;
