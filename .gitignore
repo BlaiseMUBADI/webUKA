@@ -1,0 +1,12 @@
+# Fichiers de base de données
+*.sql
+bdd_*.sql
+
+# Fichiers temporaires
+*.tmp
+*.temp
+*.log
+
+# Dossiers cache
+cache/
+temp/
