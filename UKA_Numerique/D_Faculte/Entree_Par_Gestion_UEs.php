@@ -11,18 +11,22 @@
     <!------------------ CE BLOC CONCERNE L'AFFICHAGE DES UES et ECS -------------------------------->
     <!----------------------------------------------------------------------------------------------->
 
-    <div class="home-content text-center m-0 p-3 mt-1"style="background-color:rgb(39,55,70);height:450px">
+    <div class="sales-boxes m-0 p-3 mt-3 border" 
+          style="background-color:rgb(39,55,70);">
 
-      <div class="container p-0 m-0" style="width:48%; float:left; height:100%;">
-        <div class="container table-responsive small p-0 m-0" style="width: 100%;height:90%;">
-          <table  class="tab1 table-hover table-striped table-bordered" id="table_ues" style="width:100%; ">              
-            <thead class="sticky-sm-top m-0 fw-bold ">
-              <tr>
-                <th>N°</th>
-                <th>Code UE</th>
-                <th>Nom UE</th>
-                <th>Categorie</th>
-                <th>Action</th>
+      <div class="container p-0 m-0" 
+          style="width: 48%; float: left; height:650px;">
+        
+        <div class="table-responsive small p-0 m-0" 
+            style="width: 100%; height:590px; overflow-y:auto; overflow-x:auto;">
+          <table  class="tab1 table-hover table-striped" id="table_ues" style="width:100%; border-collapse: collapse;">              
+            <thead class="sticky-sm-top m-0 fw-bold" style="background-color:midnightblue; color:white;">
+              <tr style="border-bottom: 2px solid white;">
+                <th style="border: none; padding: 8px;">N°</th>
+                <th style="border: none; padding: 8px;">Code UE</th>
+                <th style="border: none; padding: 8px;">Nom UE</th>
+                <th style="border: none; padding: 8px;">Categorie</th>
+                <th style="border: none; padding: 8px;">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -32,7 +36,7 @@
 
         <div class="container p-0 m-0 mt-2">        
           <div class="d-grid gap-1 p-0 m-0">
-            <button id="btn_ajout_compte" class="btn btn-primary p-0 m-0 font-weight-bold"
+            <button id="btn_ajout_ue" class="btn btn-primary p-1 m-0 font-weight-bold"
                 type="button" onclick="Ouvrir_Form_UEs()">Ajouter une Unité d'Enseignement
             </button>
           </div> 
@@ -43,24 +47,34 @@
     
     
     
-      <div class="container p-0 m-0" style="width:48%; float: right;height:100%;">        
-        <div class="container table-responsive small p-0 m-0" style="width: 100%; height:90%;">        
-          <table  class="tab1 table-bordered text-center" id="table_ecs" style="width:100%;">              
-            <thead class="sticky-sm-top m-0 fw-bold ">
-              <tr>
-                <th>Semestre</th>
-                <th>Niveau Semestre</th>
+      <div class="container p-0 m-0" 
+          style="width: 48%; float: right; height:650px;">
+        
+        <div class="table-responsive small p-0 m-0" 
+            style="width: 100%; height:590px; overflow-y:auto; overflow-x:auto;">        
+          <table  class="tab1 table-hover table-striped text-center" id="table_ecs" style="width:100%; border-collapse: collapse;">              
+            <thead class="sticky-sm-top m-0 fw-bold" style="background-color:midnightblue; color:white;">
+              <tr style="border-bottom: 2px solid white;">
+                <th style="border: none; padding: 8px;">N°</th>
+                <th style="border: none; padding: 8px;">Nom E.C.</th>
+                <th style="border: none; padding: 8px;">CMI</th>
+                <th style="border: none; padding: 8px;">TD</th>
+                <th style="border: none; padding: 8px;">TP</th>
+                <th style="border: none; padding: 8px;">TPE</th>
+                <th style="border: none; padding: 8px;">VHT</th>
+                <th style="border: none; padding: 8px;">Crédit</th>
+                <th style="border: none; padding: 8px;">Action</th>
               </tr>
             </thead>
             
             <tbody>              
             </tbody>
-          </table> 
+          </table>
         </div>
 
         <div class="container p-0 m-0 mt-2">        
           <div class="d-grid gap-1 p-0 m-0">
-            <button id="btn_ajout_compte" class="btn btn-primary p-0 m-0 font-weight-bold"
+            <button id="btn_ajout_ec" class="btn btn-primary p-1 m-0 font-weight-bold"
                 type="button" onclick="Ouvrir_Form_EC()">Ajouter un EC
             </button>
           </div>

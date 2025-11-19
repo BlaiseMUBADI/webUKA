@@ -223,44 +223,18 @@ function Affichage_semestre()
 
 function Affichage_UEs()
 {
-  
-  
+  // Récupérer le tableau et son tbody
   var tab_UEs = document.getElementById("table_ues");
-  while (tab_UEs .firstChild) {
-    tab_UEs .removeChild(tab_UEs .firstChild);
+  
+  // NE PAS SUPPRIMER LE THEAD - Seulement vider le tbody
+  let tbody = tab_UEs.querySelector("tbody");
+  if (!tbody) {
+      tbody = document.createElement("tbody");
+      tab_UEs.appendChild(tbody);
   }
   
-  var thead = document.createElement("thead");
-  thead.classList.add("sticky-sm-top","m-0","fw-bold"); // Pour ajouter la classe à un element HTMl
-
-  var tr1 = document.createElement("tr");
-  tr1.style="background-color:midnightblue; color:white;"
-
-  var td1 = document.createElement("td");      
-  var td2 = document.createElement("td");
-  var td3 = document.createElement("td");
-  var td4 = document.createElement("td");
-  var td5 = document.createElement("td");
-    
-
-  td1.textContent = "N°";
-  td2.textContent = "Code UE";
-  td3.textContent = "Nom UE";
-  td4.textContent = "Catégorie"; 
-  td5.textContent = "Action"; 
-
-  tr1.appendChild(td1);
-  tr1.appendChild(td2);
-  tr1.appendChild(td3);
-  tr1.appendChild(td4);
-  tr1.appendChild(td5);
-  
-
-    
-  thead.appendChild(tr1);
-  tab_UEs.appendChild(thead);
-    
-  var tbody = document.createElement("tbody");
+  // Vider uniquement le tbody
+  tbody.innerHTML = "";
 
   var url='API_PHP/Liste_UE_Filiere.php'
 
@@ -343,7 +317,8 @@ function Affichage_UEs()
       }).catch(error => {
           // Traitez l'erreur ici
           console.log("Erreur lors de la selection des transactions "+error);});
-          tab_UEs.appendChild(tbody);
+          // tbody déjà dans le DOM, pas besoin de l'ajouter
+          tab_UEs.classList.add("table-striped");
 
 
 
@@ -360,63 +335,27 @@ function Affichage_UEs()
   {
     // Ce bout de code permet de faire une selection de ligne en fixant une couleur de fond
     var table_ue_fac= document.getElementById("table_ues");
-    var rows = table_ue_fac.getElementsByTagName('tr');  
+    var rows = table_ue_fac.querySelectorAll('tbody tr');  
     for(var j = 0; j < rows.length; j++) 
     {
-      if(j!=0) rows[j].style.backgroundColor = '';
+      rows[j].classList.remove('selected');
     }
-    tr1.style.backgroundColor = 'red';
+    // Ajouter la classe 'selected' à la ligne cliquée
+    tr1.classList.add('selected');
     tr_selectionner=tr1;
     
+    // Récupérer le tableau EC et son tbody
     var table_ecs_fac = document.getElementById("table_ecs");
-
-    while (table_ecs_fac .firstChild) {
-      table_ecs_fac.removeChild(table_ecs_fac.firstChild);
+    
+    // NE PAS SUPPRIMER LE THEAD - Seulement vider le tbody
+    let tbody = table_ecs_fac.querySelector("tbody");
+    if (!tbody) {
+        tbody = document.createElement("tbody");
+        table_ecs_fac.appendChild(tbody);
     }
     
-    var thead = document.createElement("thead");
-    thead.classList.add("sticky-sm-top","m-0","fw-bold"); // Pour ajouter la classe à un element HTMl
-
-    var tr1 = document.createElement("tr");
-    tr1.style="background-color:midnightblue; color:white;"
-
-    var td1 = document.createElement("td");      
-    var td2 = document.createElement("td");
-    var td3 = document.createElement("td");
-    var td4 = document.createElement("td");
-    var td5 = document.createElement("td");
-    var td6 = document.createElement("td");
-    var td7 = document.createElement("td");
-    var td8 = document.createElement("td");
-    var td9 = document.createElement("td");
-      
-
-    td1.textContent = "N°";
-    td2.textContent = "Nom E.C.";
-    td3.textContent = "CMI";
-    td4.textContent = "TD";
-    td5.textContent = "TP";
-    td6.textContent = "TPE";
-    td7.textContent = "VHT"; 
-    td8.textContent = "Crédit"; 
-    td9.textContent = "Action"; 
-
-    tr1.appendChild(td1);
-    tr1.appendChild(td2);
-    tr1.appendChild(td3);
-    tr1.appendChild(td4);
-    tr1.appendChild(td5);
-    tr1.appendChild(td6);
-    tr1.appendChild(td7);
-    tr1.appendChild(td8);
-    tr1.appendChild(td9);
-    
-
-      
-    thead.appendChild(tr1);
-    table_ecs_fac.appendChild(thead);
-      
-    var tbody = document.createElement("tbody");
+    // Vider uniquement le tbody
+    tbody.innerHTML = "";
     var url='API_PHP/Liste_ECs_Filiere_donnee.php?code_ue='+code_ue;
     
     var i=1;
@@ -503,7 +442,8 @@ function Affichage_UEs()
         }).catch(error => {
             // Traitez l'erreur ici
             console.log("Erreur lors de la selection des transactions "+error);});
-            table_ecs_fac.appendChild(tbody);
+            // tbody déjà dans le DOM, pas besoin de l'ajouter
+            table_ecs_fac.classList.add("table-striped");
 
 
 

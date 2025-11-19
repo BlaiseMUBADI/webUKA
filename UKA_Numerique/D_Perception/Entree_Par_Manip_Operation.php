@@ -139,14 +139,14 @@
           style="width:48%; float:left; height:100%; overflow-y:auto; overflow-x:auto;" >
 
           <table  class="tab1" id="table_etudiant1" style="width:100%; height:100%;">              
-            <thead class="sticky-sm-top m-0 fw-bold">
+            <thead class="sticky-sm-top m-0 fw-bold" style="background-color:midnightblue; color:white;">
               <tr>
-                <th>N°</th>
-                <th>Matricule</th>
-                <th>Nom</th>
-                <th>Postnom</th>
-                <th>Prenom</th>
-                <th>Sexe</th>
+                <th style="border: none; padding: 8px;">N°</th>
+                <th style="border: none; padding: 8px;">Matricule</th>
+                <th style="border: none; padding: 8px;">Nom</th>
+                <th style="border: none; padding: 8px;">Postnom</th>
+                <th style="border: none; padding: 8px;">Prenom</th>
+                <th style="border: none; padding: 8px;">Sexe</th>
               </tr>
             </thead>
             <tbody>
@@ -164,14 +164,14 @@
           style="width:51%; float:right; height:100%; overflow-y:auto; overflow-x:auto;" >
 
           <table  class="tab1" id="table_transact" style="width:100%; height:100%;">              
-            <thead class="sticky-sm-top m-0 fw-bold">
+            <thead class="sticky-sm-top m-0 fw-bold" style="background-color:midnightblue; color:white;">
               <tr>
-                <th>N°</th>
-                <th>Date Transact</th>
-                <th>Motifs Transact</th>
-                <th>Montant</th>
-                <th>Lieu Paie</th>
-                <th>Actions</th>
+                <th style="border: none; padding: 8px;">N°</th>
+                <th style="border: none; padding: 8px;">Date Transact</th>
+                <th style="border: none; padding: 8px;">Motifs Transact</th>
+                <th style="border: none; padding: 8px;">Montant</th>
+                <th style="border: none; padding: 8px;">Lieu Paie</th>
+                <th style="border: none; padding: 8px;">Actions</th>
               </tr>
             </thead>
             <tbody>

@@ -192,12 +192,12 @@ function Affichage_Candidat(code_promo,Id_an_acad)
               i++;
 
               tr.addEventListener("click", function() {
-                // Retirer la couleur rouge de toutes les lignes
+                // Retirer la sélection de toutes les lignes
                 const rows = tbody.querySelectorAll("tr");
-                rows.forEach(r => r.style.backgroundColor = '');
+                rows.forEach(r => r.classList.remove('selected'));
     
-                // Colorer la ligne cliquée
-                tr.style.backgroundColor = 'red';
+                // Sélectionner la ligne cliquée
+                tr.classList.add('selected');
     
                 // Afficher le nom dans la console
                 console.log(infos.Nom);

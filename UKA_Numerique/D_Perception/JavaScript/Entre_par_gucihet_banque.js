@@ -204,14 +204,11 @@ function Recuperation_situation_finaniere(mat_etudiant,Nom,Postnom,Prenom,Sexe,I
 
   // Ce bout de code permet de faire une selection de ligne en fixant une couleur de fond
   var tableau = document.getElementById("table_paiement");
-  var rows = tableau.getElementsByTagName('tr');  
-  for(var j = 0; j < rows.length; j++) 
-  {
-    if(j!=0) rows[j].style.backgroundColor = '';
-  }
-  //rows.style="background-color:red;"
-  tr.style.backgroundColor = 'red';
-  //tr.style="background-color:red;";
+  var rows = tableau.querySelectorAll('tbody tr');  
+  rows.forEach(function(row) {
+    row.classList.remove('selected');
+  });
+  tr.classList.add('selected');
 
 
 

@@ -113,16 +113,16 @@ fenetreImpression.close();
   </div>
   <br>
   <table   id="table_paiement_inscription" style="width:100%; height:auto;">              
-    <thead class="sticky-sm-top m-0 fw-bold">
+    <thead class="sticky-sm-top m-0 fw-bold" style="background-color:midnightblue; color:white;">
       <tr>
-        <th>N°</th>
-        <th>Matricule</th>
-        <th>Nom</th>
-        <th>Postnom</th>
-        <th>Prenom</th>
-        <th>Sexe</th>
-        <th>Montant</th>
-        <th>Libellé</th>
+        <th style="border: none; padding: 8px;">N°</th>
+        <th style="border: none; padding: 8px;">Matricule</th>
+        <th style="border: none; padding: 8px;">Nom</th>
+        <th style="border: none; padding: 8px;">Postnom</th>
+        <th style="border: none; padding: 8px;">Prenom</th>
+        <th style="border: none; padding: 8px;">Sexe</th>
+        <th style="border: none; padding: 8px;">Montant</th>
+        <th style="border: none; padding: 8px;">Libellé</th>
       </tr>
     </thead>
     <tbody>
@@ -378,14 +378,14 @@ fenetreImpression.close();
           style="width: 60%; float: left; height:400px">
 
         <table  class="tab1" id="table_paiement" style="width:100%; height:100%;">              
-          <thead class="sticky-sm-top m-0 fw-bold">
+          <thead class="sticky-sm-top m-0 fw-bold" style="background-color:midnightblue; color:white;">
             <tr>
-              <th>N°</th>
-              <th>Matricule</th>
-              <th>Nom</th>
-              <th>Postnom</th>
-              <th>Prenom</th>
-              <th>Sexe</th>
+              <th style="border: none; padding: 8px;">N°</th>
+              <th style="border: none; padding: 8px;">Matricule</th>
+              <th style="border: none; padding: 8px;">Nom</th>
+              <th style="border: none; padding: 8px;">Postnom</th>
+              <th style="border: none; padding: 8px;">Prenom</th>
+              <th style="border: none; padding: 8px;">Sexe</th>
             </tr>
           </thead>
           <tbody>

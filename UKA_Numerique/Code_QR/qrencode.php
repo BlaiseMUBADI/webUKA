@@ -445,7 +445,7 @@
         //----------------------------------------------------------------------
         public function encodeRAW($intext, $outfile = false) 
         {
-            $code = new QRcode();
+            $code = new de();
 
             if($this->eightbit) {
                 $code->encodeString8bit($intext, $this->version, $this->level);
