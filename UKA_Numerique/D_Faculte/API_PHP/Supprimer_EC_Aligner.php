@@ -12,17 +12,19 @@ $id_ec = $data['id_ec'];
 $Id_Semestre = $data['Id_Semestre'];
 $Code_Promotion = $data['Code_Promotion'];
 $Mat_agent = $data['Mat_agent'];
+$Mat_assistant = isset($data['Mat_assistant']) ? $data['Mat_assistant'] : null;
 
 $con->beginTransaction();
 
 try {
-    $sql_sup = "CALL Supprimer_EC_Aligne(:idAnnee_Acad, :id_ec, :Id_Semestre, :Code_Promotion, :Mat_agent)";
+    $sql_sup = "CALL Supprimer_EC_Aligne(:idAnnee_Acad, :id_ec, :Id_Semestre, :Code_Promotion, :Mat_agent, :Mat_assistant)";
     $stmt = $con->prepare($sql_sup);
     $stmt->bindParam(':idAnnee_Acad', $idAnnee_Acad);
     $stmt->bindParam(':id_ec', $id_ec);
     $stmt->bindParam(':Id_Semestre', $Id_Semestre);
     $stmt->bindParam(':Code_Promotion', $Code_Promotion);
     $stmt->bindParam(':Mat_agent', $Mat_agent);
+    $stmt->bindParam(':Mat_assistant', $Mat_assistant);
 
     if ($stmt->execute()) {
         $con->commit();

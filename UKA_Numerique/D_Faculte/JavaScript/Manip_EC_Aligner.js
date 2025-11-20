@@ -15,7 +15,9 @@
 
   let tr_="";
   let mat_agent_="";
+  let mat_assistant_=""; // Matricule de l'assistant sélectionné
   let verfi_=true;
+  let enseignantSelected = false; // Flag pour vérifier si un enseignant est sélectionné
 
   // Les éléments du DOM sont initialisés seulement si la page contient
   // l'élément parent `div_gen_Aligne_Enseignant`. Cela évite que ce script lance des
@@ -75,6 +77,7 @@
 
   function Affichage_Enseignant_Aligner() {
     let table_aligne_enseignant = document.getElementById("table_aligne_enseignant");
+    let table_aligne_assistant = document.getElementById("table_aligne_assistant");
     
     // NE PAS SUPPRIMER LE THEAD - Seulement vider le tbody
     let tbody = table_aligne_enseignant.querySelector("tbody");
@@ -85,6 +88,17 @@
     
     // Vider uniquement le tbody
     tbody.innerHTML = "";
+
+    // Préparer aussi le tableau des assistants (si présent)
+    let tbodyAssist = null;
+    if (table_aligne_assistant) {
+      tbodyAssist = table_aligne_assistant.querySelector("tbody");
+      if (!tbodyAssist) {
+        tbodyAssist = document.createElement("tbody");
+        table_aligne_assistant.appendChild(tbodyAssist);
+      }
+      tbodyAssist.innerHTML = ""; // vider
+    }
 
     var url = 'API_PHP/Liste_Enseignants.php';
 
@@ -123,7 +137,8 @@
                 // Ajouter l'événement de clic pour afficher les infos de la ligne
                 tr.addEventListener("click", function () {
                   mat_agent_=infos.mat_agent;
-                    Selectionner_Enseignant(infos.mat_agent, tr);
+                  mat_assistant_=""; // Réinitialiser l'assistant quand on sélectionne un enseignant
+                    Selectionner_Enseignant(infos.mat_agent, tr, 'enseignant');
                     Affichage_ECs_Par_Filiere() ;
                 });
                 
@@ -135,19 +150,83 @@
                 i++;
             });
             
-            // Mettre à jour le badge avec le nombre d'enseignants de la filière
+            // Mettre à jour le badge avec le nombre total d'agents (enseignants + assistants)
             const badgeEnseignants = document.getElementById('badge_enseignants');
             if (badgeEnseignants) {
-                // Compter les enseignants dont l'id_filiere correspond à la filière de l'utilisateur
-                let enseignantsFiliere = data.filter(e => e.id_filiere == idFiliereUser);
+                // Compter tous les agents de la filière vs total université
+                let agentsFiliere = data.filter(e => e.id_filiere == idFiliereUser);
                 
-                badgeEnseignants.textContent = enseignantsFiliere.length + ' / ' + data.length;
+                badgeEnseignants.textContent = agentsFiliere.length + ' / ' + data.length;
                 
                 // Message console pour information
-                console.log(`📊 Statistiques Enseignants:`);
-                console.log(`   - Filière actuelle: ${enseignantsFiliere.length}`);
+                console.log(`📊 Statistiques Enseignants (tous agents):`);
+                console.log(`   - Filière actuelle: ${agentsFiliere.length}`);
                 console.log(`   - Total université: ${data.length}`);
                 console.log(`   - ID Filière: ${idFiliereUser}`);
+            }
+
+            // ====== Remplissage du tableau des assistants (ASS1 et ASS2) ======
+            if (table_aligne_assistant && tbodyAssist) {
+              let assistants = Array.isArray(data) ? data.filter(a => {
+                const titre = (a.titre_academique || '').toString().toUpperCase();
+                return titre === 'ASS1' || titre === 'ASS2';
+              }) : [];
+
+              // Déterminer le nom à afficher (même logique que pour enseignants)
+              let j = 1;
+              assistants.forEach(a => {
+                const tr = document.createElement('tr');
+
+                const tdnum = document.createElement('td');
+                tdnum.textContent = j;
+                tdnum.classList.add('text-center');
+
+                const tdAssistant = document.createElement('td');
+                tdAssistant.classList.add('text-center', 'w-auto');
+                tdAssistant.textContent = a.enseignant || a.nom_complet || a.identite || `${a.nom || ''} ${a.postnom || ''} ${a.prenom || ''}`.trim();
+
+                const tdStatut = document.createElement('td');
+                tdStatut.textContent = a.titre_academique || '-';
+
+                tr.appendChild(tdnum);
+                tr.appendChild(tdAssistant);
+                tr.appendChild(tdStatut);
+
+                // Harmoniser le comportement: sélection au clic
+                tr.addEventListener('click', function() {
+                  // Vérifier si un enseignant est déjà sélectionné
+                  if (!enseignantSelected) {
+                    // Afficher la boîte de dialogue d'alerte personnalisée
+                    const dialog = document.getElementById('boite_alert_SM_EC');
+                    const textAlert = document.getElementById('text_alert_boite_EC');
+                    
+                    if (dialog && textAlert) {
+                      textAlert.innerHTML = '⚠️ <strong>ATTENTION!</strong><br><br>Veuillez d\'abord sélectionner un <strong>ENSEIGNANT</strong> avant de sélectionner un assistant.';
+                      dialog.showModal();
+                    }
+                    
+                    console.warn('⚠️ Tentative de sélection d\'assistant sans enseignant');
+                    return; // Bloquer la sélection
+                  }
+                  mat_assistant_ = a.mat_agent; // Stocker le matricule de l'assistant
+                  Selectionner_Enseignant(a.mat_agent, tr, 'assistant');
+                  Affichage_ECs_Par_Filiere();
+                });
+
+                tbodyAssist.appendChild(tr);
+                j++;
+              });
+
+              // Mettre à jour le badge assistants (filière / total)
+              const badgeAssistants = document.getElementById('badge_assistants');
+              if (badgeAssistants) {
+                let assistantsFiliere = assistants.filter(x => x.id_filiere == idFiliereUser);
+                badgeAssistants.textContent = assistantsFiliere.length + ' / ' + assistants.length;
+
+                console.log('📊 Statistiques Assistants:');
+                console.log(`   - Filière actuelle: ${assistantsFiliere.length}`);
+                console.log(`   - Total université: ${assistants.length}`);
+              }
             }
         })
         .catch(error => {
@@ -238,9 +317,11 @@ function Affichage_ECs_Par_Filiere()
         {
           
           if (case_cocher.checked) {
+              console.log('➕ Ajout EC:', ec.Intutile_ec, '- Agent:', mat_agent_);
               Ajouter_EC_Aligne(ec.id_ec, mat_agent_); 
               Affichage_ECs_Par_Filiere();
           } else {
+              console.log('➖ Suppression EC:', ec.Intutile_ec, '- Agent:', mat_agent_);
               Supprimer_EC_Aligne(ec.id_ec,mat_agent_);
               Affichage_ECs_Par_Filiere();
 
@@ -273,23 +354,42 @@ function Affichage_ECs_Par_Filiere()
 
 /*
   *****************************************************************************************
-  ************  CETTE FONCTION PERMET D'AFFCIHER LES ECs D'UNE UE ********************
+  ************  CETTE FONCTION PERMET DE SÉLECTIONNER UN ENSEIGNANT OU ASSISTANT **********
   *****************************************************************************************
   */
-  function Selectionner_Enseignant(mat_agent,tr1)
+  function Selectionner_Enseignant(mat_agent, tr1, type = 'enseignant')
   {
-    // Ce bout de code permet de faire une selection de ligne en utilisant une classe CSS
-    var table_aligne_enseignant= document.getElementById("table_aligne_enseignant");
-    var rows = table_aligne_enseignant.querySelectorAll('tbody tr');  
+    var table_aligne_enseignant = document.getElementById("table_aligne_enseignant");
+    var table_aligne_assistant = document.getElementById("table_aligne_assistant");
     
-    // Retirer la classe 'selected' de toutes les lignes
-    rows.forEach(row => row.classList.remove('selected'));
+    if (type === 'enseignant') {
+      // Si on sélectionne un enseignant, désélectionner tous les enseignants et tous les assistants
+      if (table_aligne_enseignant) {
+        var rowsEnseignant = table_aligne_enseignant.querySelectorAll('tbody tr');  
+        rowsEnseignant.forEach(row => row.classList.remove('selected'));
+      }
+      
+      if (table_aligne_assistant) {
+        var rowsAssistant = table_aligne_assistant.querySelectorAll('tbody tr');  
+        rowsAssistant.forEach(row => row.classList.remove('selected'));
+      }
+      
+      enseignantSelected = true;
+      console.log('✅ Enseignant sélectionné - Assistants disponibles');
+    } else if (type === 'assistant') {
+      // Si on sélectionne un assistant, désélectionner uniquement les autres assistants
+      // (garder l'enseignant sélectionné)
+      if (table_aligne_assistant) {
+        var rowsAssistant = table_aligne_assistant.querySelectorAll('tbody tr');  
+        rowsAssistant.forEach(row => row.classList.remove('selected'));
+      }
+      
+      console.log('✅ Assistant sélectionné (enseignant reste actif)');
+    }
     
     // Ajouter la classe 'selected' à la ligne cliquée
     tr1.classList.add('selected');
-    tr_selectionner=tr1;
-    
-
+    tr_selectionner = tr1;
   }
   //
 
@@ -303,7 +403,7 @@ function Affichage_ECs_Par_Filiere()
 
   function Ajouter_EC_Aligne(ec, mat_agent) 
   {
-    //console.log("Je suis dans ajouter")
+    console.log("📝 Enregistrement EC - Matricule agent:", mat_agent, "- Matricule assistant:", mat_assistant_ || "null", "- ID EC:", ec);
     var url = 'API_PHP/Ajout_EC_Aligne.php';
 
     const data = {
@@ -311,7 +411,8 @@ function Affichage_ECs_Par_Filiere()
         id_ec: ec,
         Id_Semestre: cmb_semestre_alignre.value,
         Code_Promotion: cmb_promotion_FAC.value,
-        Mat_agent: mat_agent
+        Mat_agent: mat_agent,
+        Mat_assistant: mat_assistant_ || null
     };
     fetch(url, {
       method: 'POST',
@@ -342,6 +443,7 @@ function Affichage_ECs_Par_Filiere()
 
 
   function Supprimer_EC_Aligne(ec, mat_agent) {
+    console.log("🗑️ Suppression EC - Matricule agent:", mat_agent, "- Matricule assistant:", mat_assistant_ || "null", "- ID EC:", ec);
     var url = 'API_PHP/Supprimer_EC_Aligner.php';
 
     const data = {
@@ -349,7 +451,8 @@ function Affichage_ECs_Par_Filiere()
         id_ec: ec,
         Id_Semestre: cmb_semestre_alignre.value,
         Code_Promotion: cmb_promotion_FAC.value,
-        Mat_agent: mat_agent
+        Mat_agent: mat_agent,
+        Mat_assistant: mat_assistant_ || null
     };
 
     fetch(url, {
@@ -556,4 +659,12 @@ function formatDate(dateString) {
   const date = new Date(dateString);
   const options = { year: 'numeric', month: 'long', day: 'numeric' };
   return date.toLocaleDateString('fr-FR', options);
+}
+
+// Fonction pour fermer la boîte d'alerte
+function Fermer_Boite_Alert_SM_EC() {
+  const dialog = document.getElementById('boite_alert_SM_EC');
+  if (dialog) {
+    dialog.close();
+  }
 }

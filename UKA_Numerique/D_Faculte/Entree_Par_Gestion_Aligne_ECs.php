@@ -577,20 +577,26 @@
 <!-----------    Une boite pour afficher un message de confirmation d'enregistrement ou d'échec ------>
 
 <dialog id="boite_alert_SM_EC" 
-  class="shadow-lg  p-3 rounded bg-gradient-primary"  
-  style="background-color:#273746;color:white">
+  style="border: none; border-radius: 20px; padding: 0; box-shadow: 0 10px 40px rgba(0,0,0,0.3); max-width: 500px; animation: slideDown 0.3s ease-out;">
   
-  <div class="container border">
-    <div class="modal-header">
-      <h5 class="modal-title ms-3" id="exampleModalLabel">Message (U.KA. @ CIUKA )</h5>
-      <button type="button" class="close ms-3" onclick="Fermer_Boite_Alert_SM_EC()">
-        <span aria-hidden="true">&times;</span>
-      </button>
+  <div style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); padding: 25px; border-radius: 20px 20px 0 0; display: flex; justify-content: space-between; align-items: center;">
+    <h5 style="margin: 0; color: white; font-weight: 600; display: flex; align-items: center; gap: 10px;">
+      <i class="fas fa-exclamation-triangle"></i>
+      Attention (U.KA. @ CIUKA)
+    </h5>
+    <button type="button" onclick="Fermer_Boite_Alert_SM_EC()" 
+      style="background: rgba(255,255,255,0.2); border: none; color: white; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center; transition: all 0.3s;"
+      onmouseover="this.style.background='rgba(255,255,255,0.3)'; this.style.transform='rotate(90deg)'"
+      onmouseout="this.style.background='rgba(255,255,255,0.2)'; this.style.transform='rotate(0deg)'">
+      <span>&times;</span>
+    </button>
+  </div>
+  
+  <div style="background: white; padding: 40px 30px; border-radius: 0 0 20px 20px; text-align: center;">
+    <div style="width: 70px; height: 70px; background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: 0 4px 15px rgba(56,239,125,0.3);">
+      <i class="fas fa-exclamation-circle" style="color: white; font-size: 32px;"></i>
     </div>
-    
-    <div class="modal-body">
-      <h5 class="modal-title  text-center" id="text_alert_boite_EC">Connexion Réussier</h5>
-    </div>
+    <h5 id="text_alert_boite_EC" style="color: #2d3748; font-weight: 600; font-size: 18px; line-height: 1.6; margin: 0;">Message</h5>
   </div>
 </dialog>
 
