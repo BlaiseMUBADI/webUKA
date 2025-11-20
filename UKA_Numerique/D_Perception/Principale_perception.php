@@ -26,7 +26,6 @@
     
     <!-- Styles de base du système -->
     <link rel="stylesheet" type="text/css" href="../Styles_CSS/Styles.css" />
-    <link rel="stylesheet" type="text/css" href="../Styles_CSS/Styles_specifique.css" />
     <link rel="stylesheet" type="text/css" href="../Styles_CSS/Nos_Tableaux.css">
 
   

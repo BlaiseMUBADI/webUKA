@@ -26,9 +26,8 @@
     <link rel="stylesheet" href="../fontawesome-6.5.1/css/all.min.css">
     
     <!-- Styles de base du système -->
+    <link rel="stylesheet" type="text/css" href="../Styles_CSS/Nos_Tableaux.css">    
     <link rel="stylesheet" type="text/css" href="../Styles_CSS/Styles.css" />
-    <link rel="stylesheet" type="text/css" href="../Styles_CSS/Styles_specifique.css" />
-    <link rel="stylesheet" type="text/css" href="../Styles_CSS/Nos_Tableaux.css">
 
     <style>
       /* Animation pour les dialogs */

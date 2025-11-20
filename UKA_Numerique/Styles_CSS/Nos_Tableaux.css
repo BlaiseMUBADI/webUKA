@@ -48,7 +48,7 @@
     position: -webkit-sticky;
     position: sticky;
     top: 0;
-    z-index: 1000;
+    z-index: 10;
     background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
 }
 
@@ -71,7 +71,7 @@
     position: -webkit-sticky !important;
     position: sticky !important;
     top: 0 !important;
-    z-index: 1000 !important;
+    z-index: 10 !important;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
@@ -172,10 +172,11 @@
 
 /* ===== Indicateur de sélection avec bordure colorée moderne ===== */
 .tab1 tbody tr.selected {
-    background: rgba(0, 188, 212, 0.3) !important;
-    border-left: 4px solid #00bcd4 !important;
+    background: linear-gradient(90deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.1) 100%) !important;
+    border-left: 4px solid #10b981 !important;
     position: relative;
-    box-shadow: 0 2px 8px rgba(0, 188, 212, 0.3);
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+    transform: translateX(2px);
 }
 
 .tab1 tbody tr.selected::after {
@@ -184,9 +185,21 @@
     right: 10px;
     top: 50%;
     transform: translateY(-50%);
-    color: #00bcd4;
+    color: #10b981;
     font-weight: bold;
     font-size: 1.2rem;
+    text-shadow: 0 1px 3px rgba(16, 185, 129, 0.3);
+}
+
+.tab1 tbody tr.selected td {
+    color: #065f46 !important;
+    font-weight: 500;
+}
+
+/* Surbrillance de la ligne sélectionnée au survol */
+.tab1 tbody tr.selected:hover {
+    background: linear-gradient(90deg, rgba(16, 185, 129, 0.25) 0%, rgba(5, 150, 105, 0.2) 100%) !important;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
 }
 
 /* ===== Checkboxes personnalisées ===== */
