@@ -46,6 +46,46 @@
   #boite_Infos_Enseignant .modal-body::-webkit-scrollbar-thumb:hover {
     background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
   }
+
+  /* ====== Nouveau layout flex pour les trois tableaux ====== */
+  .ligne-tables {
+    display: flex;
+    flex-direction: row;
+    gap: 12px;
+    height: 500px;
+    background-color: rgb(39,55,70);
+  }
+  .ligne-tables .bloc {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+  }
+  .bloc .table-scroll {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    overflow-x: auto;
+  }
+  .enseignants { flex: 0 0 28%; }
+  .assistants  { flex: 0 0 28%; }
+  .ecs         { flex: 1 1 0%; min-width: 380px; }
+  /* En-têtes gradients regroupés (facultatif pour future factorisation) */
+  .header-enseignants { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: #fff; }
+  .header-ecs         { background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%); color: #fff; }
+  .header-assistants  { background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: #fff; }
+  /* Sélection EC */
+  #table_aligne_EC tbody tr { cursor:pointer; transition:background .2s ease, box-shadow .2s ease; }
+  #table_aligne_EC tbody tr.ec-selected { background:#d1fae5 !important; border-left:4px solid #10b981 !important; }
+  #table_aligne_EC tbody tr.ec-selected td { font-weight:600; }
+  #table_aligne_EC tbody tr.ec-selected td:first-child { padding-left:8px; }
+  /* Icône dans libellé EC */
+  .ec-selected-icon { display:inline-block; margin-left:8px; color:#10b981; font-weight:bold; font-size:16px; }
+  /* Responsive empilement */
+  @media (max-width: 1100px) {
+    .ligne-tables { flex-direction: column; height: auto; }
+    .enseignants, .assistants, .ecs { flex: 0 0 auto; min-width: 100%; }
+    .ecs { min-width: 100%; }
+  }
 </style>
 
 <section class="home-section" style="height: 100%;">
@@ -159,99 +199,119 @@
     <!-------CE BLOC CONCERNE L'AFFICHAGE : ENSEIGNANTS | ASSISTANTS | ECs------------------------->
     <!----------------------------------------------------------------------------------------------->
 
-    <div class="home-content text-center m-0 p-3 mt-1 border" 
-          style="background-color:rgb(39,55,70);height:500px">
+    <div class="home-content text-center m-0 p-3 mt-1 border">
+      <div class="ligne-tables">
 
-      <!-- Colonne 1 : ENSEIGNANTS (33%) -->
-      <div class="container p-0 m-0 me-2" style="width: 33%; float: left; height:100%;">
-        <div class="mb-2 p-2 rounded d-flex justify-content-between align-items-center" 
-             style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white;">
-          <div>
-            <i class="fas fa-chalkboard-teacher me-2"></i>
-            <strong>Enseignants</strong>
+        <!-- Bloc Enseignants -->
+        <div class="bloc enseignants">
+          <div class="mb-2 p-2 rounded d-flex justify-content-between align-items-center header-enseignants">
+            <div>
+              <i class="fas fa-chalkboard-teacher me-2"></i>
+              <strong>Enseignants</strong>
+            </div>
+            <span class="badge bg-light text-primary" id="badge_enseignants">0</span>
           </div>
-          <span class="badge bg-light text-primary" id="badge_enseignants">0</span>
+          <div class="container table-responsive small p-0 m-0 table-scroll">
+            <table class="tab1 table-hover text-center" id="table_aligne_enseignant" style="width:100%; border-collapse: collapse;">             
+              <thead>
+                <tr style="border-bottom: 2px solid white;">
+                  <th style="border: none;">N°</th>
+                  <th style="border: none;">ENSEIGNANT</th>
+                  <th style="border: none;">Titre Académique</th>
+                  <th style="border: none;">Domaine</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
         </div>
-        <div class="container table-responsive small p-0 m-0" style="width: 100%; height:calc(100% - 50px); overflow-y: auto; overflow-x: auto;">
-          <table class="tab1 table-hover text-center" id="table_aligne_enseignant" style="width:100%; border-collapse: collapse;">              
-            <thead>
-              <tr style="border-bottom: 2px solid white;">
-                <th style="border: none;">N°</th>
-                <th style="border: none;">ENSEIGNANT</th>
-                <th style="border: none;">Titre Académique</th>
-                <th style="border: none;">Domaine</th>
-              </tr>
-            </thead>
-            <tbody>
-            </tbody>
-          </table> 
+
+        <!-- Bloc ECs -->
+        <div class="bloc ecs">
+          <div class="mb-2 p-2 rounded d-flex justify-content-between align-items-center header-ecs">
+            <div>
+              <i class="fas fa-book-open me-2"></i>
+              <strong>Éléments Constitutifs (ECs)</strong>
+            </div>
+            <span class="badge bg-light text-purple" id="badge_ecs" style="color:#7c3aed;">0</span>
+          </div>
+          <div class="container table-responsive small p-0 m-0 table-scroll" style="overflow-x:hidden;">
+            <table class="tab1 table-hover table-striped" id="table_aligne_EC" style="width:100%;">             
+              <thead>
+                <tr style="border-bottom: 2px solid white;">
+                  <th style="width: 8%; border: none;">N°</th>
+                  <th style="width: 10%; border: none;">ACTION</th>
+                  <th style="width: 35%; border: none;">INTITULÉ EC</th>
+                  <th style="width: 15%; border: none;">CRÉDITS</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td colspan="6" class="text-muted fst-italic" style="padding: 30px;">
+                    <i class="fas fa-hand-pointer me-2"></i>
+                    Sélectionnez un enseignant ou un assistant
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
+
+        <!-- Bloc Assistants -->
+        <div class="bloc assistants">
+          <div class="mb-2 p-2 rounded d-flex justify-content-between align-items-center header-assistants">
+            <div>
+              <i class="fas fa-user-graduate me-2"></i>
+              <strong>Assistants</strong>
+            </div>
+            <span class="badge bg-light text-success" id="badge_assistants">0</span>
+          </div>
+          <div class="container table-responsive small p-0 m-0 table-scroll" style="overflow-x:hidden;">
+            <table class="tab1 table-hover text-center" id="table_aligne_assistant" style="width:100%;">             
+              <thead>
+                <tr style="border-bottom: 2px solid white;">
+                  <th style="width: 8%; border: none;">N°</th>
+                  <th style="width: 10%; border: none;">ACTION</th>
+                  <th style="width: 52%; border: none;">ASSISTANT</th>
+                  <th style="width: 30%; border: none;">STATUT</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="empty-state">
+                  <td colspan="4" class="text-center text-muted fst-italic" style="padding: 40px 20px; background: rgba(148, 163, 184, 0.05);">
+                    <div style="font-size: 2rem; opacity: 0.3; margin-bottom: 10px;">
+                      <i class="fas fa-hand-pointer"></i>
+                    </div>
+                    <div style="font-size: 0.9rem;">Sélectionnez un enseignant</div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          <!-- Légende des couleurs -->
+          <div class="mt-2 p-2 rounded" style="background: rgba(148, 163, 184, 0.1); font-size: 0.75rem;">
+            <div class="fw-bold mb-1" style="font-size: 0.8rem;">
+              <i class="fas fa-info-circle me-1"></i>Légende
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+              <div class="d-flex align-items-center">
+                <div style="width: 20px; height: 3px; background: #10b981; margin-right: 5px;"></div>
+                <span>🏠 Votre filière</span>
+              </div>
+              <div class="d-flex align-items-center">
+                <div style="width: 20px; height: 3px; background: #3b82f6; margin-right: 5px;"></div>
+                <span>🔵 Autre filière</span>
+              </div>
+              <div class="d-flex align-items-center">
+                <div style="width: 20px; height: 3px; background: #f59e0b; border-style: dashed; margin-right: 5px;"></div>
+                <span>⚠️ Occupé</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
-
-      <!-- Colonne 2 : ASSISTANTS (33%) -->
-      <div class="container p-0 m-0 me-2" style="width: 33%; float: left; height:100%;">
-        <div class="mb-2 p-2 rounded d-flex justify-content-between align-items-center" 
-             style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: white;">
-          <div>
-            <i class="fas fa-user-graduate me-2"></i>
-            <strong>Assistants</strong>
-          </div>
-          <span class="badge bg-light text-success" id="badge_assistants">0</span>
-        </div>
-        <div class="container table-responsive small p-0 m-0" style="width: 100%; height:calc(100% - 50px); overflow-y: auto; overflow-x: hidden;">
-          <table class="tab1 table-hover text-center" id="table_aligne_assistant" style="width:100%;">              
-            <thead>
-              <tr style="border-bottom: 2px solid white;">
-                <th style="width: 10%; border: none;">N°</th>
-                <th style="width: 60%; border: none;">ASSISTANT</th>
-                <th style="width: 30%; border: none;">STATUT</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr class="empty-state">
-                <td colspan="3" class="text-center text-muted fst-italic" style="padding: 40px 20px; background: rgba(148, 163, 184, 0.05);">
-                  <div style="font-size: 2rem; opacity: 0.3; margin-bottom: 10px;">
-                    <i class="fas fa-hand-pointer"></i>
-                  </div>
-                  <div style="font-size: 0.9rem;">Sélectionnez un enseignant</div>
-                </td>
-              </tr>
-            </tbody>
-          </table> 
-        </div>
-      </div>
-
-      <!-- Colonne 3 : ECs (30%) -->
-      <div class="container p-0 m-0" style="width: 30%; float: left; height:100%;">
-        <div class="mb-2 p-2 rounded d-flex justify-content-between align-items-center" 
-             style="background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%); color: white;">
-          <div>
-            <i class="fas fa-book-open me-2"></i>
-            <strong>Éléments Constitutifs (ECs)</strong>
-          </div>
-          <span class="badge bg-light text-purple" id="badge_ecs" style="color: #7c3aed;">0</span>
-        </div>
-        <div class="container table-responsive small p-0 m-0" style="width: 100%; height:calc(100% - 50px); overflow-y: auto; overflow-x: hidden;">
-          <table class="tab1 table-hover table-striped" id="table_aligne_EC" style="width:100%;">              
-            <thead>
-              <tr style="border-bottom: 2px solid white;">
-                <th style="width: 8%; border: none;">N°</th>
-                <th style="width: 10%; border: none;">ACTION</th>
-                <th style="width: 35%; border: none;">INTITULÉ EC</th>
-                <th style="width: 15%; border: none;">CRÉDITS</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td colspan="6" class="text-muted fst-italic" style="padding: 30px;">
-                  <i class="fas fa-hand-pointer me-2"></i>
-                  Sélectionnez un enseignant ou un assistant
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>     
     </div>
     <!-------------------------------Fin bloc affichage SM et UEs ---------------------------------------------->
   </div>

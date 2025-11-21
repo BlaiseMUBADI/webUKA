@@ -1,0 +1,143 @@
+DELIMITER $$
+-- Procédure pour lister tous les assistants disponibles avec leur statut d'affectation
+CREATE DEFINER=`blaise`@`%` PROCEDURE `Liste_Assistants_Disponibles`(
+    IN p_Mat_agent VARCHAR(20),      -- Matricule de l'enseignant sélectionné (celui qui fait la demande)
+    IN p_id_ec_aligne INT,           -- ID de l'EC aligné (optionnel, utilisé pour mode EC spécifique)
+    IN p_idAnnee_Acad INT,           -- Année académique (filtre sur l'année)
+    IN p_Id_Semestre INT,            -- Semestre (filtre sur le semestre)
+    IN p_Code_Promotion VARCHAR(10), -- Code promotion (filtre sur la promotion)
+    IN p_id_filiere INT              -- ID filière pour prioriser les assistants de la même filière
+)
+BEGIN
+    SELECT 
+        ag.Mat_agent AS mat_assistant,         -- Matricule de l'assistant
+        ag.Nom_agent,                         -- Nom de l'assistant
+        ag.Post_agent,                        -- Post-nom de l'assistant
+        ag.Prenom,                            -- Prénom de l'assistant
+        CONCAT(ag.Nom_agent, ' ', ag.Post_agent, ' ', ag.Prenom) AS nom_complet, -- Nom complet formaté
+        ag.Grade AS titre_academique,         -- Grade (ASS1/ASS2)
+        ag.Domaine,                           -- Domaine de compétence
+        ag.Mail,                              -- Email de l'assistant
+        ag.Tel,                               -- Téléphone de l'assistant
+        ag.Id_filiere,                        -- Filière de l'assistant (sert au tri prioritaire)
+        
+        -- Vérifie si l'assistant est attaché à l'EC sélectionné (mode EC)
+        CASE 
+            WHEN p_id_ec_aligne IS NOT NULL AND eca_specific.Mat_assistant = ag.Mat_agent THEN TRUE
+            ELSE FALSE
+        END AS est_attache_a_cet_ec,
+        
+        -- Vérifie si l'assistant travaille avec l'enseignant sélectionné
+        -- (ligne présente dans element_constitutifs_aligne avec Mat_agent = p_Mat_agent)
+        CASE 
+            WHEN eca_enseignant.Mat_assistant IS NOT NULL THEN TRUE
+            ELSE FALSE
+        END AS est_assigne_a_cet_enseignant,
+        
+        -- Vérifie si l'assistant est pris par n'importe quel enseignant (globalement)
+        -- (ligne présente dans element_constitutifs_aligne pour cet assistant, peu importe l'enseignant)
+        CASE 
+            WHEN eca_global.Mat_assistant IS NOT NULL THEN TRUE
+            ELSE FALSE
+        END AS est_assigne_globalement,
+        
+        -- Vérifie si l'assistant est actif dans l'année académique
+        CASE 
+            WHEN eca_annee.Mat_assistant IS NOT NULL THEN TRUE
+            ELSE FALSE
+        END AS est_assigne_dans_annee,
+        
+        -- Nombre d'ECs où l'assistant travaille avec l'enseignant sélectionné
+        COALESCE(COUNT(DISTINCT eca_enseignant.id_ec_aligne), 0) AS nombre_ecs_avec_enseignant,
+        
+        -- Nombre total d'ECs assignés à cet assistant dans le semestre/année/promotion
+        (SELECT COUNT(DISTINCT id_ec_aligne) 
+         FROM element_constitutifs_aligne 
+         WHERE Mat_assistant = ag.Mat_agent
+         AND idAnnee_Acad = p_idAnnee_Acad
+         AND Code_Promotion = p_Code_Promotion) AS nombre_ecs_total,
+        
+        -- Calcul de la priorité d'affichage (ordre_tri) selon la filière et le statut
+        -- 1: Ma filière + déjà assigné à moi/EC
+        -- 2: Ma filière + libre
+        -- 3: Ma filière + pris par autre
+        -- 4: Autre filière + assigné à moi/EC
+        -- 5: Autre filière + libre
+        -- 6: Autre filière + pris
+        -- 7: Id_filiere NULL (toujours à la fin)
+        CASE 
+            -- Priorité 7: Id_filiere NULL (toujours à la fin)
+            WHEN ag.Id_filiere IS NULL THEN 7
+            -- Priorité 1: Assistant de la filière ET assigné à l'enseignant/EC
+            WHEN ag.Id_filiere = p_id_filiere 
+                 AND (eca_enseignant.Mat_assistant = ag.Mat_agent 
+                      OR (p_id_ec_aligne IS NOT NULL AND eca_specific.Mat_assistant = ag.Mat_agent)) THEN 1
+            -- Priorité 2: Assistant de la filière ET libre
+            WHEN ag.Id_filiere = p_id_filiere 
+                 AND eca_global.Mat_assistant IS NULL THEN 2
+            -- Priorité 3: Assistant de la filière MAIS pris par autre
+            WHEN ag.Id_filiere = p_id_filiere 
+                 AND eca_global.Mat_assistant IS NOT NULL THEN 3
+            -- Priorité 4: Assistant d'autre filière ET assigné
+            WHEN eca_enseignant.Mat_assistant = ag.Mat_agent 
+                 OR (p_id_ec_aligne IS NOT NULL AND eca_specific.Mat_assistant = ag.Mat_agent) THEN 4
+            -- Priorité 5: Assistant d'autre filière ET libre
+            WHEN eca_global.Mat_assistant IS NULL THEN 5
+            -- Priorité 6: Assistant d'autre filière ET pris
+            ELSE 6
+        END AS ordre_tri
+        
+    FROM 
+        agent ag   -- Table principale des agents (assistants)
+    
+    -- LEFT JOIN pour EC spécifique (si p_id_ec_aligne fourni)
+    -- Permet de savoir si l'assistant est attaché à l'EC sélectionné
+    LEFT JOIN 
+        element_constitutifs_aligne eca_specific
+        ON ag.Mat_agent = eca_specific.Mat_assistant
+        AND eca_specific.id_ec_aligne = p_id_ec_aligne
+    
+    -- LEFT JOIN pour les ECs de l'enseignant actuel
+    -- Permet de savoir si l'assistant travaille avec l'enseignant sélectionné
+    LEFT JOIN 
+        element_constitutifs_aligne eca_enseignant
+        ON ag.Mat_agent = eca_enseignant.Mat_assistant
+        AND eca_enseignant.Mat_agent = p_Mat_agent
+        AND eca_enseignant.idAnnee_Acad = p_idAnnee_Acad
+        AND eca_enseignant.Code_Promotion = p_Code_Promotion
+    
+    -- LEFT JOIN pour vérifier assignation globale
+    -- Permet de savoir si l'assistant est pris par n'importe quel enseignant
+    LEFT JOIN 
+        element_constitutifs_aligne eca_global
+        ON ag.Mat_agent = eca_global.Mat_assistant
+        AND eca_global.idAnnee_Acad = p_idAnnee_Acad
+        AND eca_global.Code_Promotion = p_Code_Promotion
+    
+    -- LEFT JOIN pour vérifier assignation dans l'année
+    -- Permet de savoir si l'assistant est actif dans l'année académique
+    LEFT JOIN 
+        element_constitutifs_aligne eca_annee
+        ON ag.Mat_agent = eca_annee.Mat_assistant
+        AND eca_annee.idAnnee_Acad = p_idAnnee_Acad
+    
+    WHERE 
+        ag.Grade IN ('ASS1', 'ASS2')   -- On ne prend que les assistants (ASS1 et ASS2)
+    
+    GROUP BY 
+        ag.Mat_agent, ag.Nom_agent, ag.Post_agent, ag.Prenom, 
+        ag.Grade, ag.Domaine, ag.Mail, ag.Tel, ag.Id_filiere,
+        est_attache_a_cet_ec,
+        est_assigne_a_cet_enseignant,
+        est_assigne_globalement,
+        est_assigne_dans_annee,
+        ordre_tri
+    -- On regroupe par toutes les colonnes pour éviter les ambiguïtés
+    
+    ORDER BY 
+        ordre_tri ASC,        -- D'abord par priorité filière + statut
+        ag.Grade ASC,         -- Puis ASS1 avant ASS2
+        ag.Nom_agent ASC;     -- Puis alphabétique
+    -- L'ordre d'affichage permet de mettre en avant les assistants les plus pertinents
+END$$
+DELIMITER ;

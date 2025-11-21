@@ -118,7 +118,6 @@
    
   <script type="text/javascript" src="../D_Generale/JavaScript/Fonctions.js"></script>
     
-  <script type="text/javascript" src="../D_Generale/JavaScript/recup_promotion_et_etudiant.js"></script>  
   <script type="text/javascript" src="../D_Generale/JavaScript/Deconnexion_inactiviter.js"></script>
   
   <script type="text/javascript" src="JavaScript/Manip_UE.js"></script>
@@ -127,12 +126,6 @@
   <script type="text/javascript" src="JavaScript/Manip_EC_Aligner.js"></script>
   <script type="text/javascript" src="JavaScript/Manip_Encodage.js"></script>
 
-
-  <script type="text/javascript" src="../D_Perception/JavaScript/Entree_rapport_paie.js"></script>  
-  <script type="text/javascript" src="../D_Perception/JavaScript/Recup_prom_et_Manip_Transact.js"></script>
-
-  
-  <script type="text/javascript" src="../D_Budget/JavaScript/recup_promotion_et_frais_fixe.js"></script>
   
 
   <script type="text/javascript" src="../bootstrap/dist/js/bootstrap.bundle.js"></script>  

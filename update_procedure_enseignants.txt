@@ -1,0 +1,134 @@
+DELIMITER $$
+CREATE DEFINER=`blaise`@`%` PROCEDURE `Liste_Assistants_Disponibles`(
+    IN p_Mat_agent VARCHAR(20),
+    IN p_id_ec_aligne INT,
+    IN p_idAnnee_Acad INT,
+    IN p_Id_Semestre INT,
+    IN p_Code_Promotion VARCHAR(10),
+    IN p_id_filiere INT
+)
+BEGIN
+    SELECT 
+        ag.Mat_agent AS mat_assistant,
+        ag.Nom_agent,
+        ag.Post_agent,
+        ag.Prenom,
+        CONCAT(ag.Nom_agent, ' ', ag.Post_agent, ' ', ag.Prenom) AS nom_complet,
+        ag.Grade AS titre_academique,
+        ag.Domaine,
+        ag.Mail,
+        ag.Tel,
+        ag.Id_filiere,  -- ✅ Ajout pour tri par filière
+        
+        -- Si p_id_ec_aligne fourni, vérifier attachement à cet EC spécifique
+        CASE 
+            WHEN p_id_ec_aligne IS NOT NULL AND eca_specific.Mat_assistant = ag.Mat_agent THEN TRUE
+            ELSE FALSE
+        END AS est_attache_a_cet_ec,
+        
+        -- Vérifier si assigné à l'enseignant actuel
+        CASE 
+            WHEN eca_enseignant.Mat_assistant IS NOT NULL THEN TRUE
+            ELSE FALSE
+        END AS est_assigne_a_cet_enseignant,
+        
+        -- Vérifier si assigné globalement
+        CASE 
+            WHEN eca_global.Mat_assistant IS NOT NULL THEN TRUE
+            ELSE FALSE
+        END AS est_assigne_globalement,
+        
+        -- Vérifier si assigné dans l'année académique
+        CASE 
+            WHEN eca_annee.Mat_assistant IS NOT NULL THEN TRUE
+            ELSE FALSE
+        END AS est_assigne_dans_annee,
+        
+        -- Compter le nombre d'ECs avec cet enseignant
+        COALESCE(COUNT(DISTINCT eca_enseignant.id_ec_aligne), 0) AS nombre_ecs_avec_enseignant,
+        
+        -- Compter le nombre total d'ECs assignés
+        (SELECT COUNT(DISTINCT id_ec_aligne) 
+         FROM element_constitutifs_aligne 
+         WHERE Mat_assistant = ag.Mat_agent
+         AND idAnnee_Acad = p_idAnnee_Acad
+         AND Id_Semestre = p_Id_Semestre
+         AND Code_Promotion = p_Code_Promotion) AS nombre_ecs_total,
+        
+        -- ✅ ORDRE DE TRI AMÉLIORÉ : Priorité filière
+        CASE 
+            -- Priorité 1: Assistant de la filière ET assigné à l'enseignant/EC
+            WHEN (ag.Id_filiere = p_id_filiere OR ag.Id_filiere IS NULL) 
+                 AND (eca_enseignant.Mat_assistant = ag.Mat_agent 
+                      OR (p_id_ec_aligne IS NOT NULL AND eca_specific.Mat_assistant = ag.Mat_agent)) THEN 1
+            
+            -- Priorité 2: Assistant de la filière ET libre
+            WHEN (ag.Id_filiere = p_id_filiere OR ag.Id_filiere IS NULL) 
+                 AND eca_global.Mat_assistant IS NULL THEN 2
+            
+            -- Priorité 3: Assistant de la filière MAIS pris par autre
+            WHEN (ag.Id_filiere = p_id_filiere OR ag.Id_filiere IS NULL) 
+                 AND eca_global.Mat_assistant IS NOT NULL THEN 3
+            
+            -- Priorité 4: Assistant d'autre filière ET assigné
+            WHEN eca_enseignant.Mat_assistant = ag.Mat_agent 
+                 OR (p_id_ec_aligne IS NOT NULL AND eca_specific.Mat_assistant = ag.Mat_agent) THEN 4
+            
+            -- Priorité 5: Assistant d'autre filière ET libre
+            WHEN eca_global.Mat_assistant IS NULL THEN 5
+            
+            -- Priorité 6: Assistant d'autre filière ET pris
+            ELSE 6
+        END AS ordre_tri
+        
+    FROM 
+        agent ag
+    
+    -- LEFT JOIN pour EC spécifique (si p_id_ec_aligne fourni)
+    LEFT JOIN 
+        element_constitutifs_aligne eca_specific
+        ON ag.Mat_agent = eca_specific.Mat_assistant
+        AND eca_specific.id_ec_aligne = p_id_ec_aligne
+    
+    -- LEFT JOIN pour les ECs de l'enseignant actuel
+    LEFT JOIN 
+        element_constitutifs_aligne eca_enseignant
+        ON ag.Mat_agent = eca_enseignant.Mat_assistant
+        AND eca_enseignant.Mat_agent = p_Mat_agent
+        AND eca_enseignant.idAnnee_Acad = p_idAnnee_Acad
+        AND eca_enseignant.Id_Semestre = p_Id_Semestre
+        AND eca_enseignant.Code_Promotion = p_Code_Promotion
+    
+    -- LEFT JOIN pour vérifier assignation globale
+    LEFT JOIN 
+        element_constitutifs_aligne eca_global
+        ON ag.Mat_agent = eca_global.Mat_assistant
+        AND eca_global.idAnnee_Acad = p_idAnnee_Acad
+        AND eca_global.Id_Semestre = p_Id_Semestre
+        AND eca_global.Code_Promotion = p_Code_Promotion
+    
+    -- LEFT JOIN pour vérifier assignation dans l'année
+    LEFT JOIN 
+        element_constitutifs_aligne eca_annee
+        ON ag.Mat_agent = eca_annee.Mat_assistant
+        AND eca_annee.idAnnee_Acad = p_idAnnee_Acad
+    
+    WHERE 
+        ag.Grade IN ('ASS1', 'ASS2')
+    
+    GROUP BY 
+        ag.Mat_agent, ag.Nom_agent, ag.Post_agent, ag.Prenom, 
+        ag.Grade, ag.Domaine, ag.Mail, ag.Tel, ag.Id_filiere,
+        est_attache_a_cet_ec,
+        est_assigne_a_cet_enseignant,
+        est_assigne_globalement,
+        est_assigne_dans_annee,
+        ordre_tri
+    
+    ORDER BY 
+        ordre_tri ASC,        -- ✅ D'abord par priorité filière + statut
+        ag.Grade ASC,         -- Puis ASS1 avant ASS2
+        ag.Nom_agent ASC;     -- Puis alphabétique
+    
+END$$
+DELIMITER ;

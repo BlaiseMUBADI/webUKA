@@ -157,22 +157,16 @@
                 let agentsFiliere = data.filter(e => e.id_filiere == idFiliereUser);
                 
                 badgeEnseignants.textContent = agentsFiliere.length + ' / ' + data.length;
-                
-                // Message console pour information
-                console.log(`📊 Statistiques Enseignants (tous agents):`);
-                console.log(`   - Filière actuelle: ${agentsFiliere.length}`);
-                console.log(`   - Total université: ${data.length}`);
-                console.log(`   - ID Filière: ${idFiliereUser}`);
             }
 
-            // ====== Remplissage du tableau des assistants (ASS1 et ASS2) ======
+            // ====== Remplissage du tableau des assistants via nouvelle API ======
+            // Au chargement initial, afficher tous les assistants ASS1/ASS2
             if (table_aligne_assistant && tbodyAssist) {
               let assistants = Array.isArray(data) ? data.filter(a => {
                 const titre = (a.titre_academique || '').toString().toUpperCase();
                 return titre === 'ASS1' || titre === 'ASS2';
               }) : [];
 
-              // Déterminer le nom à afficher (même logique que pour enseignants)
               let j = 1;
               assistants.forEach(a => {
                 const tr = document.createElement('tr');
@@ -180,6 +174,19 @@
                 const tdnum = document.createElement('td');
                 tdnum.textContent = j;
                 tdnum.classList.add('text-center');
+
+                // Colonne ACTION avec checkbox (désactivée par défaut)
+                const tdAction = document.createElement('td');
+                tdAction.classList.add('text-center');
+                const divCheck = document.createElement('div');
+                divCheck.classList.add('d-flex', 'justify-content-center', 'align-items-center');
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.classList.add('form-check-input', 'm-0');
+                checkbox.disabled = true; // Désactivé jusqu'à sélection enseignant
+                checkbox.dataset.matAssistant = a.mat_agent;
+                divCheck.appendChild(checkbox);
+                tdAction.appendChild(divCheck);
 
                 const tdAssistant = document.createElement('td');
                 tdAssistant.classList.add('text-center', 'w-auto');
@@ -189,28 +196,13 @@
                 tdStatut.textContent = a.titre_academique || '-';
 
                 tr.appendChild(tdnum);
+                tr.appendChild(tdAction);
                 tr.appendChild(tdAssistant);
                 tr.appendChild(tdStatut);
 
-                // Harmoniser le comportement: sélection au clic
-                tr.addEventListener('click', function() {
-                  // Vérifier si un enseignant est déjà sélectionné
-                  if (!enseignantSelected) {
-                    // Afficher la boîte de dialogue d'alerte personnalisée
-                    const dialog = document.getElementById('boite_alert_SM_EC');
-                    const textAlert = document.getElementById('text_alert_boite_EC');
-                    
-                    if (dialog && textAlert) {
-                      textAlert.innerHTML = '⚠️ <strong>ATTENTION!</strong><br><br>Veuillez d\'abord sélectionner un <strong>ENSEIGNANT</strong> avant de sélectionner un assistant.';
-                      dialog.showModal();
-                    }
-                    
-                    console.warn('⚠️ Tentative de sélection d\'assistant sans enseignant');
-                    return; // Bloquer la sélection
-                  }
-                  mat_assistant_ = a.mat_agent; // Stocker le matricule de l'assistant
-                  Selectionner_Enseignant(a.mat_agent, tr, 'assistant');
-                  Affichage_ECs_Par_Filiere();
+                // Ajouter le menu contextuel pour afficher les infos de l'assistant
+                tr.addEventListener('contextmenu', function(event) {
+                  afficherMenuContextuel(event, a);
                 });
 
                 tbodyAssist.appendChild(tr);
@@ -222,10 +214,6 @@
               if (badgeAssistants) {
                 let assistantsFiliere = assistants.filter(x => x.id_filiere == idFiliereUser);
                 badgeAssistants.textContent = assistantsFiliere.length + ' / ' + assistants.length;
-
-                console.log('📊 Statistiques Assistants:');
-                console.log(`   - Filière actuelle: ${assistantsFiliere.length}`);
-                console.log(`   - Total université: ${assistants.length}`);
               }
             }
         })
@@ -274,7 +262,7 @@ function Affichage_ECs_Par_Filiere()
   .then(data => 
   {
       data.forEach(ec => {
-        // Création de TR
+      var tdnum = document.createElement("td");
         var tr = document.createElement("tr");
 
         tdnum = document.createElement("td");
@@ -313,16 +301,41 @@ function Affichage_ECs_Par_Filiere()
         
         
         // Ajouter l'événement pour ajouter ou supprimer EC aligné
-        case_cocher.addEventListener('change', function() 
+        case_cocher.addEventListener('change', function(e) 
         {
+          // Vérifier qu'un enseignant est sélectionné et que tous les filtres sont remplis
+          if (!mat_agent_ || 
+              !cmb_annee_academique_aligne || !cmb_annee_academique_aligne.value || 
+              !cmb_semestre_alignre || !cmb_semestre_alignre.value || cmb_semestre_alignre.value === 'rien' ||
+              !cmb_promotion_FAC || !cmb_promotion_FAC.value || cmb_promotion_FAC.value === 'rien') {
+            
+            // Bloquer l'action et remettre la checkbox à son état précédent
+            e.preventDefault();
+            case_cocher.checked = !case_cocher.checked;
+            
+            // Afficher la boîte de dialogue d'alerte
+            const dialog = document.getElementById('boite_alert_SM_EC');
+            const textAlert = document.getElementById('text_alert_boite_EC');
+            
+            if (dialog && textAlert) {
+              let messagesManquants = [];
+              if (!mat_agent_) messagesManquants.push('<strong>Enseignant</strong>');
+              if (!cmb_annee_academique_aligne.value) messagesManquants.push('<strong>Année Académique</strong>');
+              if (!cmb_semestre_alignre.value || cmb_semestre_alignre.value === 'rien') messagesManquants.push('<strong>Semestre</strong>');
+              if (!cmb_promotion_FAC.value || cmb_promotion_FAC.value === 'rien') messagesManquants.push('<strong>Promotion</strong>');
+              
+              textAlert.innerHTML = '⚠️ <strong>ATTENTION!</strong><br><br>Veuillez sélectionner les éléments suivants avant de cocher un EC:<br><br>' + messagesManquants.join(', ');
+              dialog.showModal();
+            }
+            
+            return;
+          }
           
           if (case_cocher.checked) {
-              console.log('➕ Ajout EC:', ec.Intutile_ec, '- Agent:', mat_agent_);
-              Ajouter_EC_Aligne(ec.id_ec, mat_agent_); 
+              Ajouter_EC_Aligne(ec.id_ec); 
               Affichage_ECs_Par_Filiere();
           } else {
-              console.log('➖ Suppression EC:', ec.Intutile_ec, '- Agent:', mat_agent_);
-              Supprimer_EC_Aligne(ec.id_ec,mat_agent_);
+              Supprimer_EC_Aligne(ec.id_ec);
               Affichage_ECs_Par_Filiere();
 
           }
@@ -336,6 +349,38 @@ function Affichage_ECs_Par_Filiere()
         tr.appendChild(td_action);
         tr.appendChild(td_intitule);
         tr.appendChild(td_credits);
+
+        // Ajouter gestionnaire de clic pour sélection EC (active les assistants)
+        tr.addEventListener('click', function(e) {
+          // Ne pas interférer avec le clic sur checkbox
+          if (e.target === case_cocher) return;
+          
+          // Retirer la classe de sélection et les icônes des autres lignes EC
+          tbody.querySelectorAll('tr.ec-selected').forEach(r => {
+            r.classList.remove('ec-selected');
+            // Retirer l'icône si présente
+            const icon = r.querySelector('.ec-selected-icon');
+            if (icon) icon.remove();
+          });
+          
+          // Ajouter la classe à cette ligne
+          tr.classList.add('ec-selected');
+          
+          // Ajouter l'icône checkmark à l'intitulé
+          if (!td_intitule.querySelector('.ec-selected-icon')) {
+            const icon = document.createElement('span');
+            icon.className = 'ec-selected-icon';
+            icon.textContent = '✓';
+            td_intitule.appendChild(icon);
+          }
+          
+          // Stocker l'ID de l'EC sélectionné et son id_ec_aligne
+          window.selectedECId = ec.id_ec;
+          window.selectedECAlignId = ec.id_ec_aligne; // ID de la ligne d'alignement
+          
+          // Recharger les assistants en mode EC
+          Charger_Assistants_Disponibles(true);
+        });
 
         tbody.appendChild(tr);
         i++;
@@ -375,7 +420,6 @@ function Affichage_ECs_Par_Filiere()
       }
       
       enseignantSelected = true;
-      console.log('✅ Enseignant sélectionné - Assistants disponibles');
     } else if (type === 'assistant') {
       // Si on sélectionne un assistant, désélectionner uniquement les autres assistants
       // (garder l'enseignant sélectionné)
@@ -384,16 +428,272 @@ function Affichage_ECs_Par_Filiere()
         rowsAssistant.forEach(row => row.classList.remove('selected'));
       }
       
-      console.log('✅ Assistant sélectionné (enseignant reste actif)');
     }
     
     // Ajouter la classe 'selected' à la ligne cliquée
     tr1.classList.add('selected');
     tr_selectionner = tr1;
+    
+    // Si un enseignant est sélectionné, charger les assistants disponibles avec checkboxes
+    if (type === 'enseignant') {
+      Charger_Assistants_Disponibles();
+    }
   }
   //
 
   
+  /*
+  *****************************************************************************************
+  ************  CHARGER LES ASSISTANTS DISPONIBLES AVEC CHECKBOXES ************************
+  *****************************************************************************************
+  */
+  function Charger_Assistants_Disponibles(ecMode) {
+    const table_aligne_assistant = document.getElementById("table_aligne_assistant");
+    if (!table_aligne_assistant) return;
+    
+    let tbodyAssist = table_aligne_assistant.querySelector("tbody");
+    if (!tbodyAssist) {
+      tbodyAssist = document.createElement("tbody");
+      table_aligne_assistant.appendChild(tbodyAssist);
+    }
+    
+    // Vérifier que les filtres sont sélectionnés
+    if (!cmb_annee_academique_aligne || !cmb_annee_academique_aligne.value || 
+        !cmb_semestre_alignre || !cmb_semestre_alignre.value || cmb_semestre_alignre.value === 'rien' ||
+        !cmb_promotion_FAC || !cmb_promotion_FAC.value || cmb_promotion_FAC.value === 'rien') {
+      console.log("Filtres non complets, impossible de charger les assistants");
+      return;
+    }
+    
+    // Déterminer le mode: si ecMode=true et EC sélectionné, passer id_ec_aligne
+    const modeEC = (ecMode === true && window.selectedECAlignId) ? window.selectedECAlignId : null;
+    
+    const url = 'API_PHP/Liste_Assistants_Disponibles.php';
+    fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        mat_agent: mat_agent_,
+        id_ec_aligne: modeEC, // null = mode enseignant, sinon mode EC
+        id_annee_acad: cmb_annee_academique_aligne.value,
+        id_semestre: cmb_semestre_alignre.value,
+        code_prom: cmb_promotion_FAC.value
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      // Récupérer l'ID de la filière utilisateur depuis la réponse de Liste_Enseignants
+      fetch('API_PHP/Liste_Enseignants.php')
+        .then(r => r.json())
+        .then(resp => {
+          const idFiliereUser = resp.id_filiere_user;
+          const assistants = data;
+          
+          if (assistants.status === 'error') {
+            console.error('Erreur API:', assistants.message);
+            return;
+          }
+          
+          // Vider le tableau
+          tbodyAssist.innerHTML = '';
+          
+          let j = 1;
+          assistants.forEach(a => {
+            const tr = document.createElement('tr');
+            
+            // Déterminer si l'assistant est de la filière actuelle
+            const estDeLaFiliere = (a.Id_filiere == idFiliereUser) || (a.Id_filiere === null);
+            
+            // Déterminer le niveau de priorité visuelle
+            let niveauPriorite = 6;
+            let couleurBordure = '#6c757d'; // Gris par défaut
+            let styleBordure = 'solid';
+            let opacite = 1;
+            let tooltipText = '';
+            
+            if (estDeLaFiliere && a.est_assigne_a_cet_enseignant) {
+              // Niveau 1: MA filière + Assigné à MON enseignant
+              niveauPriorite = 1;
+              couleurBordure = '#10b981'; // Vert
+              styleBordure = 'solid';
+              tooltipText = '✅ Assistant de votre filière déjà assigné';
+            } else if (estDeLaFiliere && !a.est_assigne_globalement) {
+              // Niveau 2: MA filière + Libre
+              niveauPriorite = 2;
+              couleurBordure = '#10b981'; // Vert
+              styleBordure = 'solid';
+              tooltipText = '🟢 Assistant disponible de votre filière';
+            } else if (estDeLaFiliere && a.est_assigne_globalement) {
+              // Niveau 3: MA filière + Pris par autre
+              niveauPriorite = 3;
+              couleurBordure = '#f59e0b'; // Orange
+              styleBordure = 'dashed';
+              opacite = 0.6;
+              tooltipText = '⚠️ Assistant de votre filière déjà pris par un autre enseignant';
+            } else if (!estDeLaFiliere && a.est_assigne_a_cet_enseignant) {
+              // Niveau 4: AUTRE filière + Assigné à MON enseignant
+              niveauPriorite = 4;
+              couleurBordure = '#3b82f6'; // Bleu
+              styleBordure = 'solid';
+              tooltipText = '🔵 Assistant d\'une autre filière déjà assigné à vous';
+            } else if (!estDeLaFiliere && !a.est_assigne_globalement) {
+              // Niveau 5: AUTRE filière + Libre
+              niveauPriorite = 5;
+              couleurBordure = '#9ca3af'; // Gris clair
+              styleBordure = 'solid';
+              opacite = 0.8;
+              tooltipText = '⚪ Assistant disponible d\'une autre filière';
+            } else {
+              // Niveau 6: AUTRE filière + Pris par autre
+              niveauPriorite = 6;
+              couleurBordure = '#6c757d'; // Gris foncé
+              styleBordure = 'dotted';
+              opacite = 0.4;
+              tooltipText = '⚫ Assistant d\'une autre filière déjà pris';
+            }
+            
+            // Appliquer les styles visuels
+            tr.style.borderLeft = `4px ${styleBordure} ${couleurBordure}`;
+            tr.style.opacity = opacite;
+            tr.title = tooltipText;
+            tr.dataset.priorite = niveauPriorite;
+            
+            // N°
+            const tdnum = document.createElement('td');
+            tdnum.textContent = j;
+            tdnum.classList.add('text-center');
+            
+            // ACTION (checkbox)
+            const tdAction = document.createElement('td');
+            tdAction.classList.add('text-center');
+            const divCheck = document.createElement('div');
+            divCheck.classList.add('d-flex', 'justify-content-center', 'align-items-center');
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.classList.add('form-check-input', 'm-0');
+            checkbox.dataset.matAssistant = a.mat_assistant;
+            
+            // Gérer l'état selon le mode
+            if (modeEC) {
+              // Mode EC: activer les checkboxes sauf pour assistants pris par autre enseignant
+              if (a.est_pris_par_autre == 1 || (a.est_assigne_globalement && !a.est_assigne_a_cet_enseignant)) {
+                checkbox.disabled = true;
+              } else {
+                checkbox.disabled = false;
+              }
+              // Cocher si attaché à cet EC spécifique
+              if (a.est_attache_a_ec == 1 || a.est_attache_a_cet_ec == 1) {
+                checkbox.checked = true;
+              }
+            } else {
+              // Mode enseignant: affichage seul, checkboxes désactivées
+              if (a.est_assigne_a_cet_enseignant) {
+                checkbox.checked = true;
+              }
+              checkbox.disabled = true; // Toujours désactivé en mode enseignant
+            }
+            
+            // Gérer l'événement change pour attacher/détacher assistant
+            checkbox.addEventListener('change', function(e) {
+              if (!modeEC) {
+                e.preventDefault();
+                return; // Pas d'action si pas en mode EC
+              }
+              Attacher_ou_Detacher_Assistant(window.selectedECAlignId, a.mat_assistant, e.target.checked);
+            });
+            
+            divCheck.appendChild(checkbox);
+            tdAction.appendChild(divCheck);
+            
+            // ASSISTANT (nom complet)
+            const tdAssistant = document.createElement('td');
+            tdAssistant.classList.add('text-center', 'w-auto');
+            tdAssistant.textContent = a.nom_complet || `${a.Nom_agent || ''} ${a.Post_agent || ''} ${a.Prenom || ''}`.trim();
+            
+            // STATUT (titre académique + indicateur filière)
+            const tdStatut = document.createElement('td');
+            const statutText = a.titre_academique || '-';
+            const filiereIndicateur = estDeLaFiliere ? '🏠' : '🏢';
+            tdStatut.innerHTML = `${statutText} ${filiereIndicateur}`;
+            tdStatut.title = estDeLaFiliere ? 'Votre filière' : 'Autre filière';
+            
+            tr.appendChild(tdnum);
+            tr.appendChild(tdAction);
+            tr.appendChild(tdAssistant);
+            tr.appendChild(tdStatut);
+            
+            // Ajouter le menu contextuel pour afficher les infos de l'assistant
+            tr.addEventListener('contextmenu', function(event) {
+              afficherMenuContextuel(event, a);
+            });
+            
+            tbodyAssist.appendChild(tr);
+            j++;
+          });
+          
+          // Mettre à jour le badge selon le mode
+          const badgeAssistants = document.getElementById('badge_assistants');
+          if (badgeAssistants) {
+            if (modeEC) {
+              // Mode EC: afficher le nombre d'assistants attachés à cet EC
+              const attachesEC = assistants.filter(a => (a.est_attache_a_ec == 1 || a.est_attache_a_cet_ec == 1)).length;
+              badgeAssistants.textContent = `${attachesEC} EC`;
+            } else {
+              // Mode enseignant: afficher assignés / total de la filière
+              const assistantsFiliere = assistants.filter(a => 
+                (a.Id_filiere == idFiliereUser) || (a.Id_filiere === null)
+              );
+              const assignes = assistantsFiliere.filter(a => a.est_assigne_a_cet_enseignant).length;
+              badgeAssistants.textContent = `${assignes} / ${assistantsFiliere.length}`;
+            }
+          }
+        })
+        .catch(error => {
+          console.error('Erreur lors du chargement de la filière:', error);
+        });
+    })
+    .catch(error => {
+      console.error('Erreur lors du chargement des assistants:', error);
+    });
+  }
+  
+  
+  /*
+  *****************************************************************************************
+  ************  ATTACHER OU DÉTACHER UN ASSISTANT À UN EC *********************************
+  *****************************************************************************************
+  */
+  function Attacher_ou_Detacher_Assistant(id_ec_aligne, mat_assistant, attacher) {
+    const url = 'API_PHP/Attacher_Assistant_EC.php';
+    
+    fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id_ec_aligne: id_ec_aligne,
+        mat_assistant: attacher ? mat_assistant : null, // null pour détacher
+        id_annee_acad: cmb_annee_academique_aligne.value,
+        id_semestre: cmb_semestre_alignre.value,
+        code_prom: cmb_promotion_FAC.value
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.status === 'success') {
+        console.log(attacher ? 'Assistant attaché' : 'Assistant détaché');
+        // Recharger les assistants et les ECs pour refléter les changements
+        Charger_Assistants_Disponibles(true);
+        Affichage_ECs_Par_Filiere();
+      } else {
+        console.error('Erreur:', data.message);
+        alert('Erreur: ' + data.message);
+      }
+    })
+    .catch(error => {
+      console.error('Erreur lors de l\'attachement/détachement:', error);
+      alert('Erreur de communication avec le serveur');
+    });
+  }
   
   /*
   *****************************************************************************************
@@ -401,9 +701,9 @@ function Affichage_ECs_Par_Filiere()
   *****************************************************************************************
   */
 
-  function Ajouter_EC_Aligne(ec, mat_agent) 
+  function Ajouter_EC_Aligne(ec) 
   {
-    console.log("📝 Enregistrement EC - Matricule agent:", mat_agent, "- Matricule assistant:", mat_assistant_ || "null", "- ID EC:", ec);
+    
     var url = 'API_PHP/Ajout_EC_Aligne.php';
 
     const data = {
@@ -411,7 +711,7 @@ function Affichage_ECs_Par_Filiere()
         id_ec: ec,
         Id_Semestre: cmb_semestre_alignre.value,
         Code_Promotion: cmb_promotion_FAC.value,
-        Mat_agent: mat_agent,
+        Mat_agent: mat_agent_,
         Mat_assistant: mat_assistant_ || null
     };
     fetch(url, {
@@ -442,8 +742,7 @@ function Affichage_ECs_Par_Filiere()
 
 
 
-  function Supprimer_EC_Aligne(ec, mat_agent) {
-    console.log("🗑️ Suppression EC - Matricule agent:", mat_agent, "- Matricule assistant:", mat_assistant_ || "null", "- ID EC:", ec);
+  function Supprimer_EC_Aligne(ec) {
     var url = 'API_PHP/Supprimer_EC_Aligner.php';
 
     const data = {
@@ -451,7 +750,7 @@ function Affichage_ECs_Par_Filiere()
         id_ec: ec,
         Id_Semestre: cmb_semestre_alignre.value,
         Code_Promotion: cmb_promotion_FAC.value,
-        Mat_agent: mat_agent,
+        Mat_agent: mat_agent_,
         Mat_assistant: mat_assistant_ || null
     };
 
@@ -496,24 +795,29 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   });
   
-  // Empêcher le menu contextuel du navigateur sur le tableau
+  // Empêcher le menu contextuel du navigateur sur les tableaux
   const tableEnseignant = document.getElementById('table_aligne_enseignant');
   if (tableEnseignant) {
     tableEnseignant.addEventListener('contextmenu', function(e) {
       e.preventDefault();
     });
   }
+  
+  const tableAssistant = document.getElementById('table_aligne_assistant');
+  if (tableAssistant) {
+    tableAssistant.addEventListener('contextmenu', function(e) {
+      e.preventDefault();
+    });
+  }
 });
 
 // Fonction pour afficher le menu contextuel
-function afficherMenuContextuel(event, enseignantData) {
+function afficherMenuContextuel(event, enseignantData) 
+{
   event.preventDefault();
   event.stopPropagation();
   
   selectedEnseignant = enseignantData;
-  
-  console.log('🖱️ Menu contextuel ouvert pour l\'enseignant:', enseignantData.enseignant, '- Matricule:', enseignantData.mat_agent);
-  
   if (contextMenu) {
     contextMenu.style.display = 'block';
     contextMenu.style.left = event.pageX + 'px';
@@ -522,7 +826,8 @@ function afficherMenuContextuel(event, enseignantData) {
 }
 
 // Fonction pour afficher les informations de l'enseignant
-function afficherInfosEnseignant() {
+function afficherInfosEnseignant() 
+{
   if (!selectedEnseignant) {
     console.error('❌ Aucun enseignant sélectionné');
     return;
@@ -533,8 +838,6 @@ function afficherInfosEnseignant() {
     contextMenu.style.display = 'none';
   }
   
-  console.log('📋 Affichage des informations pour:', selectedEnseignant.enseignant);
-  console.log('✅ Données complètes:', selectedEnseignant);
   
   // Remplir les champs de la boîte de dialogue avec les données déjà disponibles
   document.getElementById('info_mat_agent').textContent = selectedEnseignant.mat_agent || '-';
