@@ -130,7 +130,7 @@
               class="form-control p-0 pe-2 fw-bolder text-center border ms-2"
               style="background-color:#273746;color:white; font-weight:bold;">
               
-                      <option value="rien" selected >Séléction Semestre</option>
+                      <option value='0' selected >Séléction Semestre</option>
                   <?php 
                     //$req="SELECT * from semestre ORDER BY semestre.Id_Semestre  ASC";
                     $req="
