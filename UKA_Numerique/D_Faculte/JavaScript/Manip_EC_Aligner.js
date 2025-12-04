@@ -19,6 +19,8 @@
   let verfi_=true;
   let enseignantSelected = false; // Flag pour vérifier si un enseignant est sélectionné
 
+
+
   // Les éléments du DOM sont initialisés seulement si la page contient
   // l'élément parent `div_gen_Aligne_Enseignant`. Cela évite que ce script lance des
   // getElementById() au top-level et retourne `null` quand il est inclus
@@ -146,6 +148,7 @@
                 // Ajouter l'événement de clic droit pour afficher le menu contextuel
                 tr.addEventListener("contextmenu", function (event) {
                   afficherMenuContextuel(event, infos);
+                 
                 });
                 
                 i++;
@@ -216,10 +219,10 @@ function Affichage_ECs_Par_Filiere()
         'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-        mat_agent: mat_agent_,
-        id_annee_acad: cmb_annee_academique_aligne.value,
-        id_semestre: cmb_semestre_alignre.value,
-        code_prom: cmb_promotion_FAC.value
+        mat_agent: (mat_agent_ === '' || mat_agent_ === undefined) ? null : mat_agent_,
+        id_annee_acad: (cmb_annee_academique_aligne.value === '' || cmb_annee_academique_aligne.value === undefined || cmb_annee_academique_aligne.value === 'rien') ? null : cmb_annee_academique_aligne.value,
+        id_semestre: (cmb_semestre_alignre.value === '' || cmb_semestre_alignre.value === undefined || cmb_semestre_alignre.value === 'rien') ? null : cmb_semestre_alignre.value,
+        code_prom: (cmb_promotion_FAC.value === '' || cmb_promotion_FAC.value === undefined || cmb_promotion_FAC.value === 'rien') ? null : cmb_promotion_FAC.value
     })
   })
   .then(response => response.json())
@@ -630,12 +633,12 @@ function Affichage_ECs_Par_Filiere()
     var url = 'API_PHP/Ajout_EC_Aligne.php';
 
     const data = {
-        idAnnee_Acad: cmb_annee_academique_aligne.value,
-        id_ec: ec,
-        Id_Semestre: cmb_semestre_alignre.value,
-        Code_Promotion: cmb_promotion_FAC.value,
-        Mat_agent: mat_agent_,
-        Mat_assistant: mat_assistant_ || null
+      idAnnee_Acad: (cmb_annee_academique_aligne.value === '' || cmb_annee_academique_aligne.value === undefined) ? null : cmb_annee_academique_aligne.value,
+      id_ec: ec,
+      Id_Semestre: (cmb_semestre_alignre.value === '' || cmb_semestre_alignre.value === undefined) ? null : cmb_semestre_alignre.value,
+      Code_Promotion: (cmb_promotion_FAC.value === '' || cmb_promotion_FAC.value === undefined) ? null : cmb_promotion_FAC.value,
+      Mat_agent: (mat_agent_ === '' || mat_agent_ === undefined) ? null : mat_agent_,
+      Mat_assistant: (mat_assistant_ === '' || mat_assistant_ === undefined) ? null : mat_assistant_
     };
     fetch(url, {
       method: 'POST',
@@ -669,12 +672,12 @@ function Affichage_ECs_Par_Filiere()
     var url = 'API_PHP/Supprimer_EC_Aligner.php';
 
     const data = {
-        idAnnee_Acad: cmb_annee_academique_aligne.value,
-        id_ec: ec,
-        Id_Semestre: cmb_semestre_alignre.value,
-        Code_Promotion: cmb_promotion_FAC.value,
-        Mat_agent: mat_agent_,
-        Mat_assistant: mat_assistant_ || null
+      idAnnee_Acad: (cmb_annee_academique_aligne.value === '' || cmb_annee_academique_aligne.value === undefined) ? null : cmb_annee_academique_aligne.value,
+      id_ec: ec,
+      Id_Semestre: (cmb_semestre_alignre.value === '' || cmb_semestre_alignre.value === undefined) ? null : cmb_semestre_alignre.value,
+      Code_Promotion: (cmb_promotion_FAC.value === '' || cmb_promotion_FAC.value === undefined) ? null : cmb_promotion_FAC.value,
+      Mat_agent: (mat_agent_ === '' || mat_agent_ === undefined) ? null : mat_agent_,
+      Mat_assistant: (mat_assistant_ === '' || mat_assistant_ === undefined) ? null : mat_assistant_
     };
 
     fetch(url, {

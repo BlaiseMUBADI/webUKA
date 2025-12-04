@@ -39,7 +39,7 @@
     
     <section class="home-section " style="height: auto;">
         
-        <?php require_once 'D_Generale/Profil_Sec_Administratif.php'; ?>
+        <!--?php require_once 'D_Generale/Profil_Sec_Administratif.php'; ?-->
 
         <div class="home-content me-3 ms-3 "id=""style="height:auto;"  >
             <div class="sales-boxes m-0 p-0 " >

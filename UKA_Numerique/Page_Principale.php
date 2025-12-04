@@ -41,7 +41,7 @@
   <body style="height:auto; " >
       <?php
          
-          include("../../Connexion_BDD/Connexion_1.php");
+          include("../Connexion_BDD/Connexion_1.php");
           
           //include("D_Generale/Connexion.php");
           ?>
