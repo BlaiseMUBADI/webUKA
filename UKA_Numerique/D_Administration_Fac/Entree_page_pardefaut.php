@@ -2,7 +2,7 @@
 
 <section class="home-section" style="height: 100%;">
       <?php
-         require_once '../D_Generale/Profil_User_Connecter.php';
+         require_once 'Profil_Admin_Fac.php';
       ?>
   <div class="home-content me-3 ms-3" >
 
@@ -12,7 +12,4 @@
       </div>
     </div>   
   </div>
-  
 </section>
-    
-       

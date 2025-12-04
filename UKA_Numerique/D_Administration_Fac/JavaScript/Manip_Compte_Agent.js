@@ -315,11 +315,10 @@ function Recuperation_Compte_agent(mat_ag,tr1)
   // Ce bout de code permet de faire une selection de ligne en fixant une couleur de fond
   var tab_agent = document.getElementById("table_agent");
   var rows = tab_agent.getElementsByTagName('tr');  
-  for(var j = 0; j < rows.length; j++) 
-  {
-    if(j!=0) rows[j].style.backgroundColor = '';
+  for(var j = 0; j < rows.length; j++) {
+    if(j!=0) rows[j].classList.remove('selected');
   }
-  tr1.style.backgroundColor = 'red';
+  tr1.classList.add('selected');
   tr_selectionner=tr1;
 
   mat_agent=mat_ag;
