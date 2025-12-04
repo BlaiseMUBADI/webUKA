@@ -11,11 +11,8 @@
     <!------------------ CE BLOC CONCERNE L'AFFICHAGE DES UES et ECS -------------------------------->
     <!----------------------------------------------------------------------------------------------->
 
-    <div class="sales-boxes m-0 p-3 mt-3 border" 
-          style="background-color:rgb(39,55,70);">
-
-      <div class="container p-0 m-0" 
-          style="width: 48%; float: left; height:650px;">
+    <div class="sales-boxes m-0 p-3 mt-3 border" style="background-color:rgb(39,55,70);">
+      <div class="container p-0 m-0" style="width: 48%; float: left; height:650px;">
         
         <div class="table-responsive small p-0 m-0" style="width: 100%; height:590px; overflow-y:auto; overflow-x:auto;">
           <table  class="tab1 table-hover table-striped" id="table_ues" style="width:100%; border-collapse: collapse;">              

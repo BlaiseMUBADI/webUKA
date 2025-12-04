@@ -41,7 +41,19 @@ document.addEventListener("DOMContentLoaded",function(event)
       boite_alert_G_jury_UE = document.getElementById('boite_alert_g_jury');
       boite_Action_G_Jury = document.getElementById('boite_confirmaion_action_Jury');
 
-      Affichage_agent();
+      //Affichage_agent();
+      Affichage_Jurys();
+
+      // Actualiser la liste des jurys si une année académique est sélectionnée
+      const cmb_annee_academique = container.querySelector('#id_fac_annee') || document.getElementById('id_fac_annee');
+      if (cmb_annee_academique) {
+        cmb_annee_academique.addEventListener('change', function() {
+          if (cmb_annee_academique.value && cmb_annee_academique.value !== 'rien') {
+            Affichage_Jurys();
+          }
+        });
+      }
+      
 
       if (cmb_fontion_compte_agent !== null) {
         cmb_fontion_compte_agent.addEventListener('change', (event) => {
@@ -82,7 +94,7 @@ document.addEventListener("DOMContentLoaded",function(event)
 /**********************************************************************************************
 ******************* CE CODE PERMET D'AFFICHER TOUT LES AGENT DE L'UNIVERSITE DANS LE tab_agent 
 ***************************************************************************************/
-function Affichage_agent()
+/*function Affichage_agent()
 {
 
    
@@ -192,7 +204,7 @@ function Affichage_agent()
 /**********************************************************************************************
 ******************* CE CODE PERMET D'AFFICHER LE COMPTE D'UN AGENT SELECTIONNER *****************
 ***************************************************************************************/
-
+/*
 function Recuperation_Compte_agent()
 {
   // Ce bout de code permet de faire une selection de ligne en fixant une couleur de fond
@@ -288,7 +300,7 @@ function Recuperation_Compte_agent()
 
          
           // Ici on crée deux boutons pour l'impressionet la suppression
-          // On commence par créer un contenaire qui vas accceuillir nos deux poubont
+          // On commence par créer un contenaire qui vas accieuillir nos deux poubont
 
           var div = document.createElement("div");
           div.classList.add("row", "text-center", "p-0", "m-0");
@@ -340,7 +352,7 @@ function Recuperation_Compte_agent()
 
 
 
-}
+}*/
 
 
 /*************************************************************************************
@@ -499,6 +511,158 @@ function Suppression_compte_agent(mat_agent,
     
   }
 
+  function Ouvrir_Form_Jury() {
+    var dialog = document.getElementById('boite_Form_Jury');
+    if (dialog) dialog.showModal();
+  }
+  function Fermer_Form_Jury() {
+    var dialog = document.getElementById('boite_Form_Jury');
+    if (dialog) dialog.close();
+  }
+
+
+
+  function Ajouter_Jury() 
+  {
+    var nom_jury = document.getElementById('jury_nom')?.value || '';
+    var date_jury = document.getElementById('jury_date')?.value || '';
+    var code_promotion = document.getElementById('jury_promotion')?.value || '';
+    var id_annee_acad = document.getElementById('id_fac_annee')?.value || '';
+
+    if (!nom_jury || !date_jury || !code_promotion || code_promotion === 'rien' || !id_annee_acad) {
+      Ouvrir_Boite_Alert_G_Jury('Veuillez remplir tous les champs, sélectionner une promotion et une année académique.');
+      return;
+    }
+
+    var data = {
+      nom_jury: nom_jury,
+      date_jury: date_jury,
+      code_promotion: code_promotion,
+      id_annee_acad: id_annee_acad
+    };
+
+    // Debug : afficher les données envoyées
+    console.log('[AJOUT JURY] Données envoyées :', data);
+
+    fetch('API_PHP/Ajout_Nouvel_Jury.php', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    })
+    .then(async response => {
+      // Debug : afficher la réponse brute
+      const text = await response.text();
+      console.log('[AJOUT JURY] Réponse brute :', text);
+      let json;
+      try {
+        json = JSON.parse(text);
+      } catch (e) {
+        console.error('[AJOUT JURY] Erreur de parsing JSON :', e, text);
+        Ouvrir_Boite_Alert_G_Jury('Erreur de parsing JSON : ' + e);
+        return;
+      }
+      if (json.success) {
+        Ouvrir_Boite_Alert_G_Jury('Jury ajouté avec succès !');
+        Affichage_Jurys();
+        Fermer_Form_Jury();
+        
+      } else {
+        Ouvrir_Boite_Alert_G_Jury('Erreur : ' + json.message);
+        // Debug : afficher la trace si présente
+        if (json.trace) {
+          console.error('[AJOUT JURY] Trace erreur PHP :', json.trace);
+        }
+      }
+    })
+    .catch(error => {
+      console.error('[AJOUT JURY] Erreur de connexion à l’API :', error);
+      Ouvrir_Boite_Alert_G_Jury('Erreur de connexion à l’API : ' + error);
+    });
+  }
 
 
   
+  function Affichage_Jurys() {
+    var tab_jury = document.getElementById("table_jury");
+    let tbody = tab_jury.querySelector("tbody");
+    if (!tbody) {
+      tbody = document.createElement("tbody");
+      tab_jury.appendChild(tbody);
+    }
+    tbody.innerHTML = "";
+
+    // Variable pour garder la ligne sélectionnée
+    let tr_selectionner = null;
+
+    var id_annee_acad = document.getElementById('id_fac_annee')?.value || '';
+    var url = 'API_PHP/Liste_Jurys.php';
+    var i = 1;
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        id_annee_acad: id_annee_acad
+      })
+    })
+      .then(response => response.json())
+      .then(data => {
+        data.forEach(jury => {
+          var tr = document.createElement("tr");
+          var tdnum = document.createElement("td");
+          tdnum.classList.add("text-center");
+          tdnum.style.position = "relative";
+          tdnum.style.padding = "8px";
+          tdnum.textContent = i;
+
+          var td_libele = document.createElement("td");
+          td_libele.textContent = jury.nom_jury;
+          td_libele.style.padding = "8px";
+          var td_promotion = document.createElement("td");
+          td_promotion.textContent = jury.promotion;
+          td_promotion.style.padding = "8px";
+          var td_date = document.createElement("td");
+          td_date.textContent = jury.date_jury;
+          td_date.style.padding = "8px";
+
+          tr.appendChild(tdnum);
+          tr.appendChild(td_libele);
+          tr.appendChild(td_promotion);
+          tr.appendChild(td_date);
+
+          // Ajout de l'événement de sélection de ligne
+          tr.addEventListener("click", function() {
+            // Retirer la sélection sur toutes les lignes
+            Array.from(tbody.querySelectorAll("tr")).forEach(row => {
+              row.classList.remove("selected");
+              let icon = row.querySelector('.fa-check');
+              if (icon) icon.remove();
+            });
+            // Ajouter la sélection sur la ligne cliquée
+            tr.classList.add("selected");
+            tr_selectionner = tr;
+            // Ajouter une icône sur la première cellule
+            let checkIcon = document.createElement("i");
+            checkIcon.className = "fas fa-check text-success ms-2";
+            checkIcon.style.position = "absolute";
+            checkIcon.style.right = "4px";
+            checkIcon.style.top = "50%";
+            checkIcon.style.transform = "translateY(-50%)";
+            tdnum.appendChild(checkIcon);
+          });
+
+          tbody.appendChild(tr);
+          i++;
+        });
+      })
+      .catch(error => {
+        console.log("Erreur lors de la récupération des jurys : " + error);
+      });
+    tab_jury.classList.add("table-striped");
+}
+
+
+
