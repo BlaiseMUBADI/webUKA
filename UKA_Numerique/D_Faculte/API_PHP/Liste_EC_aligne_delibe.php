@@ -13,7 +13,7 @@ $id_semestre = $data['id_semestre'];
 $con->beginTransaction();
 
 try {
-    $sql = "CALL Liste_EC_Aligne_Delibe(:promo_code, :annee_acad,:id_semestre)";
+    $sql = "CALL Liste_EC_aligner_delibee(:promo_code, :annee_acad,:id_semestre)";
     $stmt = $con->prepare($sql);
 
     $stmt->bindParam(':promo_code', $promotion);

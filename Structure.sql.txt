@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 9.1.0, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.2.0, for Win64 (x86_64)
 --
 -- Host: localhost    Database: bdd_uka
 -- ------------------------------------------------------
--- Server version	9.1.0
+-- Server version	8.2.0
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -1068,7 +1068,7 @@ CREATE TABLE `t_jury_deliberation` (
   KEY `Code_Promotion` (`Code_Promotion`),
   CONSTRAINT `t_jury_deliberation_ibfk_1` FOREIGN KEY (`idAnnee_Acad`) REFERENCES `annee_academique` (`idAnnee_Acad`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `t_jury_deliberation_ibfk_2` FOREIGN KEY (`Code_Promotion`) REFERENCES `promotion` (`Code_Promotion`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1083,13 +1083,17 @@ CREATE TABLE `t_membre_jury` (
   `ID_jury` int NOT NULL,
   `Mat_agent` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,
   `role` enum('Président','Secrétaire','Membre') DEFAULT 'Membre',
+  `Login` varchar(50) DEFAULT NULL,
+  `Mot_passe` varchar(255) DEFAULT NULL,
+  `Statut` enum('Actif','Inactif') DEFAULT 'Actif',
   `date_ajout` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`ID_jury_membre`),
+  UNIQUE KEY `unique_login` (`Login`),
   KEY `ID_jury` (`ID_jury`),
   KEY `Mat_agent` (`Mat_agent`),
   CONSTRAINT `t_membre_jury_ibfk_1` FOREIGN KEY (`ID_jury`) REFERENCES `t_jury_deliberation` (`ID_jury`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `t_membre_jury_ibfk_2` FOREIGN KEY (`Mat_agent`) REFERENCES `agent` (`Mat_agent`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1176,7 +1180,7 @@ CREATE TABLE `unite_enseignement` (
 --
 -- Dumping routines for database 'bdd_uka'
 --
-/*!50003 DROP PROCEDURE IF EXISTS `Liste_Assistants_Disponibles` */;
+/*!50003 DROP PROCEDURE IF EXISTS `Ajouter_Membre_Jury` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
@@ -1186,283 +1190,348 @@ CREATE TABLE `unite_enseignement` (
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-CREATE DEFINER=`blaise`@`%` PROCEDURE `Liste_Assistants_Disponibles`(
+CREATE DEFINER=`blaise`@`%` PROCEDURE `Ajouter_Membre_Jury`(
 
-    IN p_Mat_agent VARCHAR(20),      -- Matricule de l'enseignant sélectionné (celui qui fait la demande)
+    IN p_id_jury INT,
 
-    IN p_id_ec_aligne INT,           -- ID de l'EC aligné (optionnel, utilisé pour mode EC spécifique)
+    IN p_mat_agent VARCHAR(50),
 
-    IN p_idAnnee_Acad INT,           -- Année académique (filtre sur l'année)
+    IN p_role ENUM('Président','Secrétaire','Membre'),
 
-    IN p_Id_Semestre INT,            -- Semestre (filtre sur le semestre)
+    IN p_login VARCHAR(50),
 
-    IN p_Code_Promotion VARCHAR(10), -- Code promotion (filtre sur la promotion)
+    IN p_mot_passe VARCHAR(255),
 
-    IN p_id_filiere INT              -- ID filière pour prioriser les assistants de la même filière
+    IN p_statut ENUM('Actif', 'Inactif'),
+
+    OUT p_success BOOLEAN,
+
+    OUT p_message VARCHAR(255),
+
+    OUT p_id_membre INT
 
 )
 BEGIN
 
+    DECLARE v_count INT DEFAULT 0;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+
+    BEGIN
+
+        SET p_success = FALSE;
+
+        SET p_message = 'Erreur lors de l\'ajout du membre au jury.';
+
+        SET p_id_membre = NULL;
+
+        ROLLBACK;
+
+    END;
+
+
+
+    START TRANSACTION;
+
+
+
+    -- Initialiser les valeurs de sortie
+
+    SET p_success = FALSE;
+
+    SET p_message = '';
+
+    SET p_id_membre = NULL;
+
+
+
+    -- Vérifier que toutes les données nécessaires sont présentes
+
+    IF p_id_jury IS NULL OR p_mat_agent IS NULL OR p_role IS NULL THEN
+
+        SET p_message = 'Données manquantes : id_jury, mat_agent et role sont requis.';
+
+        ROLLBACK;
+
+    ELSE
+
+        -- Vérifier si le membre existe déjà dans ce jury
+
+        SELECT COUNT(*) INTO v_count 
+
+        FROM t_membre_jury 
+
+        WHERE ID_jury = p_id_jury AND Mat_agent = p_mat_agent;
+
+
+
+        IF v_count > 0 THEN
+
+            SET p_message = 'Cet agent est déjà membre de ce jury.';
+
+            ROLLBACK;
+
+        ELSE
+
+            -- Si Président ou Secrétaire, vérifier que login et password sont fournis
+
+            IF (p_role = 'Président' OR p_role = 'Secrétaire') AND (p_login IS NULL OR p_login = '' OR p_mot_passe IS NULL OR p_mot_passe = '') THEN
+
+                SET p_message = 'Le login et le mot de passe sont obligatoires pour les Présidents et Secrétaires.';
+
+                ROLLBACK;
+
+            ELSE
+
+                -- Vérifier que le login n'est pas déjà utilisé (si fourni)
+
+                IF p_login IS NOT NULL AND p_login != '' THEN
+
+                    SELECT COUNT(*) INTO v_count 
+
+                    FROM t_membre_jury 
+
+                    WHERE Login = p_login;
+
+
+
+                    IF v_count > 0 THEN
+
+                        SET p_message = 'Ce login est déjà utilisé par un autre membre.';
+
+                        ROLLBACK;
+
+                    ELSE
+
+                        -- Insérer avec Login et Mot_passe (Président ou Secrétaire)
+
+                        INSERT INTO t_membre_jury 
+
+                        (ID_jury, Mat_agent, role, Login, Mot_passe, Statut, date_ajout) 
+
+                        VALUES 
+
+                        (p_id_jury, p_mat_agent, p_role, p_login, p_mot_passe, p_statut, NOW());
+
+
+
+                        SET p_id_membre = LAST_INSERT_ID();
+
+                        SET p_success = TRUE;
+
+                        SET p_message = 'Membre ajouté avec succès au jury.';
+
+                        COMMIT;
+
+                    END IF;
+
+                ELSE
+
+                    -- Insérer sans Login et Mot_passe (Membre simple)
+
+                    INSERT INTO t_membre_jury 
+
+                    (ID_jury, Mat_agent, role, date_ajout) 
+
+                    VALUES 
+
+                    (p_id_jury, p_mat_agent, p_role, NOW());
+
+
+
+                    SET p_id_membre = LAST_INSERT_ID();
+
+                    SET p_success = TRUE;
+
+                    SET p_message = 'Membre ajouté avec succès au jury.';
+
+                    COMMIT;
+
+                END IF;
+
+            END IF;
+
+        END IF;
+
+    END IF;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `Ajout_Nouvel_Jury` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
+DELIMITER ;;
+CREATE DEFINER=`blaise`@`%` PROCEDURE `Ajout_Nouvel_Jury`(IN `p_Libelle_jury` TEXT, IN `p_Date_deliberation` DATE, IN `p_Code_Promotion` VARCHAR(10), IN `p_idAnnee_Acad` INT)
+BEGIN
+    INSERT INTO t_jury_deliberation (
+        Libelle_jury,
+        Date_délibération,
+        Code_Promotion,
+        idAnnee_Acad
+    ) VALUES (
+        p_Libelle_jury,
+        p_Date_deliberation,
+        p_Code_Promotion,
+        p_idAnnee_Acad
+    );
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `Liste_Assistants_Disponibles` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
+DELIMITER ;;
+CREATE DEFINER=`blaise`@`%` PROCEDURE `Liste_Assistants_Disponibles`(IN `p_Mat_agent` VARCHAR(20), IN `p_id_ec_aligne` INT, IN `p_idAnnee_Acad` INT, IN `p_Id_Semestre` INT, IN `p_Code_Promotion` VARCHAR(10), IN `p_id_filiere` INT)
+BEGIN
     SELECT 
-
         ag.Mat_agent AS mat_assistant,         -- Matricule de l'assistant
-
         ag.Nom_agent,                         -- Nom de l'assistant
-
         ag.Post_agent,                        -- Post-nom de l'assistant
-
         ag.Prenom,                            -- Prénom de l'assistant
-
         CONCAT(ag.Nom_agent, ' ', ag.Post_agent, ' ', ag.Prenom) AS nom_complet, -- Nom complet formaté
-
         ag.Grade AS titre_academique,         -- Grade (ASS1/ASS2)
-
         ag.Domaine,                           -- Domaine de compétence
-
         ag.Mail,                              -- Email de l'assistant
-
         ag.Tel,                               -- Téléphone de l'assistant
-
         ag.Id_filiere,                        -- Filière de l'assistant (sert au tri prioritaire)
-
         
-
         -- Vérifie si l'assistant est attaché à l'EC sélectionné (mode EC)
-
         CASE 
-
             WHEN p_id_ec_aligne IS NOT NULL AND eca_specific.Mat_assistant = ag.Mat_agent THEN TRUE
-
             ELSE FALSE
-
         END AS est_attache_a_cet_ec,
-
         
-
         -- Vérifie si l'assistant travaille avec l'enseignant sélectionné
-
         -- (ligne présente dans element_constitutifs_aligne avec Mat_agent = p_Mat_agent)
-
         CASE 
-
             WHEN eca_enseignant.Mat_assistant IS NOT NULL THEN TRUE
-
             ELSE FALSE
-
         END AS est_assigne_a_cet_enseignant,
-
         
-
         -- Vérifie si l'assistant est pris par n'importe quel enseignant (globalement)
-
         -- (ligne présente dans element_constitutifs_aligne pour cet assistant, peu importe l'enseignant)
-
         CASE 
-
             WHEN eca_global.Mat_assistant IS NOT NULL THEN TRUE
-
             ELSE FALSE
-
         END AS est_assigne_globalement,
-
         
-
         -- Vérifie si l'assistant est actif dans l'année académique
-
         CASE 
-
             WHEN eca_annee.Mat_assistant IS NOT NULL THEN TRUE
-
             ELSE FALSE
-
         END AS est_assigne_dans_annee,
-
         
-
         -- Nombre d'ECs où l'assistant travaille avec l'enseignant sélectionné
-
         COALESCE(COUNT(DISTINCT eca_enseignant.id_ec_aligne), 0) AS nombre_ecs_avec_enseignant,
-
         
-
         -- Nombre total d'ECs assignés à cet assistant dans le semestre/année/promotion
-
         (SELECT COUNT(DISTINCT id_ec_aligne) 
-
          FROM element_constitutifs_aligne 
-
          WHERE Mat_assistant = ag.Mat_agent
-
          AND idAnnee_Acad = p_idAnnee_Acad
-
          AND Code_Promotion = p_Code_Promotion) AS nombre_ecs_total,
-
         
-
         -- Calcul de la priorité d'affichage (ordre_tri) selon la filière et le statut
-
         -- 1: Ma filière + déjà assigné à moi/EC
-
         -- 2: Ma filière + libre
-
         -- 3: Ma filière + pris par autre
-
         -- 4: Autre filière + assigné à moi/EC
-
         -- 5: Autre filière + libre
-
         -- 6: Autre filière + pris
-
         -- 7: Id_filiere NULL (toujours à la fin)
-
         CASE 
-
             -- Priorité 7: Id_filiere NULL (toujours à la fin)
-
             WHEN ag.Id_filiere IS NULL THEN 7
-
             -- Priorité 1: Assistant de la filière ET assigné à l'enseignant/EC
-
             WHEN ag.Id_filiere = p_id_filiere 
-
                  AND (eca_enseignant.Mat_assistant = ag.Mat_agent 
-
                       OR (p_id_ec_aligne IS NOT NULL AND eca_specific.Mat_assistant = ag.Mat_agent)) THEN 1
-
             -- Priorité 2: Assistant de la filière ET libre
-
             WHEN ag.Id_filiere = p_id_filiere 
-
                  AND eca_global.Mat_assistant IS NULL THEN 2
-
             -- Priorité 3: Assistant de la filière MAIS pris par autre
-
             WHEN ag.Id_filiere = p_id_filiere 
-
                  AND eca_global.Mat_assistant IS NOT NULL THEN 3
-
             -- Priorité 4: Assistant d'autre filière ET assigné
-
             WHEN eca_enseignant.Mat_assistant = ag.Mat_agent 
-
                  OR (p_id_ec_aligne IS NOT NULL AND eca_specific.Mat_assistant = ag.Mat_agent) THEN 4
-
             -- Priorité 5: Assistant d'autre filière ET libre
-
             WHEN eca_global.Mat_assistant IS NULL THEN 5
-
             -- Priorité 6: Assistant d'autre filière ET pris
-
             ELSE 6
-
         END AS ordre_tri
-
         
-
     FROM 
-
         agent ag   -- Table principale des agents (assistants)
-
     
-
     -- LEFT JOIN pour EC spécifique (si p_id_ec_aligne fourni)
-
     -- Permet de savoir si l'assistant est attaché à l'EC sélectionné
-
     LEFT JOIN 
-
         element_constitutifs_aligne eca_specific
-
         ON ag.Mat_agent = eca_specific.Mat_assistant
-
         AND eca_specific.id_ec_aligne = p_id_ec_aligne
-
     
-
     -- LEFT JOIN pour les ECs de l'enseignant actuel
-
     -- Permet de savoir si l'assistant travaille avec l'enseignant sélectionné
-
     LEFT JOIN 
-
         element_constitutifs_aligne eca_enseignant
-
         ON ag.Mat_agent = eca_enseignant.Mat_assistant
-
         AND eca_enseignant.Mat_agent = p_Mat_agent
-
         AND eca_enseignant.idAnnee_Acad = p_idAnnee_Acad
-
         AND eca_enseignant.Code_Promotion = p_Code_Promotion
-
     
-
     -- LEFT JOIN pour vérifier assignation globale
-
     -- Permet de savoir si l'assistant est pris par n'importe quel enseignant
-
     LEFT JOIN 
-
         element_constitutifs_aligne eca_global
-
         ON ag.Mat_agent = eca_global.Mat_assistant
-
         AND eca_global.idAnnee_Acad = p_idAnnee_Acad
-
         AND eca_global.Code_Promotion = p_Code_Promotion
-
     
-
     -- LEFT JOIN pour vérifier assignation dans l'année
-
     -- Permet de savoir si l'assistant est actif dans l'année académique
-
     LEFT JOIN 
-
         element_constitutifs_aligne eca_annee
-
         ON ag.Mat_agent = eca_annee.Mat_assistant
-
         AND eca_annee.idAnnee_Acad = p_idAnnee_Acad
-
     
-
     WHERE 
-
         UPPER(ag.Grade) LIKE '%ASS%'   -- On prend tous les assistants dont le grade contient 'ASS' (ex: ASS1, ASS2, ASSISTANT, ASSISTANT DE RECHERCHE)
-
     
-
     GROUP BY 
-
         ag.Mat_agent, ag.Nom_agent, ag.Post_agent, ag.Prenom, 
-
         ag.Grade, ag.Domaine, ag.Mail, ag.Tel, ag.Id_filiere,
-
         est_attache_a_cet_ec,
-
         est_assigne_a_cet_enseignant,
-
         est_assigne_globalement,
-
         est_assigne_dans_annee,
-
         ordre_tri
-
     -- On regroupe par toutes les colonnes pour éviter les ambiguïtés
-
     
-
     ORDER BY 
-
         ordre_tri ASC,        -- D'abord par priorité filière + statut
-
         ag.Grade ASC,         -- Puis ASS1 avant ASS2
-
         ag.Nom_agent ASC;     -- Puis alphabétique
-
     -- L'ordre d'affichage permet de mettre en avant les assistants les plus pertinents
-
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1657,63 +1726,37 @@ DELIMITER ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = utf8mb4 */ ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = '' */ ;
+/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
 CREATE DEFINER=`blaise`@`%` PROCEDURE `Liste_Enseignants_Aligner`(IN `p_idfiliere` INT)
 BEGIN
-
     SELECT
-
         agent.Mat_agent AS mat_agent,
-
         CONCAT(agent.Nom_agent, ' ', agent.Post_agent, ' ', agent.Prenom) AS enseignant,
-
         agent.Sexe AS sexe,
-
         agent.Niveau_Etude AS niveau_etude,
-
         categorie.Libelle AS categorie,
-
         agent.Tel AS phone,
-
         agent.Mail AS email,
-
         agent.AdressePhysique AS adresse,
-
         agent.Grade AS titre_academique,
-
         agent.Domaine_etude AS domaine,
-
         agent.Institution_attachee AS institut_attache,
-
         filiere.IdFiliere AS id_filiere,
-
         filiere.Libelle_Filiere AS filiere
-
     FROM
-
         agent
-
     JOIN
-
         filiere ON agent.Id_filiere = filiere.IdFiliere
-
     JOIN
-
         categorie ON agent.IdCategorie=categorie.IdCategorie
-
     ORDER BY
-
         CASE WHEN filiere.IdFiliere = p_idfiliere THEN 1 ELSE 2 END,
-
         agent.Nom_agent,
-
         agent.Post_agent,
-
         agent.Prenom;
-
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1942,65 +1985,38 @@ DELIMITER ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = utf8mb4 */ ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = '' */ ;
+/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
 CREATE DEFINER=`blaise`@`%` PROCEDURE `Nouvel_EC_Aligne`(IN `p_idAnnee_Acad` INT, IN `p_id_ec` INT, IN `p_Id_Semestre` INT, IN `p_Code_Promotion` VARCHAR(10), IN `p_Mat_agent` VARCHAR(20), IN `p_Mat_assistant` VARCHAR(20))
 BEGIN
-
     IF NOT EXISTS (
-
         SELECT 1 FROM element_constitutifs_aligne
-
         WHERE idAnnee_Acad = p_idAnnee_Acad
-
           AND id_ec        = p_id_ec
-
           AND Id_Semestre  = p_Id_Semestre
-
           AND Code_Promotion = p_Code_Promotion
-
           AND Mat_agent    = p_Mat_agent
-
           AND ( (Mat_assistant IS NULL AND p_Mat_assistant IS NULL)
-
                 OR Mat_assistant = p_Mat_assistant )
-
     ) THEN
-
         INSERT INTO element_constitutifs_aligne (
-
             idAnnee_Acad,
-
             id_ec,
-
             Id_Semestre,
-
             Code_Promotion,
-
             Mat_agent,
-
             Mat_assistant
-
         ) VALUES (
-
             p_idAnnee_Acad,
-
             p_id_ec,
-
             p_Id_Semestre,
-
             p_Code_Promotion,
-
             p_Mat_agent,
-
             p_Mat_assistant
-
         );
-
     END IF;
-
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -2121,29 +2137,20 @@ DELIMITER ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = utf8mb4 */ ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = '' */ ;
+/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
 CREATE DEFINER=`blaise`@`%` PROCEDURE `Supprimer_EC_Aligne`(IN `p_idAnnee_Acad` INT, IN `p_id_ec` INT, IN `p_Id_Semestre` INT, IN `p_Code_Promotion` VARCHAR(10), IN `p_Mat_agent` VARCHAR(20), IN `p_Mat_assistant` VARCHAR(20))
 BEGIN
-
     DELETE FROM element_constitutifs_aligne
-
     WHERE idAnnee_Acad = p_idAnnee_Acad
-
       AND id_ec        = p_id_ec
-
       AND Id_Semestre  = p_Id_Semestre
-
       AND Code_Promotion = p_Code_Promotion
-
       AND Mat_agent    = p_Mat_agent
-
       AND ( (Mat_assistant IS NULL AND p_Mat_assistant IS NULL)
-
             OR Mat_assistant = p_Mat_assistant );
-
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -2180,4 +2187,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-12-04 10:04:43
+-- Dump completed on 2025-12-04 23:09:36

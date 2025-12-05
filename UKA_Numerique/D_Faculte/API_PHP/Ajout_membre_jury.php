@@ -1,93 +1,71 @@
 <?php
-    session_start();
-    include("../../../Connexion_BDD/Connexion_1.php");
 
-    
-    $mat_agent=$_POST['mat_agent'];
-    $login=$_POST['login'];
-    $pawwsord=$_POST['password'];
-    $password_hacher=password_hash($pawwsord,PASSWORD_BCRYPT);
+session_start();
+include("../../../Connexion_BDD/Connexion_1.php");
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
-    $etat=$_POST['etat_compte'];
-    $fonction_compte=$_POST['fonction_membre'];
-    $date_creation=$_POST['date_creation'];
-    $code_prom=$_POST['code_prom'];
-    $id_annee_acad=$_POST['id_annee_acad'];
-    
-    $con->beginTransaction();
-    //$con->exec("SET FOREIGN_KEY_CHECKS = 0");
-    
-    
+/*header('Content-Type: application/json');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: POST');
+header('Access-Control-Allow-Headers: Content-Type');*/
 
-    
-    try
-    {
-        echo " filiere est ".$code_prom;
-        if($code_prom==="null")
-        {
-            echo "je suis dans if";
 
-            $sql_insert = "INSERT INTO compte_agent
-                (Mat_agent
-                ,Login
-                ,Mot_passe
-                ,Etat
-                ,Categorie
-                ,Date_creation,code_prom) 
-                VALUES (:mat,:logi,:pswd,:etat,:fonction,:date_creation,:code_prom)";
-        
-            $stmt = $con->prepare($sql_insert);
-            
-            $stmt->bindParam(':mat', $mat_agent);
-            $stmt->bindParam(':logi', $login);
-            $stmt->bindParam(':pswd', $password_hacher);
-            $stmt->bindParam(':etat', $etat);
-            $stmt->bindParam(':fonction', $fonction_compte);
-            $stmt->bindParam(':date_creation', $date_creation);
-            $stmt->bindValue(':code_prom', null,PDO::PARAM_STR);
+$json_data = file_get_contents('php://input');
+$data = json_decode($json_data, true);
 
-        }
-        else
-        {
-        
-            echo "je suis dans elese";
-        $sql_insert = "INSERT INTO compte_agent
-                (Mat_agent
-                ,Login
-                ,Mot_passe
-                ,Etat
-                ,Categorie
-                ,Date_creation,code_prom) 
-                VALUES (:mat,:logi,:pswd,:etat,:fonction,:date_creation,:code_prom)";
-            
-            $stmt = $con->prepare($sql_insert);
-            
-            $stmt->bindParam(':mat', $mat_agent);
-            $stmt->bindParam(':logi', $login);
-            $stmt->bindParam(':pswd', $password_hacher);
-            $stmt->bindParam(':etat', $etat);
-            $stmt->bindParam(':fonction', $fonction_compte);
-            $stmt->bindParam(':date_creation', $date_creation);
-            $stmt->bindParam(':code_prom', $code_prom);
-        }
-    
+// Initialiser la réponse
+$response = [
+    'success' => false,
+    'message' => ''
+];
 
-        
-        if($stmt->execute()) echo "\n\nOk\n\n";
-        else echo "\n\nimpossible de faire cet enregistrment \n\n";
-        $con->commit();
-        //$con->exec("SET FOREIGN_KEY_CHECKS = 1");
-    } 
-    catch(PDOException $e) {
-        // Annuler la transaction en cas d'erreur
-        $con->rollback();
-        echo "Erreur lors de l'insertion: " . $e->getMessage();
-        ///$con->exec("SET FOREIGN_KEY_CHECKS = 1");
+try {
+    // Récupérer les données
+    $id_jury = isset($data['id_jury']) ? $data['id_jury'] : null;
+    $mat_agent = isset($data['mat_agent']) ? $data['mat_agent'] : null;
+    $role = isset($data['role']) ? $data['role'] : null;
+    $login = isset($data['login']) && !empty($data['login']) ? $data['login'] : null;
+    $password = isset($data['password']) && !empty($data['password']) ? $data['password'] : null;
+    $statut = isset($data['statut']) ? $data['statut'] : 'Actif';
+
+    // Crypter le mot de passe avec bcrypt si fourni
+    $mot_passe_crypte = null;
+    if (!empty($password)) {
+        $mot_passe_crypte = password_hash($password, PASSWORD_BCRYPT);
     }
 
+    // Appeler la procédure stockée
+    $sql = "CALL Ajouter_Membre_Jury(:id_jury, :mat_agent, :role, :login, :mot_passe, :statut, @success, @message, @id_membre)";
+    $stmt = $con->prepare($sql);
+    
+    $stmt->bindParam(':id_jury', $id_jury, PDO::PARAM_INT);
+    $stmt->bindParam(':mat_agent', $mat_agent, PDO::PARAM_STR);
+    $stmt->bindParam(':role', $role, PDO::PARAM_STR);
+    $stmt->bindParam(':login', $login, PDO::PARAM_STR);
+    $stmt->bindParam(':mot_passe', $mot_passe_crypte, PDO::PARAM_STR);
+    $stmt->bindParam(':statut', $statut, PDO::PARAM_STR);
+    
+    $stmt->execute();
+    
+    // Récupérer les valeurs de sortie
+    $result = $con->query("SELECT @success AS success, @message AS message, @id_membre AS id_membre")->fetch(PDO::FETCH_ASSOC);
+    
+    $response['success'] = (bool)$result['success'];
+    $response['message'] = $result['message'];
+    
+    if ($response['success']) {
+        $response['id_membre'] = $result['id_membre'];
+    }
 
+} catch (Exception $e) {
+    $response['success'] = false;
+    $response['message'] = $e->getMessage();
+}
 
-
+// Envoyer la réponse JSON
+echo json_encode($response);
 ?>
 
 

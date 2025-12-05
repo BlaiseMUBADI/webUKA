@@ -84,6 +84,20 @@ async function Afficher_EC_aligne_delibe() {
   let tab_etudiants_aligne = await Liste_Etudiants();
   let tab_Cotes = await Liste_Cotes(cmb_semestre_encodage.value); // Renommer la variable locale
 
+  // Vérification que les données sont bien des tableaux
+  if (!Array.isArray(tab_ECs_aligne)) {
+    console.error("Erreur: tab_ECs_aligne n'est pas un tableau:", tab_ECs_aligne);
+    tab_ECs_aligne = [];
+  }
+  if (!Array.isArray(tab_etudiants_aligne)) {
+    console.error("Erreur: tab_etudiants_aligne n'est pas un tableau:", tab_etudiants_aligne);
+    tab_etudiants_aligne = [];
+  }
+  if (!Array.isArray(tab_Cotes)) {
+    console.error("Erreur: tab_Cotes n'est pas un tableau:", tab_Cotes);
+    tab_Cotes = [];
+  }
+
   let table_encodage = document.getElementById("table_encodage");
   while (table_encodage.firstChild) {
       table_encodage.removeChild(table_encodage.firstChild);
