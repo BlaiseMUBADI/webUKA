@@ -119,21 +119,19 @@ async function Afficher_EC_aligne_delibe() {
   var td1 = document.createElement("td");
   td1.rowSpan = 3;
   td1.textContent = "N°";
-  td1.classList.add("text-center", "header-fixed");
+  td1.classList.add("text-center");
+  td1.style = "background-color:midnightblue; color:white;"
 
   var td2 = document.createElement("td");
   td2.rowSpan = 3;
-  td2.textContent = "NOM, POST, PRÉNOM";
-  td2.classList.add("text-center", "header-fixed");
+  td2.textContent = "Mat & Nom ,Post, Prénom";
+  td2.classList.add("text-center");
+  td2.style = "background-color:midnightblue; color:white;"
 
   var td3 = document.createElement("td");
   td3.textContent = "EC";
-  td3.classList.add("text-center", "header-label");
-  td3.style.backgroundColor = "#2c3e50";
-  td3.style.color = "white";
-  td3.style.fontWeight = "700";
-  td3.style.fontSize = "14px";
-  td3.style.letterSpacing = "1px"
+  td3.classList.add("text-center");
+  td3.style = "background-color:midnightblue; color:white;"
 
   tr1.appendChild(td1);
   tr1.appendChild(td2);
@@ -141,20 +139,12 @@ async function Afficher_EC_aligne_delibe() {
 
   var td4 = document.createElement("td");
   td4.textContent = "CEC";
-  td4.classList.add("text-center", "header-label");
-  td4.style.backgroundColor = "#34495e";
-  td4.style.color = "white";
-  td4.style.fontWeight = "600";
-  td4.style.fontSize = "13px";
+  td4.classList.add("text-center");
   tr2.appendChild(td4);
 
   var td5 = document.createElement("td");
   td5.textContent = "MAX";
-  td5.classList.add("text-center", "header-label");
-  td5.style.backgroundColor = "#3498db";
-  td5.style.color = "white";
-  td5.style.fontWeight = "600";
-  td5.style.fontSize = "13px";
+  td5.classList.add("text-center");
   tr3.appendChild(td5);
 
   // Boucle pour récuperer touts les ECs (Aligner dans un semestre ) qui sont dans la base de données
@@ -197,20 +187,8 @@ async function Afficher_EC_aligne_delibe() {
       tdnum.classList.add("text-center", "col-md-auto");
 
       const td_etudiant = document.createElement('td');
+      td_etudiant.textContent = etudiant.ident_etudiant;
       td_etudiant.classList.add("text-start");
-      
-      // Créer le nom
-      const nameSpan = document.createElement('span');
-      nameSpan.textContent = etudiant.ident_etudiant;
-      nameSpan.classList.add("student-name");
-      
-      // Créer le matricule avec style moderne
-      const matriculeSpan = document.createElement('span');
-      matriculeSpan.textContent = ` (${etudiant.Matricule})`;
-      matriculeSpan.classList.add("student-matricule");
-      
-      td_etudiant.appendChild(nameSpan);
-      td_etudiant.appendChild(matriculeSpan);
 
       const td_vide = document.createElement('td');
       td_vide.style = "background-color:midnightblue; color:white;"
@@ -638,68 +616,8 @@ async function Modifier_cote(mat_etudiant,id_ec,cote)
     xhr.send(data);
   }    
 }
+  
 
-// ===== FONCTIONNALITÉ DE RECHERCHE D'ÉTUDIANTS =====
-document.addEventListener('DOMContentLoaded', function() {
-  const searchInput = document.getElementById('search-student');
-  const clearBtn = document.getElementById('clear-search');
-  
-  if (searchInput) {
-    // Recherche en temps réel
-    searchInput.addEventListener('input', function(e) {
-      const searchTerm = e.target.value.toLowerCase().trim();
-      
-      // Afficher/masquer le bouton clear
-      if (searchTerm.length > 0) {
-        clearBtn.style.display = 'flex';
-      } else {
-        clearBtn.style.display = 'none';
-      }
-      
-      filterStudents(searchTerm);
-    });
-    
-    // Bouton pour effacer
-    clearBtn.addEventListener('click', function() {
-      searchInput.value = '';
-      clearBtn.style.display = 'none';
-      filterStudents('');
-      searchInput.focus();
-    });
-  }
-});
 
-// Filtrer les lignes d'étudiants
-function filterStudents(searchTerm) {
-  const tbody = document.querySelector('#table_encodage tbody');
-  if (!tbody) return;
+
   
-  const rows = tbody.querySelectorAll('tr');
-  let visibleCount = 0;
-  
-  rows.forEach(row => {
-    // Récupérer le nom et matricule de l'étudiant (2ème colonne)
-    const nameCell = row.children[1];
-    if (!nameCell) return;
-    
-    // Récupérer le texte complet (nom + matricule)
-    const fullText = nameCell.textContent.toLowerCase();
-    
-    // Vérifier si le terme de recherche est dans le nom ou le matricule
-    if (searchTerm === '' || fullText.includes(searchTerm)) {
-      row.style.display = '';
-      visibleCount++;
-    } else {
-      row.style.display = 'none';
-    }
-  });
-  
-  // Mettre à jour le compteur d'étudiants
-  const countElement = document.getElementById('count-etudiants');
-  if (countElement && searchTerm !== '') {
-    countElement.textContent = visibleCount;
-    countElement.parentElement.style.background = 'rgba(76, 175, 80, 0.3)';
-  } else if (countElement) {
-    countElement.parentElement.style.background = 'rgba(255, 255, 255, 0.2)';
-  }
-}

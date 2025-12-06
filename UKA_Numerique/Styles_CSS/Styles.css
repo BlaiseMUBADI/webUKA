@@ -27,6 +27,17 @@
   background: #2c3e50;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   gap: 25px;
+  transition: all 0.3s ease;
+}
+
+/* Ajuster le logo quand le menu est réduit */
+.sidebar.active .logo-details {
+  gap: 0;
+  justify-content: center;
+}
+
+.sidebar.active .logo-details i {
+  margin: 0;
 }
 
 .sidebar .logo-details i {
@@ -42,6 +53,7 @@
   font-weight: 700;
   letter-spacing: 2px;
   text-transform: uppercase;
+  transition: opacity 0.3s ease;
 }
 
 /* Navigation Links */
@@ -87,6 +99,17 @@
   transition: all 0.3s ease;
 }
 
+/* Centrer les icônes quand le menu est réduit */
+.sidebar.active .nav-links li i {
+  margin-right: 0;
+  margin-left: 5px;
+}
+
+.sidebar.active .nav-links li a {
+  justify-content: center;
+  padding-left: 0;
+}
+
 .sidebar .nav-links li a:hover i {
   color: #3498db;
   transform: translateX(3px);
@@ -99,11 +122,23 @@
   white-space: nowrap;
   margin-left: 15px;
   transition: all 0.3s ease;
+  opacity: 1;
 }
 
 .sidebar .nav-links li a:hover .links_name {
   color: #ffffff;
   font-weight: 500;
+}
+
+/* Masquer les textes quand le menu est réduit */
+.sidebar.active .nav-links li a .links_name {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.sidebar.active .logo-details .logo_name {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .sidebar .nav-links .log_out {
@@ -443,6 +478,11 @@ nav .profile-details i {
   background: #ffffff !important;
   z-index: 9999 !important;
   position: absolute !important;
+}
+
+/* Masquer les menus contextuels quand le sidebar est réduit */
+.sidebar.active .dropdown-menu {
+  display: none !important;
 }
 
 /* Header du menu contextuel */

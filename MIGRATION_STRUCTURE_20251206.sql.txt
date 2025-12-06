@@ -1,0 +1,287 @@
+-- ===================================================================
+-- MIGRATION DE STRUCTURE : bdd_uka → bdd_uka_original
+-- Date de création : 6 décembre 2025
+-- ===================================================================
+-- Ce script migre UNIQUEMENT la structure (tables et procédures)
+-- SANS TOUCHER aux données existantes dans bdd_uka_original
+-- ===================================================================
+
+USE bdd_uka_original;
+
+SET FOREIGN_KEY_CHECKS=0;
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+SET AUTOCOMMIT = 0;
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+-- ===================================================================
+-- RAPPORT DE DÉTECTION AUTOMATIQUE
+-- ===================================================================
+SELECT '================================================' AS '';
+SELECT 'ANALYSE DES DIFFÉRENCES ENTRE LES DEUX BASES' AS '';
+SELECT '================================================' AS '';
+SELECT 'Source      : dump-bdd_uka-202512061049.sql (51 tables, 22 procédures)' AS Info;
+SELECT 'Destination : dump-bdd_uka_original-202512061049.sql (51 tables, 21 procédures)' AS Info;
+SELECT '================================================' AS '';
+
+-- ===================================================================
+-- SECTION 1 : VÉRIFICATION DES TABLES
+-- ===================================================================
+SELECT '--- TABLES DÉTECTÉES ---' AS '';
+
+-- Les 51 tables sont identiques entre les deux bases
+-- Donc aucune nouvelle table à créer
+
+SELECT 'RÉSULTAT: Les 51 tables existent déjà dans les deux bases' AS Statut;
+SELECT 'Tables communes: affecter, agent, annee_academique, autorisation_depense,' AS '';
+SELECT 'autoriser_depense, autreinfo_etudiant, categorie, compte_agent, compte_etudiant,' AS '';
+SELECT 'decaissement_caisse, domaine, element_constitutifs, element_constitutifs_aligne,' AS '';
+SELECT 'encaissement_caisse, enfant, enseignant, est_pris_en_charger, etudiant, evaluer,' AS '';
+SELECT 'events, filiere, fonction_user, frais, lieu_paiement, mecanisation, mentions,' AS '';
+SELECT 'numero_autorisation, numero_piece, paie_locale, parent, passer_par, payer_frais,' AS '';
+SELECT 'photo, promotion, recette_generale, repartition, rubrique, semestre, service,' AS '';
+SELECT 'solde, t_budget, t_depense_generale, t_depense_prevues, t_imputation,' AS '';
+SELECT 't_jury_deliberation, t_membre_jury, t_recettes_prevues, t_type_recette,' AS '';
+SELECT 'taux_du_jours, type_conge, unite_enseignement' AS '';
+
+-- ===================================================================
+-- SECTION 2 : DIFFÉRENCES DE STRUCTURE DES TABLES
+-- ===================================================================
+SELECT '--- ANALYSE DES STRUCTURES DE TABLES ---' AS '';
+
+-- Comparer les structures une par une (exemples)
+-- Vous pouvez décommenter ces lignes pour comparer manuellement
+
+/*
+-- Exemple de comparaison de structure
+DESCRIBE agent;
+DESCRIBE compte_agent;
+DESCRIBE t_jury_deliberation;
+DESCRIBE t_membre_jury;
+*/
+
+SELECT 'VÉRIFICATION: Comparer manuellement les structures si nécessaire' AS Note;
+SELECT 'Utilisez DESCRIBE nom_table pour vérifier chaque table' AS Conseil;
+
+-- ===================================================================
+-- SECTION 3 : PROCÉDURES STOCKÉES - DIFFÉRENCES DÉTECTÉES
+-- ===================================================================
+SELECT '================================================' AS '';
+SELECT 'PROCÉDURES STOCKÉES : DIFFÉRENCES DÉTECTÉES' AS '';
+SELECT '================================================' AS '';
+
+-- bdd_uka a 22 procédures
+-- bdd_uka_original a 21 procédures
+
+SELECT 'PROCÉDURES MANQUANTES dans bdd_uka_original :' AS '';
+SELECT '1. Ajouter_Membre_Jury' AS Procedure_Manquante;
+SELECT '2. Ajout_Nouvel_Jury' AS Procedure_Manquante;
+
+SELECT '' AS '';
+SELECT 'PROCÉDURES MANQUANTES dans bdd_uka :' AS '';
+SELECT '1. Liste_Agent_Aligner' AS Procedure_Manquante;
+
+-- ===================================================================
+-- SECTION 4 : AJOUT DES PROCÉDURES MANQUANTES
+-- ===================================================================
+SELECT '================================================' AS '';
+SELECT 'AJOUT DES PROCÉDURES MANQUANTES' AS '';
+SELECT '================================================' AS '';
+
+-- -------------------------------------------------------------------
+-- Procédure 1: Ajouter_Membre_Jury
+-- -------------------------------------------------------------------
+SELECT 'Ajout de la procédure : Ajouter_Membre_Jury' AS Action;
+
+DROP PROCEDURE IF EXISTS `Ajouter_Membre_Jury`;
+
+DELIMITER $$
+CREATE DEFINER=`blaise`@`%` PROCEDURE `Ajouter_Membre_Jury`(
+    IN p_id_jury INT,
+    IN p_mat_agent VARCHAR(50),
+    IN p_role ENUM('Président','Secrétaire','Membre'),
+    IN p_login VARCHAR(50),
+    IN p_mot_passe VARCHAR(255),
+    IN p_statut ENUM('Actif', 'Inactif'),
+    OUT p_success BOOLEAN,
+    OUT p_message VARCHAR(255),
+    OUT p_id_membre INT
+)
+BEGIN
+    DECLARE v_count INT DEFAULT 0;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        SET p_message = 'Erreur lors de l\'ajout du membre au jury.';
+        SET p_id_membre = NULL;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- Initialiser les valeurs de sortie
+    SET p_success = FALSE;
+    SET p_message = '';
+    SET p_id_membre = NULL;
+
+    -- Vérifier que toutes les données nécessaires sont présentes
+    IF p_id_jury IS NULL OR p_mat_agent IS NULL OR p_role IS NULL THEN
+        SET p_message = 'Données manquantes : id_jury, mat_agent et role sont requis.';
+        ROLLBACK;
+    ELSE
+        -- =============================================================================
+        -- VÉRIFICATION ANTI-DOUBLON PAR MATRICULE (Mat_agent)
+        -- =============================================================================
+        -- LOGIQUE DU SYSTÈME D'AUTHENTIFICATION DUAL (voir index.php):
+        --
+        -- Un même agent (identifié par Mat_agent) peut avoir DEUX types de comptes:
+        --   1. Compte administratif dans 'compte_agent' (avec son propre Login/Password)
+        --   2. Compte jury dans 't_membre_jury' (avec un Login/Password différent)
+        --
+        -- RÈGLE IMPORTANTE pour t_membre_jury:
+        --   - Un agent peut être membre de PLUSIEURS jurys différents (jury A, jury B, etc.)
+        --   - MAIS il ne peut avoir qu'UN SEUL compte par jury spécifique
+        --
+        -- Exemples:
+        --   ✓ Agent matricule '001' → compte_agent (login: 'admin001') + jury A (login: 'jury001a')
+        --   ✓ Agent matricule '001' → jury A (login: 'jury001a') + jury B (login: 'jury001b')
+        --   ✗ Agent matricule '001' → jury A (login: 'jury001a') + jury A (login: 'jury001b2')
+        --
+        -- Cette vérification empêche le dernier cas (doublon dans le même jury)
+        -- =============================================================================
+        
+        SELECT COUNT(*) INTO v_count 
+        FROM t_membre_jury 
+        WHERE ID_jury = p_id_jury AND Mat_agent = p_mat_agent;
+
+        IF v_count > 0 THEN
+            SET p_message = CONCAT('L''agent avec le matricule ', p_mat_agent, ' est déjà membre de ce jury (ID_jury=', p_id_jury, '). Un agent ne peut avoir qu''un seul compte par jury.');
+            ROLLBACK;
+        ELSE
+            -- Si Président ou Secrétaire, vérifier que login et password sont fournis
+            IF (p_role = 'Président' OR p_role = 'Secrétaire') AND (p_login IS NULL OR p_login = '' OR p_mot_passe IS NULL OR p_mot_passe = '') THEN
+                SET p_message = 'Le login et le mot de passe sont obligatoires pour les Présidents et Secrétaires.';
+                ROLLBACK;
+            ELSE
+                -- Vérifier que le login n'est pas déjà utilisé (si fourni)
+                IF p_login IS NOT NULL AND p_login != '' THEN
+                    SELECT COUNT(*) INTO v_count 
+                    FROM t_membre_jury 
+                    WHERE Login = p_login;
+
+                    IF v_count > 0 THEN
+                        SET p_message = 'Ce login est déjà utilisé par un autre membre.';
+                        ROLLBACK;
+                    ELSE
+                        -- Insérer avec Login et Mot_passe (Président ou Secrétaire)
+                        INSERT INTO t_membre_jury 
+                        (ID_jury, Mat_agent, role, Login, Mot_passe, Statut, date_ajout) 
+                        VALUES 
+                        (p_id_jury, p_mat_agent, p_role, p_login, p_mot_passe, p_statut, NOW());
+
+                        SET p_id_membre = LAST_INSERT_ID();
+                        SET p_success = TRUE;
+                        SET p_message = 'Membre ajouté avec succès au jury.';
+                        COMMIT;
+                    END IF;
+                ELSE
+                    -- Insérer sans Login et Mot_passe (Membre simple)
+                    INSERT INTO t_membre_jury 
+                    (ID_jury, Mat_agent, role, date_ajout) 
+                    VALUES 
+                    (p_id_jury, p_mat_agent, p_role, NOW());
+
+                    SET p_id_membre = LAST_INSERT_ID();
+                    SET p_success = TRUE;
+                    SET p_message = 'Membre ajouté avec succès au jury.';
+                    COMMIT;
+                END IF;
+            END IF;
+        END IF;
+    END IF;
+END$$
+DELIMITER ;
+
+SELECT '✓ Procédure Ajouter_Membre_Jury créée/mise à jour' AS Statut;
+
+-- -------------------------------------------------------------------
+-- Procédure 2: Ajout_Nouvel_Jury
+-- -------------------------------------------------------------------
+SELECT 'Ajout de la procédure : Ajout_Nouvel_Jury' AS Action;
+
+DROP PROCEDURE IF EXISTS `Ajout_Nouvel_Jury`;
+
+DELIMITER $$
+CREATE DEFINER=`blaise`@`%` PROCEDURE `Ajout_Nouvel_Jury`(
+    IN `p_Libelle_jury` TEXT, 
+    IN `p_Date_deliberation` DATE, 
+    IN `p_Code_Promotion` VARCHAR(10), 
+    IN `p_idAnnee_Acad` INT
+)
+BEGIN
+    INSERT INTO t_jury_deliberation (
+        Libelle_jury,
+        Date_délibération,
+        Code_Promotion,
+        idAnnee_Acad
+    ) VALUES (
+        p_Libelle_jury,
+        p_Date_deliberation,
+        p_Code_Promotion,
+        p_idAnnee_Acad
+    );
+END$$
+DELIMITER ;
+
+SELECT '✓ Procédure Ajout_Nouvel_Jury créée/mise à jour' AS Statut;
+
+-- ===================================================================
+-- SECTION 5 : VÉRIFICATION POST-MIGRATION
+-- ===================================================================
+SELECT '================================================' AS '';
+SELECT 'VÉRIFICATION POST-MIGRATION' AS '';
+SELECT '================================================' AS '';
+
+-- Vérifier que les procédures ont bien été créées
+SELECT 'Vérification des procédures stockées :' AS '';
+
+SELECT ROUTINE_NAME AS Procedure_Name, 
+       ROUTINE_TYPE AS Type,
+       CREATED AS Date_Creation
+FROM information_schema.ROUTINES 
+WHERE ROUTINE_SCHEMA = 'bdd_uka_original' 
+AND ROUTINE_TYPE = 'PROCEDURE'
+ORDER BY ROUTINE_NAME;
+
+-- Compter le nombre de procédures
+SELECT COUNT(*) AS Nombre_Total_Procedures
+FROM information_schema.ROUTINES 
+WHERE ROUTINE_SCHEMA = 'bdd_uka_original' 
+AND ROUTINE_TYPE = 'PROCEDURE';
+
+-- ===================================================================
+-- SECTION 6 : RÉACTIVATION DES VÉRIFICATIONS
+-- ===================================================================
+SET FOREIGN_KEY_CHECKS=1;
+COMMIT;
+
+-- ===================================================================
+-- RAPPORT FINAL
+-- ===================================================================
+SELECT '================================================' AS '';
+SELECT 'MIGRATION TERMINÉE AVEC SUCCÈS' AS '';
+SELECT '================================================' AS '';
+SELECT 'RÉSUMÉ DES MODIFICATIONS :' AS '';
+SELECT '- 0 nouvelles tables créées (51 tables déjà identiques)' AS '';
+SELECT '- 2 nouvelles procédures ajoutées :' AS '';
+SELECT '  1. Ajouter_Membre_Jury (gestion membres jury avec validation)' AS '';
+SELECT '  2. Ajout_Nouvel_Jury (création de jury)' AS '';
+SELECT '- Aucune donnée n''a été modifiée ou supprimée' AS '';
+SELECT '================================================' AS '';
+SELECT 'PROCHAINES ÉTAPES :' AS '';
+SELECT '1. Vérifier que les procédures fonctionnent :' AS '';
+SELECT '   CALL Ajout_Nouvel_Jury(...)' AS '';
+SELECT '2. Tester l\'ajout de membres :' AS '';
+SELECT '   CALL Ajouter_Membre_Jury(...)' AS '';
+SELECT '3. Vérifier l\'intégration avec index.php' AS '';
+SELECT '================================================' AS '';

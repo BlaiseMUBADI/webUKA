@@ -28,9 +28,6 @@
     <!-- Styles de base du système -->
     <link rel="stylesheet" type="text/css" href="../Styles_CSS/Nos_Tableaux.css">    
     <link rel="stylesheet" type="text/css" href="../Styles_CSS/Styles.css" />
-    
-    <!-- Style moderne pour la grille d'encodage -->
-    <link rel="stylesheet" type="text/css" href="Styles_CSS/Encodage_Modern.css" />
 
     <style>
       /* Animation pour les dialogs */

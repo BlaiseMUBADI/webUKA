@@ -303,6 +303,25 @@
                     }
                 }
                 
+                // ===== ÉTAPE 3.5: VALIDATION MATRICULE POUR LE CHOIX =====
+                // Si les deux comptes sont valides, vérifier s'ils ont le MÊME matricule
+                // Le choix n'est proposé QUE si c'est la même personne (même matricule)
+                $choix_possible = false;
+                if($compte_agent_valide && $compte_jury_valide) {
+                    // Comparer les matricules
+                    if($data_agent['mat_agent'] === $data_jury['Mat_agent']) {
+                        // MÊME MATRICULE = MÊME PERSONNE
+                        // On peut proposer le choix entre les deux comptes
+                        $choix_possible = true;
+                    } else {
+                        // MATRICULES DIFFÉRENTS = PERSONNES DIFFÉRENTES
+                        // Priorité au compte agent (connexion directe)
+                        // Le compte jury est ignoré dans ce cas
+                        $compte_jury_valide = false;
+                        $data_jury = null;
+                    }
+                }
+                
                 // ===== ÉTAPE 4: GESTION DES DIFFÉRENTS CAS =====
                 // Variables de compatibilité (pour ne pas casser le code existant)
                 $totale = $total_agent;
@@ -318,10 +337,11 @@
                         $msgerreur = '<i class="fas fa-key"></i> Mot de passe incorrect ou compte inactif';
                     }
                 }
-                // --- CAS 2: LES DEUX COMPTES SONT VALIDES ---
+                // --- CAS 2: LES DEUX COMPTES SONT VALIDES ET MÊME MATRICULE ---
                 // L'utilisateur a deux rôles actifs (agent ET membre de jury)
+                // ET c'est la même personne (même matricule)
                 // On doit lui demander quel compte il veut utiliser pour cette session
-                else if($compte_agent_valide && $compte_jury_valide)
+                else if($compte_agent_valide && $compte_jury_valide && $choix_possible)
                 {
                     // Stocker les données en session temporaire (accessible après rechargement de page)
                     // Ces données seront utilisées dans le BLOC 1 quand l'utilisateur fait son choix

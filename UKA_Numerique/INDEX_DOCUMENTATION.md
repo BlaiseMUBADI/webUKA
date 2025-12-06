@@ -39,12 +39,25 @@ Le fichier `index.php` implémente un système d'authentification sophistiqué p
 │  COMPTE VALIDE│            │  VALIDES      │
 └───────┬───────┘            └───────┬───────┘
         │                            │
-        ▼                            ▼
-┌───────────────┐            ┌───────────────┐
-│  CONNEXION    │            │  AFFICHAGE    │
-│  DIRECTE      │            │  BOÎTE DE     │
-│               │            │  CHOIX        │
-└───────────────┘            └───────────────┘
+        │                            ▼
+        │                ┌───────────────────────┐
+        │                │ VALIDATION MATRICULE  │
+        │                │ mat_agent = Mat_agent?│
+        │                └───────┬───────────────┘
+        │                        │
+        │            ┌───────────┴───────────┐
+        │            ▼                       ▼
+        │    ┌───────────────┐      ┌──────────────┐
+        │    │  IDENTIQUES   │      │  DIFFÉRENTS  │
+        │    │ (même personne│      │(2 personnes) │
+        │    └───────┬───────┘      └──────┬───────┘
+        │            │                     │
+        ▼            ▼                     ▼
+┌───────────────┐ ┌───────────────┐ ┌──────────────┐
+│  CONNEXION    │ │  AFFICHAGE    │ │  CONNEXION   │
+│  DIRECTE      │ │  BOÎTE DE     │ │  AGENT       │
+│               │ │  CHOIX        │ │  DIRECTE     │
+└───────────────┘ └───────────────┘ └──────────────┘
 ```
 
 ## 🔧 Composants Principaux
@@ -232,6 +245,38 @@ if(password_verify($motdepasse, $ligne['password_jury'])) {
 
 **Raison** : Les comptes jury sont récents et utilisent exclusivement bcrypt.
 
+#### Étape 3.5 : Validation du Matricule pour le Choix
+
+**Règle de cohérence** : Le choix entre deux comptes n'est proposé **QUE SI** les matricules sont identiques.
+
+```php
+$choix_possible = false;
+if($compte_agent_valide && $compte_jury_valide) {
+    if($data_agent['mat_agent'] === $data_jury['Mat_agent']) {
+        // MÊME MATRICULE = MÊME PERSONNE
+        // On peut proposer le choix entre les deux comptes
+        $choix_possible = true;
+    } else {
+        // MATRICULES DIFFÉRENTS = PERSONNES DIFFÉRENTES
+        // Priorité au compte agent (connexion directe)
+        $compte_jury_valide = false;
+        $data_jury = null;
+    }
+}
+```
+
+**Pourquoi cette validation ?**
+- Plusieurs personnes peuvent partager les mêmes identifiants de connexion
+- Le matricule est l'identifiant unique de la personne physique
+- Le choix n'a de sens que si les deux comptes appartiennent à la même personne
+
+**Scénarios** :
+
+| Login | Password | Mat Agent | Mat Jury | Résultat |
+|-------|----------|-----------|----------|----------|
+| jdupont | 1234 | 12345 | 12345 | ✅ Choix proposé (même personne) |
+| secretaire | 1234 | 12345 | 67890 | ❌ Connexion agent direct (personnes différentes) |
+
 #### Étape 4 : Gestion des 4 Cas Possibles
 
 ##### CAS 1 : Aucun Compte Valide ❌
@@ -248,12 +293,17 @@ if(!$compte_agent_valide && !$compte_jury_valide)
 
 **Variables session** : Aucune
 
-##### CAS 2 : Deux Comptes Valides 🔀
+##### CAS 2 : Deux Comptes Valides ET Même Matricule 🔀
 
 **Condition** :
 ```php
-else if($compte_agent_valide && $compte_jury_valide)
+else if($compte_agent_valide && $compte_jury_valide && $choix_possible)
 ```
+
+**Prérequis pour ce cas** :
+- Login + Password valides dans `compte_agent`
+- Login + Password valides dans `t_membre_jury`
+- **Matricules identiques** dans les deux tables
 
 **Traitement** :
 ```php
@@ -266,6 +316,8 @@ $_SESSION['choix_en_cours'] = true;
 - Affichage d'une boîte de dialogue moderne
 - L'utilisateur doit choisir quel compte utiliser
 - Le traitement se poursuivra dans le BLOC 1 après la sélection
+
+**Important** : Si les matricules sont différents, ce cas n'est pas activé et le système se rabat sur le CAS 4 (connexion agent directe).
 
 ##### CAS 3 : Seulement Compte Jury ⚖️
 
@@ -579,20 +631,23 @@ if(isset($_SESSION['choix_en_cours'])) {
    ↓
 5. Détermination du nombre de comptes valides
    ↓
-┌──────────────┬─────────────────┬────────────────┐
-│  0 compte    │   1 compte      │   2 comptes    │
-│  valide      │   valide        │   valides      │
-└──────┬───────┴────────┬────────┴────────┬───────┘
-       │                │                 │
-       ▼                ▼                 ▼
-   Message          Connexion         Affichage
-   d'erreur         directe           boîte choix
-                        │                 │
-                        │                 ▼
-                        │            Sélection
-                        │            utilisateur
-                        │                 │
-                        └────────┬────────┘
+6. Validation des matricules (si 2 comptes valides)
+   ↓
+┌──────────────┬─────────────────┬────────────────┬─────────────────┐
+│  0 compte    │   1 compte      │   2 comptes    │   2 comptes     │
+│  valide      │   valide        │   valides      │   valides       │
+│              │                 │  MÊME matricule│ DIFF. matricule │
+└──────┬───────┴────────┬────────┴────────┬───────┴────────┬────────┘
+       │                │                 │                │
+       ▼                ▼                 ▼                ▼
+   Message          Connexion         Affichage       Connexion
+   d'erreur         directe           boîte choix     agent direct
+                        │                 │                │
+                        │                 ▼                │
+                        │            Sélection             │
+                        │            utilisateur           │
+                        │                 │                │
+                        └────────┬────────┴────────────────┘
                                  │
                                  ▼
                         Établissement session
