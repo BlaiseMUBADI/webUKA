@@ -113,7 +113,7 @@ CREATE TABLE `autorisation_depense` (
   KEY `Imputation` (`Imputation`),
   CONSTRAINT `autorisation_depense_ibfk_1` FOREIGN KEY (`Imputation`) REFERENCES `t_imputation` (`Num_imputation`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `autorisation_depense_ibfk_2` FOREIGN KEY (`Num_pce`) REFERENCES `numero_autorisation` (`numero_pce`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE=InnoDB AUTO_INCREMENT=80 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=81 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -139,7 +139,7 @@ CREATE TABLE `autoriser_depense` (
   CONSTRAINT `autoriser_depense_ibfk_1` FOREIGN KEY (`Agent_auriz1`) REFERENCES `agent` (`Mat_agent`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `autoriser_depense_ibfk_2` FOREIGN KEY (`Agent_auriz2`) REFERENCES `agent` (`Mat_agent`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `autoriser_depense_ibfk_3` FOREIGN KEY (`Num_pce`) REFERENCES `numero_autorisation` (`numero_pce`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -180,9 +180,8 @@ CREATE TABLE `autreinfo_etudiant` (
   `Territoire` varchar(45) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,
   `TelResponsable` varchar(15) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,
   PRIMARY KEY (`idAutreInfo_etudiant`),
-  KEY `fk_AutreInfo_etudiant_Etudiant1_idx` (`Matricule`),
-  CONSTRAINT `autreinfo_etudiant_ibfk_1` FOREIGN KEY (`Matricule`) REFERENCES `etudiant` (`Matricule`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE=InnoDB AUTO_INCREMENT=11937 DEFAULT CHARSET=utf8mb3;
+  KEY `fk_AutreInfo_etudiant_Etudiant1_idx` (`Matricule`)
+) ENGINE=InnoDB AUTO_INCREMENT=11940 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -305,7 +304,7 @@ DROP TABLE IF EXISTS `element_constitutifs`;
 CREATE TABLE `element_constitutifs` (
   `id_ec` int NOT NULL AUTO_INCREMENT,
   `Code_ue` varchar(10) NOT NULL,
-  `Intutile_ec` varchar(50) NOT NULL,
+  `Intutile_ec` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL,
   `Hr_TD` int NOT NULL,
   `Hr_TP` int NOT NULL,
   `Credit` int NOT NULL,
@@ -315,7 +314,7 @@ CREATE TABLE `element_constitutifs` (
   PRIMARY KEY (`id_ec`),
   KEY `fk_Element_constutifs_Unite_Enseignant1_idx` (`Code_ue`),
   CONSTRAINT `fk_Element_constutifs_Unite_Enseignant1` FOREIGN KEY (`Code_ue`) REFERENCES `unite_enseignement` (`Code_ue`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=42 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -339,14 +338,14 @@ CREATE TABLE `element_constitutifs_aligne` (
   KEY `Id_Semestre` (`Id_Semestre`),
   KEY `Mat_agent` (`Mat_agent`),
   KEY `Code_promotion` (`Code_promotion`),
-  KEY `element_constitutifs_aligne_ibfk_5` (`Mat_assistant`),
+  KEY `Mat_assistant` (`Mat_assistant`),
   CONSTRAINT `element_constitutifs_aligne_ibfk_1` FOREIGN KEY (`idAnnee_Acad`) REFERENCES `annee_academique` (`idAnnee_Acad`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `element_constitutifs_aligne_ibfk_2` FOREIGN KEY (`Id_Semestre`) REFERENCES `semestre` (`Id_Semestre`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `element_constitutifs_aligne_ibfk_3` FOREIGN KEY (`Mat_agent`) REFERENCES `agent` (`Mat_agent`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `element_constitutifs_aligne_ibfk_4` FOREIGN KEY (`Code_promotion`) REFERENCES `promotion` (`Code_Promotion`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  CONSTRAINT `element_constitutifs_aligne_ibfk_5` FOREIGN KEY (`Mat_assistant`) REFERENCES `agent` (`Mat_agent`) ON DELETE SET NULL ON UPDATE SET NULL,
+  CONSTRAINT `element_constitutifs_aligne_ibfk_5` FOREIGN KEY (`Mat_assistant`) REFERENCES `agent` (`Mat_agent`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `fk_Element_constitufs_aligne_Element_constutifs1` FOREIGN KEY (`id_ec`) REFERENCES `element_constitutifs` (`id_ec`)
-) ENGINE=InnoDB AUTO_INCREMENT=48 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -372,10 +371,10 @@ CREATE TABLE `encaissement_caisse` (
   KEY `Numero_pce` (`Numero_pce`),
   KEY `Imputation` (`Imputation`),
   KEY `IdAnnee` (`IdAnnee`),
-  CONSTRAINT `encaissement_caisse_ibfk_1` FOREIGN KEY (`Numero_pce`) REFERENCES `numero_piece` (`numero_pce`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `encaissement_caisse_ibfk_1` FOREIGN KEY (`Numero_pce`) REFERENCES `numero_piece` (`numero_pce`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `encaissement_caisse_ibfk_2` FOREIGN KEY (`Imputation`) REFERENCES `t_imputation` (`Num_imputation`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `encaissement_caisse_ibfk_3` FOREIGN KEY (`IdAnnee`) REFERENCES `annee_academique` (`idAnnee_Acad`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE=InnoDB AUTO_INCREMENT=85 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=180 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -546,7 +545,7 @@ CREATE TABLE `frais` (
   KEY `fk_Frais_Promotion1_idx` (`Code_Promotion`),
   CONSTRAINT `fk_Frais_Annee_academique1` FOREIGN KEY (`idAnnee_Acad`) REFERENCES `annee_academique` (`idAnnee_Acad`),
   CONSTRAINT `fk_Frais_Promotion1` FOREIGN KEY (`Code_Promotion`) REFERENCES `promotion` (`Code_Promotion`)
-) ENGINE=InnoDB AUTO_INCREMENT=909 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=951 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -680,7 +679,7 @@ CREATE TABLE `passer_par` (
   KEY `fk_Etudiant_has_Promotion_Etudiant1_idx` (`Etudiant_Matricule`),
   KEY `fk_Etudiant_has_Promotion_Annee_academique1_idx` (`idAnnee_academique`),
   CONSTRAINT `fk_Etudiant_has_Promotion_Annee_academique1` FOREIGN KEY (`idAnnee_academique`) REFERENCES `annee_academique` (`idAnnee_Acad`),
-  CONSTRAINT `fk_Etudiant_has_Promotion_Etudiant1` FOREIGN KEY (`Etudiant_Matricule`) REFERENCES `etudiant` (`Matricule`),
+  CONSTRAINT `fk_Etudiant_has_Promotion_Etudiant1` FOREIGN KEY (`Etudiant_Matricule`) REFERENCES `etudiant` (`Matricule`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `fk_Etudiant_has_Promotion_Promotion1` FOREIGN KEY (`Code_Promotion`) REFERENCES `promotion` (`Code_Promotion`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -705,7 +704,7 @@ CREATE TABLE `payer_frais` (
   `Ensemble` varchar(10) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL COMMENT 'Cette colonne nous permet de rassamblés les réçus d''une personne ( FA et F_Enrol)',
   `Fc` float DEFAULT NULL COMMENT 'Cette colonne nous permet de faire l''impression de rapport en franc congolais',
   `Motif_suppression` varchar(255) DEFAULT NULL COMMENT 'Motif obligatoire avant suppression',
-  `numero_recu` varchar(25) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT 'C''est une colonne qui stock le numéro du reçu journalièrement .\r\n',
+  `numero_recu` varchar(25) NOT NULL COMMENT 'C''est une colonne qui stock le numéro du reçu journalièrement .',
   PRIMARY KEY (`Id_payer_frais`),
   KEY `fk_Etudiant_has_Frais_Frais1_idx` (`idFrais`),
   KEY `fk_Etudiant_has_Frais_Etudiant1_idx` (`Matricule`),
@@ -715,14 +714,14 @@ CREATE TABLE `payer_frais` (
   CONSTRAINT `fk_Paie_Etudiant_Lieu_paiement1` FOREIGN KEY (`idLieu_paiement`) REFERENCES `lieu_paiement` (`idLieu_paiement`),
   CONSTRAINT `fk_Payer_Frais_Agent1` FOREIGN KEY (`Mat_agent`) REFERENCES `agent` (`Mat_agent`),
   CONSTRAINT `payer_frais_ibfk_1` FOREIGN KEY (`idFrais`) REFERENCES `frais` (`idFrais`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE=InnoDB AUTO_INCREMENT=488514 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=489190 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = utf8mb4 */ ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
@@ -812,7 +811,7 @@ DELIMITER ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = utf8mb4 */ ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
@@ -978,7 +977,7 @@ CREATE TABLE `solde` (
   `montant` float NOT NULL,
   `Observation` varchar(1000) NOT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1068,7 +1067,7 @@ CREATE TABLE `t_jury_deliberation` (
   KEY `Code_Promotion` (`Code_Promotion`),
   CONSTRAINT `t_jury_deliberation_ibfk_1` FOREIGN KEY (`idAnnee_Acad`) REFERENCES `annee_academique` (`idAnnee_Acad`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `t_jury_deliberation_ibfk_2` FOREIGN KEY (`Code_Promotion`) REFERENCES `promotion` (`Code_Promotion`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1093,7 +1092,7 @@ CREATE TABLE `t_membre_jury` (
   KEY `Mat_agent` (`Mat_agent`),
   CONSTRAINT `t_membre_jury_ibfk_1` FOREIGN KEY (`ID_jury`) REFERENCES `t_jury_deliberation` (`ID_jury`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `t_membre_jury_ibfk_2` FOREIGN KEY (`Mat_agent`) REFERENCES `agent` (`Mat_agent`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1169,7 +1168,7 @@ DROP TABLE IF EXISTS `unite_enseignement`;
 CREATE TABLE `unite_enseignement` (
   `Code_ue` varchar(10) NOT NULL,
   `IdFiliere` int NOT NULL,
-  `Intitule_ue` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,
+  `Intitule_ue` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,
   `Catégorie` varchar(200) NOT NULL,
   PRIMARY KEY (`Code_ue`),
   KEY `fk_Unite_Enseignant_Semestre1_idx` (`IdFiliere`),
@@ -1188,7 +1187,7 @@ CREATE TABLE `unite_enseignement` (
 /*!50003 SET character_set_results = utf8mb4 */ ;
 /*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = '' */ ;
+/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
 CREATE DEFINER=`blaise`@`%` PROCEDURE `Ajouter_Membre_Jury`(
 
@@ -1255,7 +1254,47 @@ BEGIN
 
     ELSE
 
-        -- Vérifier si le membre existe déjà dans ce jury
+        -- =============================================================================
+
+        -- VÉRIFICATION ANTI-DOUBLON PAR MATRICULE (Mat_agent)
+
+        -- =============================================================================
+
+        -- LOGIQUE DU SYSTÈME D'AUTHENTIFICATION DUAL (voir index.php):
+
+        --
+
+        -- Un même agent (identifié par Mat_agent) peut avoir DEUX types de comptes:
+
+        --   1. Compte administratif dans 'compte_agent' (avec son propre Login/Password)
+
+        --   2. Compte jury dans 't_membre_jury' (avec un Login/Password différent)
+
+        --
+
+        -- RÈGLE IMPORTANTE pour t_membre_jury:
+
+        --   - Un agent peut être membre de PLUSIEURS jurys différents (jury A, jury B, etc.)
+
+        --   - MAIS il ne peut avoir qu'UN SEUL compte par jury spécifique
+
+        --
+
+        -- Exemples:
+
+        --   ✓ Agent matricule '001' → compte_agent (login: 'admin001') + jury A (login: 'jury001a')
+
+        --   ✓ Agent matricule '001' → jury A (login: 'jury001a') + jury B (login: 'jury001b')
+
+        --   ✗ Agent matricule '001' → jury A (login: 'jury001a') + jury A (login: 'jury001b2')
+
+        --
+
+        -- Cette vérification empêche le dernier cas (doublon dans le même jury)
+
+        -- =============================================================================
+
+        
 
         SELECT COUNT(*) INTO v_count 
 
@@ -1267,7 +1306,7 @@ BEGIN
 
         IF v_count > 0 THEN
 
-            SET p_message = 'Cet agent est déjà membre de ce jury.';
+            SET p_message = CONCAT('L''agent avec le matricule ', p_mat_agent, ' est déjà membre de ce jury (ID_jury=', p_id_jury, '). Un agent ne peut avoir qu''un seul compte par jury.');
 
             ROLLBACK;
 
@@ -1367,23 +1406,87 @@ DELIMITER ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = utf8mb4 */ ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
-CREATE DEFINER=`blaise`@`%` PROCEDURE `Ajout_Nouvel_Jury`(IN `p_Libelle_jury` TEXT, IN `p_Date_deliberation` DATE, IN `p_Code_Promotion` VARCHAR(10), IN `p_idAnnee_Acad` INT)
+CREATE DEFINER=`blaise`@`%` PROCEDURE `Ajout_Nouvel_Jury`(
+
+    IN `p_Libelle_jury` TEXT, 
+
+    IN `p_Date_deliberation` DATE, 
+
+    IN `p_Code_Promotion` VARCHAR(10), 
+
+    IN `p_idAnnee_Acad` INT
+
+)
 BEGIN
+
     INSERT INTO t_jury_deliberation (
+
         Libelle_jury,
+
         Date_délibération,
+
         Code_Promotion,
+
         idAnnee_Acad
+
     ) VALUES (
+
         p_Libelle_jury,
+
         p_Date_deliberation,
+
         p_Code_Promotion,
+
         p_idAnnee_Acad
+
     );
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `Liste_Agent_Aligner` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
+DELIMITER ;;
+CREATE DEFINER=`blaise`@`%` PROCEDURE `Liste_Agent_Aligner`(IN `p_idfiliere` INT)
+BEGIN
+    SELECT 
+        agent.Mat_agent AS mat_agent,
+        CONCAT(agent.Nom_agent, ' ', agent.Post_agent, ' ', agent.Prenom) AS enseignant,
+        agent.Sexe AS sexe,
+        agent.Niveau_Etude AS niveau_etude,
+        categorie.Libelle AS categorie,
+        agent.Tel AS phone,
+        agent.Mail AS email,
+        agent.AdressePhysique AS adresse,
+        agent.Grade AS titre_academique,
+        agent.Domaine_etude AS domaine,
+        agent.Institution_attachee AS institut_attache,
+        filiere.Libelle_Filiere AS filiere
+    FROM 
+        agent
+    JOIN 
+        filiere ON agent.Id_filiere = filiere.IdFiliere
+    JOIN 
+    	categorie ON agent.IdCategorie=categorie.IdCategorie
+    ORDER BY 
+        CASE WHEN filiere.IdFiliere = p_idfiliere THEN 1 ELSE 2 END, 
+        agent.Nom_agent, 
+        agent.Post_agent, 
+        agent.Prenom;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1396,7 +1499,7 @@ DELIMITER ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = utf8mb4 */ ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
@@ -1515,7 +1618,7 @@ BEGIN
         AND eca_annee.idAnnee_Acad = p_idAnnee_Acad
     
     WHERE 
-        UPPER(ag.Grade) LIKE '%ASS%'   -- On prend tous les assistants dont le grade contient 'ASS' (ex: ASS1, ASS2, ASSISTANT, ASSISTANT DE RECHERCHE)
+        ag.Grade IN ('ASS1', 'ASS2')   -- On ne prend que les assistants (ASS1 et ASS2)
     
     GROUP BY 
         ag.Mat_agent, ag.Nom_agent, ag.Post_agent, ag.Prenom, 
@@ -1544,7 +1647,7 @@ DELIMITER ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = utf8mb4 */ ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
@@ -1567,7 +1670,7 @@ DELIMITER ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = utf8mb4 */ ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
@@ -1596,7 +1699,7 @@ DELIMITER ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = utf8mb4 */ ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
@@ -1625,11 +1728,22 @@ BEGIN
             WHEN eca_annee.id_ec IS NOT NULL THEN TRUE
             ELSE FALSE
         END AS etat_ec_pris_dans_annee,
+        -- NOUVEAU: EC déjà aligné dans cette promotion (peu importe le semestre)
+        CASE 
+            WHEN eca_promotion.id_ec IS NOT NULL THEN TRUE
+            ELSE FALSE
+        END AS etat_ec_pris_dans_promotion,
+        -- NOUVEAU: Informations sur le semestre où l'EC est déjà aligné dans cette promotion
+        eca_promotion.Id_Semestre AS semestre_alignement_promotion,
+        s_prom.libelle_semestre AS nom_semestre_alignement_promotion,
+        eca_promotion.Mat_agent AS mat_agent_alignement_promotion,
+        CONCAT(a_prom.Nom_agent, ' ', a_prom.Post_agent, ' ', a_prom.Prenom) AS nom_agent_alignement_promotion,
         CASE 
             WHEN eca.Mat_agent = p_Mat_agent THEN 1
             WHEN eca_global.id_ec IS NOT NULL THEN 2
             ELSE 3
-        END AS ordre_tri
+        END AS ordre_tri,
+        eca.id_ec_aligne
         
     FROM 
         element_constitutifs ec
@@ -1650,6 +1764,17 @@ BEGIN
     LEFT JOIN 
         element_constitutifs_aligne eca_annee ON ec.id_ec = eca_annee.id_ec 
         AND eca_annee.idAnnee_Acad = p_idAnnee_Acad
+    -- NOUVEAU: Jointure pour détecter si l'EC est déjà aligné dans cette promotion
+    LEFT JOIN 
+        element_constitutifs_aligne eca_promotion ON ec.id_ec = eca_promotion.id_ec 
+        AND eca_promotion.Code_Promotion = p_Code_Promotion
+        AND eca_promotion.idAnnee_Acad = p_idAnnee_Acad
+    -- Jointure pour récupérer le nom du semestre où l'EC est aligné dans la promotion
+    LEFT JOIN 
+        semestre s_prom ON eca_promotion.Id_Semestre = s_prom.Id_Semestre
+    -- Jointure pour récupérer le nom de l'agent qui a aligné l'EC dans la promotion
+    LEFT JOIN 
+        agent a_prom ON eca_promotion.Mat_agent = a_prom.Mat_agent
     WHERE 
         f.IdFiliere = p_id_filiere
     ORDER BY 
@@ -1666,7 +1791,7 @@ DELIMITER ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = utf8mb4 */ ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
@@ -1726,7 +1851,7 @@ DELIMITER ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = utf8mb4 */ ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
@@ -1769,7 +1894,7 @@ DELIMITER ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = utf8mb4 */ ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
@@ -1793,7 +1918,7 @@ DELIMITER ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = utf8mb4 */ ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
@@ -1829,7 +1954,7 @@ DELIMITER ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = utf8mb4 */ ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
@@ -1855,7 +1980,7 @@ DELIMITER ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = utf8mb4 */ ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
@@ -1876,7 +2001,7 @@ DELIMITER ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = utf8mb4 */ ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
@@ -1908,7 +2033,7 @@ DELIMITER ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = utf8mb4 */ ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
@@ -1928,11 +2053,11 @@ DELIMITER ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = utf8mb4 */ ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
-CREATE DEFINER=`blaise`@`%` PROCEDURE `Nouvelle_UE`(IN `p_Code_ue` VARCHAR(10), IN `p_IdFiliere` INT, IN `p_Intitule_ue` VARCHAR(50), IN `p_Categorie` VARCHAR(200))
+CREATE DEFINER=`blaise`@`%` PROCEDURE `Nouvelle_UE`(IN `p_Code_ue` VARCHAR(10), IN `p_IdFiliere` INT, IN `p_Intitule_ue` VARCHAR(200), IN `p_Categorie` VARCHAR(200))
 BEGIN
     INSERT INTO unite_enseignement (Code_ue, IdFiliere, Intitule_ue, Catégorie)
     VALUES (p_Code_ue, p_IdFiliere, p_Intitule_ue, p_Categorie);
@@ -1948,11 +2073,11 @@ DELIMITER ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = utf8mb4 */ ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
-CREATE DEFINER=`blaise`@`%` PROCEDURE `Nouvel_EC`(IN `p_Code_ue` VARCHAR(10), IN `p_Intutile_ec` VARCHAR(50), IN `p_Credit` INT, IN `p_CMI` INT, IN `p_Hr_TD` INT, IN `p_Hr_TP` INT, IN `p_TPE` INT, IN `p_VHT` INT)
+CREATE DEFINER=`blaise`@`%` PROCEDURE `Nouvel_EC`(IN `p_Code_ue` VARCHAR(10), IN `p_Intutile_ec` VARCHAR(200), IN `p_Credit` INT, IN `p_CMI` INT, IN `p_Hr_TD` INT, IN `p_Hr_TP` INT, IN `p_TPE` INT, IN `p_VHT` INT)
 BEGIN
     INSERT INTO element_constitutifs (
         Code_ue,
@@ -1985,7 +2110,7 @@ DELIMITER ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = utf8mb4 */ ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
@@ -2029,7 +2154,7 @@ DELIMITER ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = utf8mb4 */ ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
@@ -2096,7 +2221,7 @@ DELIMITER ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = utf8mb4 */ ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
@@ -2117,7 +2242,7 @@ DELIMITER ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = utf8mb4 */ ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
@@ -2137,7 +2262,7 @@ DELIMITER ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = utf8mb4 */ ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
@@ -2163,7 +2288,7 @@ DELIMITER ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = utf8mb4 */ ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
 DELIMITER ;;
@@ -2187,4 +2312,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-12-04 23:09:36
+-- Dump completed on 2025-12-06 11:19:14

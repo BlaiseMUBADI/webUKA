@@ -252,13 +252,126 @@ function Affichage_ECs_Par_Filiere()
         case_cocher.classList.add("form-check-input", "m-0");
         case_cocher.classList.add("form-check-input")
 
-        if(ec.etat_ec===1 && ec.etat_ec_pris===1 )
+        // Lorsque Un EC appartient au SM selectionné et qu'il a appartient à l'enseignant selectionné
+        // On donne la possibilité a l'utilisateur de décocher la case
+        // et la case est cochée par défaut ( ce qui veu dire que c'est EC est aligné  avec cet enseignant)
+        if(ec.etat_ec_pris_sm_envoyer===1 && ec.etat_ec_pris_enseignant===1 )
         {
           case_cocher.disabled=false;
           case_cocher.checked=true;
+          
+          // Style visuel moderne vert pour EC aligné avec cet enseignant (modifiable)
+          tr.style.backgroundColor = '#d1fae5'; // Vert très clair (green-100)
+          tr.style.borderLeft = '4px solid #10b981'; // Bordure verte moderne (green-500)
+          tr.style.opacity = '1';
+          
+          // Titre infobulle
+          tr.title = `✅ Cet EC est aligné avec vous dans ce semestre. Vous pouvez le décocher pour le retirer.`;
+          
+          // Ajouter une icône de succès dans l'intitulé
+          const iconSuccess = document.createElement('span');
+          iconSuccess.textContent = ' ✓';
+          iconSuccess.style.color = '#10b981';
+          iconSuccess.style.fontWeight = 'bold';
+          iconSuccess.style.marginLeft = '8px';
+          iconSuccess.title = `Aligné avec vous`;
+          td_intitule.appendChild(iconSuccess);
         }
-        if((ec.etat_ec!==1 && ec.etat_ec_pris===1 ))case_cocher.disabled=true;
-        if(ec.etat_ec_pris === 1)case_cocher.checked=true;
+
+        // Lorsque Un EC appartient au SM selectionné et qu'il n'a pas appartient à l'enseignant selectionné
+        // Ce qui veut dire que cet EC est aligné avec un autre enseignant dans cette promotion 
+        // pour cette année académique et ce semestre
+        // On doit bloquer la case à cocher et la case doite etre cochée par défaut
+        if((ec.etat_ec_pris_sm_envoyer===1 && ec.etat_ec_pris_enseignant!==1 ))
+        {
+            case_cocher.disabled=true;
+            case_cocher.checked=true;
+            
+            // Style visuel moderne orange pour EC pris par un autre enseignant dans CE semestre
+            tr.style.backgroundColor = '#fef3c7'; // Orange très clair (amber-100)
+            tr.style.borderLeft = '4px solid #f59e0b'; // Bordure orange moderne (amber-500)
+            tr.style.opacity = '0.85';
+            
+            // Titre infobulle avec nom complet de l'agent
+            const semestreActuel = cmb_semestre_alignre.value || 'actuel';
+            const titreAgent = ec.Titre_Academique_Agent || '';
+            const nomCompletAgent = ec.Nom_Complet_Agent || ec.Mat_agent || 'un autre enseignant';
+            const agentComplet = titreAgent ? `${titreAgent}. ${nomCompletAgent}` : nomCompletAgent;
+            tr.title = `⚠️ Cet EC est déjà aligné dans ce semestre (S${semestreActuel}) avec ${agentComplet}`;
+            
+            // Ajouter une icône d'avertissement dans l'intitulé
+            const iconWarning = document.createElement('span');
+            iconWarning.textContent = ' ⚠️';
+            iconWarning.style.color = '#f59e0b';
+            iconWarning.style.fontWeight = 'bold';
+            iconWarning.style.marginLeft = '8px';
+            iconWarning.title = `Pris par ${agentComplet}`;
+            td_intitule.appendChild(iconWarning);
+        }
+        
+        // Lorsque Un EC n'appartient pas au SM selectionné 
+        // Mais il est aligné dans cette promotion pour cette année académique dans un autre semestre
+        // On doit bloquer la case et appliquer un style visuel mauve moderne
+
+        if((ec.etat_ec_pris_sm_envoyer!==1 && ec.etat_ec_pris_dans_promotion ===1 ))
+        {
+            case_cocher.disabled=true;
+            case_cocher.checked=true;
+            
+            // Style visuel moderne mauve pour EC déjà pris dans un autre semestre de cette promotion
+            tr.style.backgroundColor = '#f3e8ff'; // Mauve très clair (purple-100)
+            tr.style.borderLeft = '4px solid #a855f7'; // Bordure mauve moderne (purple-500)
+            tr.style.opacity = '0.85';
+            
+            // Titre infobulle avec nom complet de l'agent
+            const semestreAligne = ec.Id_Semestre || 'inconnu';
+            const titreAgent = ec.Titre_Academique_Agent || '';
+            const nomCompletAgent = ec.Nom_Complet_Agent || ec.Mat_agent || 'un enseignant';
+            const agentComplet = titreAgent ? `${titreAgent}. ${nomCompletAgent}` : nomCompletAgent;
+            tr.title = `⚠️ Cet EC est déjà aligné dans le Semestre ${semestreAligne} de cette promotion et attribué à ${agentComplet}`;
+            
+            // Ajouter une icône d'avertissement dans l'intitulé
+            const iconWarning = document.createElement('span');
+            iconWarning.textContent = ' 🔒';
+            iconWarning.style.color = '#a855f7';
+            iconWarning.style.fontWeight = 'bold';
+            iconWarning.style.marginLeft = '8px';
+            iconWarning.title = `Déjà Aligné en S${semestreAligne} par ${agentComplet}`;
+            td_intitule.appendChild(iconWarning);
+        }
+
+        // Lorsque Un EC appartient à l'année académique sélectionnée
+        // Donc il est aligné dans une autre promotion (cours cyclique)
+        // L'EC est disponible pour être aligné dans cette promotion
+
+        if((ec.etat_ec_pris_dans_annee===1 && ec.etat_ec_pris_sm_envoyer!==1 && ec.etat_ec_pris_dans_promotion!==1 ))
+        {
+            case_cocher.disabled=false;
+            case_cocher.checked=false;
+            
+            // Style visuel moderne bleu pour EC utilisé dans une autre promotion (disponible ici)
+            tr.style.backgroundColor = '#dbeafe'; // Bleu très clair (blue-100)
+            tr.style.borderLeft = '4px solid #3b82f6'; // Bordure bleue moderne (blue-500)
+            tr.style.opacity = '0.90';
+            
+            // Titre infobulle avec nom complet de l'agent
+            const semestreAligne = ec.Id_Semestre || 'inconnu';
+            const titreAgent = ec.Titre_Academique_Agent || '';
+            const nomCompletAgent = ec.Nom_Complet_Agent || ec.Mat_agent || 'un enseignant';
+            const agentComplet = titreAgent ? `${titreAgent}. ${nomCompletAgent}` : nomCompletAgent;
+            tr.title = `ℹ️ Cet EC est utilisé dans une autre promotion (Semestre ${semestreAligne}) par ${agentComplet}. Il est disponible pour cette promotion.`;
+            
+            // Ajouter une icône d'information dans l'intitulé
+            const iconInfo = document.createElement('span');
+            iconInfo.textContent = ' ℹ️';
+            iconInfo.style.color = '#3b82f6';
+            iconInfo.style.fontWeight = 'bold';
+            iconInfo.style.marginLeft = '8px';
+            iconInfo.title = `Cours cyclique - Disponible`;
+            td_intitule.appendChild(iconInfo);
+        }
+
+        //if(ec.etat_ec_pris_enseignant === 1)case_cocher.checked=true;
         
         
         
@@ -801,8 +914,6 @@ function modifierEnseignant() {
   console.log('✏️ Modification de l\'enseignant:', selectedEnseignant.enseignant);
   console.log('📋 Données:', selectedEnseignant);
   console.log('⚠️ Fonctionnalité à développer: Modification des données de l\'enseignant');
-  
-  // TODO: Implémenter la fonctionnalité de modification
 }
 
 // Fonction pour afficher l'historique des cours (à développer)
@@ -897,3 +1008,80 @@ function Fermer_Boite_Alert_SM_EC() {
     dialog.close();
   }
 }
+
+/*
+*****************************************************************************************
+************  FONCTIONNALITÉ DE RECHERCHE DANS LES TABLEAUX **************************
+*****************************************************************************************
+*/
+
+// Fonction utilitaire pour normaliser les chaînes (enlever accents et mettre en minuscules)
+function normalizeString(str) {
+  if (!str) return '';
+  return str.toString()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+// Fonction générique de filtrage de tableau
+function filterTable(searchInputId, tableId) {
+  const searchInput = document.getElementById(searchInputId);
+  const table = document.getElementById(tableId);
+  
+  // Ne rien faire si les éléments n'existent pas (on n'est pas sur la bonne page)
+  if (!searchInput || !table) {
+    return;
+  }
+
+  searchInput.addEventListener('input', function() {
+    const searchTerm = normalizeString(this.value);
+    const tbody = table.querySelector('tbody');
+    
+    if (!tbody) {
+      return;
+    }
+
+    const rows = tbody.querySelectorAll('tr');
+    let visibleCount = 0;
+
+    rows.forEach(row => {
+      // Récupérer tout le texte de la ligne
+      const rowText = normalizeString(row.textContent);
+      
+      if (rowText.includes(searchTerm)) {
+        row.style.display = '';
+        visibleCount++;
+      } else {
+        row.style.display = 'none';
+      }
+    });
+
+    // Log pour debug (optionnel)
+    console.log(`🔍 Recherche dans ${tableId}: "${this.value}" - ${visibleCount} résultats`);
+  });
+}
+
+// Initialisation des filtres de recherche au chargement du DOM
+document.addEventListener('DOMContentLoaded', function() {
+  // Vérifier d'abord si on est sur la page d'alignement des ECs
+  const container = document.getElementById("div_gen_Aligne_Enseignant");
+  if (!container) {
+    // Pas sur la bonne page, ne rien faire
+    return;
+  }
+  
+  // Attendre un peu que les tableaux soient chargés
+  setTimeout(() => {
+    // Filtrage pour le tableau des enseignants
+    filterTable('search_enseignant', 'table_aligne_enseignant');
+    
+    // Filtrage pour le tableau des ECs
+    filterTable('search_ec', 'table_aligne_EC');
+    
+    // Filtrage pour le tableau des assistants
+    filterTable('search_assistant', 'table_aligne_assistant');
+    
+    console.log('✅ Filtres de recherche initialisés pour les 3 tableaux');
+  }, 500);
+});

@@ -592,3 +592,74 @@ if(document.getElementById("div_gen_Aligne_Enseignant")!==null)
  
  /*********************************FIN SUPPRESSION UE ******************************************* */
 } 
+
+/*
+*****************************************************************************************
+************  FONCTIONNALITÉ DE RECHERCHE DANS LES TABLEAUX **************************
+*****************************************************************************************
+*/
+
+// Fonction utilitaire pour normaliser les chaînes (enlever accents et mettre en minuscules)
+function normalizeString(str) {
+  if (!str) return '';
+  return str.toString()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+// Fonction générique de filtrage de tableau
+function filterTable(searchInputId, tableId) {
+  const searchInput = document.getElementById(searchInputId);
+  const table = document.getElementById(tableId);
+  
+  if (!searchInput || !table) {
+    console.warn(`⚠️ Élément non trouvé: ${searchInputId} ou ${tableId}`);
+    return;
+  }
+
+  searchInput.addEventListener('input', function() {
+    const searchTerm = normalizeString(this.value);
+    const tbody = table.querySelector('tbody');
+    
+    if (!tbody) {
+      console.warn(`⚠️ Tbody non trouvé dans ${tableId}`);
+      return;
+    }
+
+    const rows = tbody.querySelectorAll('tr');
+    let visibleCount = 0;
+
+    rows.forEach(row => {
+      // Récupérer tout le texte de la ligne
+      const rowText = normalizeString(row.textContent);
+      
+      if (rowText.includes(searchTerm)) {
+        row.style.display = '';
+        visibleCount++;
+      } else {
+        row.style.display = 'none';
+      }
+    });
+
+    // Log pour debug (optionnel)
+    console.log(`🔍 Recherche dans ${tableId}: "${this.value}" - ${visibleCount} résultats`);
+  });
+}
+
+// Initialisation des filtres de recherche au chargement du DOM
+document.addEventListener('DOMContentLoaded', function() {
+  // Attendre un peu que les tableaux soient chargés
+  setTimeout(() => {
+    // Filtrage pour le tableau des enseignants
+    filterTable('search_enseignant', 'table_aligne_enseignant');
+    
+    // Filtrage pour le tableau des ECs
+    filterTable('search_ec', 'table_aligne_EC');
+    
+    // Filtrage pour le tableau des assistants
+    filterTable('search_assistant', 'table_aligne_assistant');
+    
+    console.log('✅ Filtres de recherche initialisés pour les 3 tableaux');
+  }, 500);
+});

@@ -52,7 +52,8 @@
     display: flex;
     flex-direction: row;
     gap: 12px;
-    height: 500px;
+    height: calc(100vh - 200px);
+    min-height: 600px;
     background-color: rgb(39,55,70);
   }
   .ligne-tables .bloc {
@@ -86,9 +87,75 @@
     .enseignants, .assistants, .ecs { flex: 0 0 auto; min-width: 100%; }
     .ecs { min-width: 100%; }
   }
+  /* Style pour les zones de recherche - Design moderne et attractif */
+  .search-box {
+    margin-bottom: 12px;
+    padding: 0 10px;
+  }
+  
+  .search-box input {
+    width: 100%;
+    padding: 12px 16px 12px 40px;
+    border: 2px solid rgba(255,255,255,0.15);
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.08) 100%);
+    backdrop-filter: blur(10px);
+    color: white;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.1);
+    letter-spacing: 0.3px;
+  }
+  
+  .search-box input::placeholder {
+    color: rgba(255,255,255,0.7);
+    font-weight: 400;
+    letter-spacing: 0.5px;
+  }
+  
+  .search-box input:hover {
+    border-color: rgba(255,255,255,0.3);
+    background: linear-gradient(135deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.12) 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.15);
+  }
+  
+  .search-box input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    background: linear-gradient(135deg, rgba(59,130,246,0.2) 0%, rgba(59,130,246,0.1) 100%);
+    box-shadow: 0 8px 16px rgba(59,130,246,0.3), 
+                0 0 0 4px rgba(59,130,246,0.15),
+                inset 0 1px 0 rgba(255,255,255,0.2);
+    transform: translateY(-2px);
+  }
+  
+  /* Animation de l'icône de recherche */
+  .search-box {
+    position: relative;
+  }
+  
+  .search-box::before {
+    content: "🔍";
+    position: absolute;
+    left: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px;
+    pointer-events: none;
+    z-index: 1;
+    filter: grayscale(30%);
+    transition: all 0.3s ease;
+  }
+  
+  .search-box:has(input:focus)::before {
+    filter: grayscale(0%);
+    transform: translateY(-50%) scale(1.1);
+  }
 </style>
 
-<section class="home-section" style="height: 100%;">
+<section class="home-section" style="height: 100%; "style="border:solid 1px red;">
       <?php
         require_once 'Profil_Gestion_delibe.php';
       ?>
@@ -211,6 +278,9 @@
             </div>
             <span class="badge bg-light text-primary" id="badge_enseignants">0</span>
           </div>
+          <div class="search-box">
+            <input type="text" id="search_enseignant" placeholder="Rechercher un enseignant..." />
+          </div>
           <div class="container table-responsive small p-0 m-0 table-scroll">
             <table class="tab1 table-hover text-center" id="table_aligne_enseignant" style="width:100%; border-collapse: collapse;">             
               <thead>
@@ -234,6 +304,9 @@
               <strong>Éléments Constitutifs (ECs)</strong>
             </div>
             <span class="badge bg-light text-purple" id="badge_ecs" style="color:#7c3aed;">0</span>
+          </div>
+          <div class="search-box">
+            <input type="text" id="search_ec" placeholder="Rechercher un élément constitutif..." />
           </div>
           <div class="container table-responsive small p-0 m-0 table-scroll" style="overflow-x:hidden;">
             <table class="tab1 table-hover table-striped" id="table_aligne_EC" style="width:100%;">             
@@ -265,6 +338,9 @@
               <strong>Assistants</strong>
             </div>
             <span class="badge bg-light text-success" id="badge_assistants">0</span>
+          </div>
+          <div class="search-box">
+            <input type="text" id="search_assistant" placeholder="Rechercher un assistant..." />
           </div>
           <div class="container table-responsive small p-0 m-0 table-scroll" style="overflow-x:hidden;">
             <table class="tab1 table-hover text-center" id="table_aligne_assistant" style="width:100%;">             

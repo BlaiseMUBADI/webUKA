@@ -558,7 +558,7 @@ function Ajout_Membre() {
   };
 
   // TODO: Créer l'API PHP pour ajouter un membre au jury
-  fetch('API_PHP/Ajout_Membre_Jury.php', {
+  fetch('API_PHP/Ajout_membre_Jury.php', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'

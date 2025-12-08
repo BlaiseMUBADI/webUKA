@@ -107,7 +107,7 @@
             if($_GET['page']=="gestion_Aligne_ECs") require_once 'Entree_Par_Gestion_Aligne_ECs.php';
             if($_GET['page']=="gestion_Enseignants") require_once 'Entree_Par_Gestion_Enseignants.php';
             if($_GET['page']=="gestion_jury") require_once 'Entree_Par_Gestion_Jury.php';
-            if($_GET['page']=="gestion_encodage") require_once 'Entree_Par_encodage.php';
+            if($_GET['page']=="gestion_encodage") require_once 'Entree_Par_Encodage.php';
 
             if($_GET['page']=="non_acces") require_once 'Entree_Erreur.php';
             

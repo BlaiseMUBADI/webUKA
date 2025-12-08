@@ -1,9 +1,12 @@
-  console.log(" je suis dans Manip_EC_Aligne")
+  console.log(" je suis dans Manip_EC_Aligne - VERSION CORRIGÉE")
 
   /*
   *++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   *+++++++++++++++++++ C'est un script qui se charge de la manipulation des comptes agents+++++++++
+  *++++++++++++++++++++++ VERSION CORRIGÉE: Protection alignement multiple ECs par promotion +++++
   +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  *
+  * CORRECTION: Un EC ne peut être aligné qu'une seule fois par promotion (peu importe le semestre)
   *
   */
 
@@ -243,6 +246,36 @@ function Affichage_ECs_Par_Filiere()
         td_intitule.textContent = ec.Intutile_ec;
         td_credits.textContent = ec.Credit;
 
+        // ========================================================================
+        // NOUVEAU: Vérification si l'EC est déjà pris dans la promotion
+        // ========================================================================
+        const estDejaAligneDansPromotion = ec.etat_ec_pris_dans_promotion === 1 || ec.etat_ec_pris_dans_promotion === true;
+        const semestreAlignementPromotion = ec.Id_Semestre; // Colonne directe de la procédure
+        // Générer le nom du semestre à partir de l'ID
+        const nomSemestreAlignementPromotion = semestreAlignementPromotion ? `Semestre ${semestreAlignementPromotion}` : null;
+        const matAgentAlignementPromotion = ec.Mat_agent; // Matricule de l'agent qui a aligné
+        const semestreActuel = parseInt(cmb_semestre_alignre.value);
+        
+        // L'EC est déjà pris dans UN AUTRE semestre de cette promotion
+        const estAligneDansAutreSemestre = estDejaAligneDansPromotion && 
+                                           semestreAlignementPromotion !== null && 
+                                           semestreAlignementPromotion !== semestreActuel;
+
+        // ========================================================================
+        // Appliquer le style visuel si l'EC est déjà pris dans un autre semestre
+        // ========================================================================
+        if (estAligneDansAutreSemestre) {
+          tr.style.backgroundColor = '#fee2e2'; // Rouge moderne clair
+          tr.style.borderLeft = '4px solid #ef4444'; // Bordure rouge
+          tr.title = `⚠️ Cet EC est déjà aligné dans le ${nomSemestreAlignementPromotion || 'semestre ' + semestreAlignementPromotion} de cette promotion par l'agent ${matAgentAlignementPromotion || 'un enseignant'}`;
+          
+          // Ajouter une icône d'avertissement dans l'intitulé
+          const iconWarning = document.createElement('span');
+          iconWarning.textContent = ' ⚠️';
+          iconWarning.style.color = '#ef4444';
+          iconWarning.style.fontWeight = 'bold';
+          iconWarning.title = `Déjà aligné en ${nomSemestreAlignementPromotion || 'S' + semestreAlignementPromotion}`;
+        }
 
         var div = document.createElement("div");
         div.classList.add("d-flex", "justify-content-center", "align-items-center", "p-0", "m-0");
@@ -252,13 +285,24 @@ function Affichage_ECs_Par_Filiere()
         case_cocher.classList.add("form-check-input", "m-0");
         case_cocher.classList.add("form-check-input")
 
-        if(ec.etat_ec===1 && ec.etat_ec_pris===1 )
-        {
+        // ========================================================================
+        // NOUVELLE LOGIQUE: Désactiver si déjà aligné dans un autre semestre
+        // ========================================================================
+        if (estAligneDansAutreSemestre) {
+          // EC déjà aligné dans un AUTRE semestre de cette promotion
+          case_cocher.disabled = true;
+          case_cocher.checked = false;
+          case_cocher.style.cursor = 'not-allowed';
+        } else if(ec.etat_ec_pris_enseignant===1 && ec.etat_ec_pris_sm_envoyer===1) {
+          // EC aligné par cet enseignant pour ce semestre
           case_cocher.disabled=false;
           case_cocher.checked=true;
+        } else if((ec.etat_ec_pris_enseignant!==1 && ec.etat_ec_pris_sm_envoyer===1)) {
+          // EC pris par un autre enseignant pour ce semestre
+          case_cocher.disabled=true;
         }
-        if((ec.etat_ec!==1 && ec.etat_ec_pris===1 ))case_cocher.disabled=true;
-        if(ec.etat_ec_pris === 1)case_cocher.checked=true;
+        
+        if(ec.etat_ec_pris_sm_envoyer === 1)case_cocher.checked=true;
         
         
         
@@ -287,6 +331,29 @@ function Affichage_ECs_Par_Filiere()
               if (!cmb_promotion_FAC.value || cmb_promotion_FAC.value === 'rien') messagesManquants.push('<strong>Promotion</strong>');
               
               textAlert.innerHTML = '⚠️ <strong>ATTENTION!</strong><br><br>Veuillez sélectionner les éléments suivants avant de cocher un EC:<br><br>' + messagesManquants.join(', ');
+              dialog.showModal();
+            }
+            
+            return;
+          }
+          
+          // ========================================================================
+          // NOUVELLE VÉRIFICATION: Bloquer si déjà aligné dans un autre semestre
+          // ========================================================================
+          if (estAligneDansAutreSemestre) {
+            e.preventDefault();
+            case_cocher.checked = false;
+            
+            const dialog = document.getElementById('boite_alert_SM_EC');
+            const textAlert = document.getElementById('text_alert_boite_EC');
+            
+            if (dialog && textAlert) {
+              textAlert.innerHTML = `
+                ⚠️ <strong>EC DÉJÀ ALIGNÉ DANS CETTE PROMOTION!</strong><br><br>
+                Cet EC "<strong>${ec.Intutile_ec}</strong>" est déjà aligné dans le <strong>${nomSemestreAlignementPromotion || 'semestre ' + semestreAlignementPromotion}</strong> 
+                de cette promotion par l'agent <strong>${matAgentAlignementPromotion || 'un enseignant'}</strong>.<br><br>
+                <strong>Règle:</strong> Un EC ne peut être aligné qu'une seule fois par promotion, peu importe le semestre.
+              `;
               dialog.showModal();
             }
             
