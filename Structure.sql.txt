@@ -345,7 +345,7 @@ CREATE TABLE `element_constitutifs_aligne` (
   CONSTRAINT `element_constitutifs_aligne_ibfk_4` FOREIGN KEY (`Code_promotion`) REFERENCES `promotion` (`Code_Promotion`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `element_constitutifs_aligne_ibfk_5` FOREIGN KEY (`Mat_assistant`) REFERENCES `agent` (`Mat_agent`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `fk_Element_constitufs_aligne_Element_constutifs1` FOREIGN KEY (`id_ec`) REFERENCES `element_constitutifs` (`id_ec`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=48 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -714,7 +714,7 @@ CREATE TABLE `payer_frais` (
   CONSTRAINT `fk_Paie_Etudiant_Lieu_paiement1` FOREIGN KEY (`idLieu_paiement`) REFERENCES `lieu_paiement` (`idLieu_paiement`),
   CONSTRAINT `fk_Payer_Frais_Agent1` FOREIGN KEY (`Mat_agent`) REFERENCES `agent` (`Mat_agent`),
   CONSTRAINT `payer_frais_ibfk_1` FOREIGN KEY (`idFrais`) REFERENCES `frais` (`idFrais`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE=InnoDB AUTO_INCREMENT=489190 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=489191 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -1067,7 +1067,7 @@ CREATE TABLE `t_jury_deliberation` (
   KEY `Code_Promotion` (`Code_Promotion`),
   CONSTRAINT `t_jury_deliberation_ibfk_1` FOREIGN KEY (`idAnnee_Acad`) REFERENCES `annee_academique` (`idAnnee_Acad`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `t_jury_deliberation_ibfk_2` FOREIGN KEY (`Code_Promotion`) REFERENCES `promotion` (`Code_Promotion`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1092,7 +1092,7 @@ CREATE TABLE `t_membre_jury` (
   KEY `Mat_agent` (`Mat_agent`),
   CONSTRAINT `t_membre_jury_ibfk_1` FOREIGN KEY (`ID_jury`) REFERENCES `t_jury_deliberation` (`ID_jury`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `t_membre_jury_ibfk_2` FOREIGN KEY (`Mat_agent`) REFERENCES `agent` (`Mat_agent`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1701,84 +1701,247 @@ DELIMITER ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
 /*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
+/*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-CREATE DEFINER=`blaise`@`%` PROCEDURE `Liste_EC_Aligne`(IN `p_id_filiere` INT, IN `p_Mat_agent` VARCHAR(20), IN `p_idAnnee_Acad` INT, IN `p_Id_Semestre` INT, IN `p_Code_Promotion` VARCHAR(10))
+CREATE DEFINER=`blaise`@`%` PROCEDURE `Liste_EC_Aligne`(
+
+    IN `p_id_filiere` INT, 
+
+    IN `p_Mat_agent` VARCHAR(20), 
+
+    IN `p_idAnnee_Acad` INT, 
+
+    IN `p_Id_Semestre` INT, 
+
+    IN `p_Code_Promotion` VARCHAR(10)
+
+)
 BEGIN
+
+    -- ========================================================================
+
+    -- SÉLECTION DES ÉLÉMENTS CONSTITUTIFS (EC) AVEC DÉTECTION D'ALIGNEMENT
+
+    -- ========================================================================
+
     SELECT 
+
+        -- Informations de base de l'EC
+
         ec.id_ec,
+
         ec.Intutile_ec,
+
         ec.Credit,
+
         ec.CMI,
+
         ec.Hr_TD,
+
         ec.Hr_TP,
+
         ec.TPE,
+
         ec.VHT,
+
         ue.Intitule_ue,
+
         f.Libelle_Filiere,
-        CASE 
-            WHEN eca.Mat_agent IS NOT NULL THEN TRUE
-            ELSE FALSE
-        END AS etat_ec,
-        CASE 
-            WHEN eca_global.id_ec IS NOT NULL THEN TRUE
-            ELSE FALSE
-        END AS etat_ec_pris,
-        CASE 
-            WHEN eca_annee.id_ec IS NOT NULL THEN TRUE
-            ELSE FALSE
-        END AS etat_ec_pris_dans_annee,
-        -- NOUVEAU: EC déjà aligné dans cette promotion (peu importe le semestre)
-        CASE 
-            WHEN eca_promotion.id_ec IS NOT NULL THEN TRUE
-            ELSE FALSE
-        END AS etat_ec_pris_dans_promotion,
-        -- NOUVEAU: Informations sur le semestre où l'EC est déjà aligné dans cette promotion
-        eca_promotion.Id_Semestre AS semestre_alignement_promotion,
-        s_prom.libelle_semestre AS nom_semestre_alignement_promotion,
-        eca_promotion.Mat_agent AS mat_agent_alignement_promotion,
-        CONCAT(a_prom.Nom_agent, ' ', a_prom.Post_agent, ' ', a_prom.Prenom) AS nom_agent_alignement_promotion,
-        CASE 
-            WHEN eca.Mat_agent = p_Mat_agent THEN 1
-            WHEN eca_global.id_ec IS NOT NULL THEN 2
-            ELSE 3
-        END AS ordre_tri,
-        eca.id_ec_aligne
+
+        eca_promotion.Id_Semestre,
+
+        eca_promotion.Mat_agent,
+
+        CONCAT(a_prom.Nom_agent, ' ', a_prom.Post_agent, ' ', a_prom.Prenom) AS Nom_Complet_Agent,
+
+        a_prom.Grade AS Titre_Academique_Agent,
+
         
+
+        
+
+        
+
+        -- État d'alignement: EC pris par quelqu'un pour ce semestre/année
+
+        CASE 
+
+            WHEN eca_global.id_ec IS NOT NULL THEN TRUE
+
+            ELSE FALSE
+
+        END AS etat_ec_pris_sm_envoyer,
+
+
+
+        -- État d'alignement: EC aligné par cet enseignant pour ce contexte
+
+        CASE 
+
+            WHEN eca.Mat_agent IS NOT NULL THEN TRUE
+
+            ELSE FALSE
+
+        END AS etat_ec_pris_enseignant,
+
+        
+
+        -- État d'alignement: EC pris dans l'année académique (tous semestres)
+
+        CASE 
+
+            WHEN eca_annee.id_ec IS NOT NULL THEN TRUE
+
+            ELSE FALSE
+
+        END AS etat_ec_pris_dans_annee,
+
+        
+
+        -- ====================================================================
+
+        -- NOUVEAU: État d'alignement dans la promotion
+
+        -- ====================================================================
+
+        -- Indique si l'EC est déjà aligné dans cette promotion
+
+        -- (peu importe le semestre ou l'enseignant)
+
+        CASE 
+
+            WHEN eca_promotion.id_ec IS NOT NULL THEN TRUE
+
+            ELSE FALSE
+
+        END AS etat_ec_pris_dans_promotion,
+
+        
+
+        -- Ordre de tri pour affichage prioritaire
+
+        CASE 
+
+            WHEN eca.Mat_agent = p_Mat_agent THEN 1
+
+            WHEN eca_global.id_ec IS NOT NULL THEN 2
+
+            ELSE 3
+
+        END AS ordre_tri
+
+        
+
     FROM 
+
         element_constitutifs ec
+
+    
+
+    -- ========================================================================
+
+    -- JOINTURES PRINCIPALES
+
+    -- ========================================================================
+
     JOIN 
+
         unite_enseignement ue ON ec.Code_ue = ue.Code_ue
+
     JOIN 
+
         filiere f ON ue.IdFiliere = f.IdFiliere
+
+    
+
+    -- ========================================================================
+
+    -- JOINTURES POUR DÉTECTION D'ALIGNEMENT (ANCIENNES)
+
+    -- ========================================================================
+
+    -- Alignement par cet enseignant pour ce contexte précis
+
     LEFT JOIN 
+
         element_constitutifs_aligne eca ON ec.id_ec = eca.id_ec 
+
         AND eca.Mat_agent = p_Mat_agent
+
         AND eca.idAnnee_Acad = p_idAnnee_Acad
+
         AND eca.Id_Semestre = p_Id_Semestre
+
         AND eca.Code_Promotion = p_Code_Promotion
+
+    
+
+    -- Alignement global pour ce semestre/année
+
     LEFT JOIN 
+
         element_constitutifs_aligne eca_global ON ec.id_ec = eca_global.id_ec 
+
         AND eca_global.idAnnee_Acad = p_idAnnee_Acad
+
         AND eca_global.Id_Semestre = p_Id_Semestre
+
+    
+
+    -- Alignement dans l'année académique (tous semestres)
+
     LEFT JOIN 
+
         element_constitutifs_aligne eca_annee ON ec.id_ec = eca_annee.id_ec 
+
         AND eca_annee.idAnnee_Acad = p_idAnnee_Acad
-    -- NOUVEAU: Jointure pour détecter si l'EC est déjà aligné dans cette promotion
+
+    
+
+    -- ========================================================================
+
+    -- NOUVELLE JOINTURE: Détection d'alignement dans la promotion
+
+    -- ========================================================================
+
+    -- Cette jointure détecte si l'EC est déjà aligné dans CETTE promotion spécifique
+
+    -- peu importe le semestre (S1, S2, S3...) mais UNIQUEMENT dans cette promotion
+
     LEFT JOIN 
+
         element_constitutifs_aligne eca_promotion ON ec.id_ec = eca_promotion.id_ec 
+
         AND eca_promotion.Code_Promotion = p_Code_Promotion
+
         AND eca_promotion.idAnnee_Acad = p_idAnnee_Acad
-    -- Jointure pour récupérer le nom du semestre où l'EC est aligné dans la promotion
+
+    
+
+    -- Jointure pour récupérer le nom complet de l'agent qui a aligné l'EC
+
     LEFT JOIN 
-        semestre s_prom ON eca_promotion.Id_Semestre = s_prom.Id_Semestre
-    -- Jointure pour récupérer le nom de l'agent qui a aligné l'EC dans la promotion
-    LEFT JOIN 
+
         agent a_prom ON eca_promotion.Mat_agent = a_prom.Mat_agent
+
+    
+
+    -- ========================================================================
+
+    -- FILTRAGE ET TRI
+
+    -- ========================================================================
+
     WHERE 
+
         f.IdFiliere = p_id_filiere
+
+        
+
     ORDER BY 
+
         ordre_tri, ec.id_ec;
+
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1896,16 +2059,49 @@ DELIMITER ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
 /*!50003 SET collation_connection  = utf8mb4_unicode_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
+/*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
 CREATE DEFINER=`blaise`@`%` PROCEDURE `Liste_etudiant_deliberation`(IN `promo_code` VARCHAR(10), IN `annee_acad` INT)
 BEGIN
-    SELECT e.Matricule, CONCAT(e.Nom,' ', e.Postnom,' ', e.Prenom) as ident_etudiant
+
+    
+
+    SELECT 
+
+        e.Matricule,
+
+        CONCAT(
+
+            IFNULL(e.Nom, ''), 
+
+            ' ', 
+
+            IFNULL(e.Postnom, ''), 
+
+            ' ', 
+
+            IFNULL(e.Prenom, '')
+
+        ) AS ident_etudiant
+
     FROM etudiant e
-    JOIN passer_par p ON e.Matricule = p.Etudiant_Matricule
-    WHERE p.Code_Promotion = promo_code
-    AND p.idAnnee_academique = annee_acad
-    ORDER BY e.Nom, e.Postnom, e.Prenom;
+
+    INNER JOIN passer_par pp ON e.Matricule = pp.Etudiant_Matricule
+
+    INNER JOIN promotion p ON pp.Code_Promotion = p.Code_Promotion
+
+    INNER JOIN mentions m ON p.idMentions = m.idMentions
+
+    INNER JOIN filiere f ON m.IdFiliere = f.IdFiliere
+
+    INNER JOIN annee_academique aa ON pp.idAnnee_academique = aa.idAnnee_Acad
+
+    WHERE pp.Code_Promotion = promo_code
+
+      AND aa.idAnnee_Acad = annee_acad
+
+    ORDER BY e.Nom ASC, e.Postnom ASC, e.Prenom ASC;
+
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -2312,4 +2508,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-12-06 11:19:14
+-- Dump completed on 2025-12-08 22:24:40

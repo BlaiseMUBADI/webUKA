@@ -86,7 +86,7 @@ if(isset($_POST['Decon']))
           <a class="dropdown-item" 
             href="Principale_fac.php<?php 
             
-              if($_SESSION['Categorie']=="Secrétaire_jury") echo"?page=gestion_encodage";
+              if($_SESSION['Role_Jury'] =="Secrétaire") echo"?page=gestion_encodage";
               
               else echo"?page=non_acces";?>">
             <i class="fas fa-keyboard" style="color: #16a085 !important;"></i>
@@ -96,8 +96,8 @@ if(isset($_POST['Decon']))
           <a class="dropdown-item" 
             href="Principale_fac.php<?php 
             
-              if($_SESSION['Categorie']=="Secrétaire_jury") echo"?page=gestion_deliberation";
-              
+              if($_SESSION['Role_Jury']=="Président" || $_SESSION['Role_Jury']=="Secrétaire") echo"?page=gestion_deliberation";
+                
               else echo"?page=non_acces";?>">
             <i class="fas fa-gavel" style="color: #3498db !important;"></i>
             <span class="links_name">Délibération</span>
@@ -131,7 +131,7 @@ if(isset($_POST['Decon']))
           
             if($_SESSION['Categorie']=="Doyen" 
             || $_SESSION['Categorie']=="VD"
-            || $_SESSION['Categorie']=="Sec_facultaire") echo"?page=gestion_Enseignants";
+            || $_SESSION['Categorie']=="Sec_facultaire") echo"?page=gestion_Enseignants";            
             
             else echo"?page=non_acces";?>">
           <i class="fas fa-user-tie" style="color: #16a085 !important;"></i>

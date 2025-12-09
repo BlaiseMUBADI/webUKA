@@ -1,39 +1,215 @@
-console.log(" je suis dans Manip_encodage")
+console.log("🎓 Module Encodage chargé")
 
-// Déclaration de variable et des composants
-// Les éléments du DOM sont initialisés seulement si la page contient
-// l'élément parent `div_gen_encodage`. Cela évite que ce script lance des
-// getElementById() au top-level et retourne `null` quand il est inclus
-// sur d'autres pages.
-let cmb_semestre_encodage;
+// ==================== Variables Module Encodage ====================
+let cmb_semestre_encodage_enc;
+let selectedStudentMatricule_enc = null;
+let selectedStudentNom_enc = null;
 
-document.addEventListener("DOMContentLoaded",function(event)
-  {
+// ==================== Initialisation ====================
+document.addEventListener("DOMContentLoaded", function(event) {
     const container = document.getElementById("div_gen_encodage");
-    if(container !== null)
-    {
-      // initialiser les éléments en utilisant le conteneur pour éviter
-      // toute sélection hors-contexte lorsque ce script est inclus sur
-      // d'autres pages
-      cmb_semestre_encodage = container.querySelector('#id_semestre_encodage') || document.getElementById('id_semestre_encodage');
+    if (container !== null) {
+        cmb_semestre_encodage_enc = container.querySelector('#id_semestre_encodage') || document.getElementById('id_semestre_encodage');
 
-      Liste_Etudiants();
-      Afficher_EC_aligne_delibe();
-      
-      if (cmb_semestre_encodage !== null) {
-        cmb_semestre_encodage.addEventListener('change',(event)=> {
-          var id_semetre=cmb_semestre_encodage.value;
-          Liste_Ec_Aligne(id_semetre); 
-          Afficher_EC_aligne_delibe();
-        });
-      }
+        Liste_Etudiants();
+        Afficher_EC_aligne_encodage();
+        
+        if (cmb_semestre_encodage_enc !== null) {
+            cmb_semestre_encodage_enc.addEventListener('change', (event) => {
+                var id_semetre = cmb_semestre_encodage_enc.value;
+                Liste_Ec_Aligne(id_semetre); 
+                Afficher_EC_aligne_encodage();
+            });
+        }
 
-
+        // Initialiser le menu contextuel
+        initializeContextMenu();
+        
+        // Restaurer la préférence du menu
+        restoreMenuPreference();
     }
+});
 
+// ==================== Toggle Menu Sidebar ====================
+function toggleMenuEncodage() {
+    const sidebar = document.querySelector('.sidebar');
+    const container = document.getElementById('encodage-container');
+    const btn = document.querySelector('.toggle-menu-btn i');
+    
+    if (!sidebar || !container) return;
+    
+    sidebar.classList.toggle('active');
+    container.classList.toggle('fullscreen');
+    
+    // Changer l'icône selon l'état
+    const indicator = document.getElementById('fullscreen-indicator');
+    if (sidebar.classList.contains('active')) {
+        btn.className = 'fas fa-angle-double-right';
+        if (indicator) indicator.style.display = 'flex';
+    } else {
+        btn.className = 'fas fa-bars';
+        if (indicator) indicator.style.display = 'none';
+    }
+    
+    // Sauvegarder la préférence
+    localStorage.setItem('menuEncodageCollapsed', sidebar.classList.contains('active'));
+}
 
+function restoreMenuPreference() {
+    const isCollapsed = localStorage.getItem('menuEncodageCollapsed') === 'true';
+    if (isCollapsed) {
+        const sidebar = document.querySelector('.sidebar');
+        const container = document.getElementById('encodage-container');
+        const btn = document.querySelector('.toggle-menu-btn i');
+        
+        if (sidebar && container) {
+            sidebar.classList.add('active');
+            container.classList.add('fullscreen');
+            if (btn) btn.className = 'fas fa-angle-double-right';
+            
+            const indicator = document.getElementById('fullscreen-indicator');
+            if (indicator) indicator.style.display = 'flex';
+        }
+    }
+}
 
-})
+// ==================== Boîte d'Alerte Moderne ====================
+function Ouvrir_Boite_Alert_Encodage(text_a_afficher, type = 'info') {
+    const boite = document.getElementById('boite_alert_encodage');
+    const texte = document.getElementById('text_alert_boite_encodage');
+    const icon = document.getElementById('alert_icon_type_encodage');
+    
+    if (!boite || !texte || !icon) return;
+    
+    texte.innerText = text_a_afficher;
+    
+    // Changer l'icône selon le type
+    if (type === 'success') {
+        icon.className = 'fas fa-check-circle';
+    } else if (type === 'error') {
+        icon.className = 'fas fa-exclamation-circle';
+    } else if (type === 'warning') {
+        icon.className = 'fas fa-exclamation-triangle';
+    } else {
+        icon.className = 'fas fa-info-circle';
+    }
+    
+    boite.showModal();
+}
+
+function Fermer_Boite_Alert_Encodage() {
+    const boite = document.getElementById('boite_alert_encodage');
+    if (boite) boite.close();
+}
+
+// ==================== Menu Contextuel Étudiant ====================
+function initializeContextMenu() {
+    const table = document.getElementById('table_encodage');
+    const contextMenu = document.getElementById('contextMenuStudent');
+    
+    if (!table || !contextMenu) return;
+    
+    // Événement clic droit sur les lignes étudiants
+    table.addEventListener('contextmenu', function(e) {
+        const row = e.target.closest('tbody tr');
+        if (!row) return;
+        
+        e.preventDefault();
+        
+        // Récupérer les données de l'étudiant
+        const nomCell = row.querySelector('.cell-editable[data-matricule]');
+        if (!nomCell) return;
+        
+        selectedStudentMatricule_enc = nomCell.dataset.matricule;
+        
+        // Extraire le nom
+        const nameSpan = nomCell.querySelector('.student-name');
+        selectedStudentNom_enc = nameSpan ? nameSpan.textContent.trim() : 'Étudiant';
+        
+        // Positionner le menu
+        contextMenu.style.left = e.pageX + 'px';
+        contextMenu.style.top = e.pageY + 'px';
+        contextMenu.style.display = 'block';
+    });
+    
+    // Fermer le menu si clic ailleurs
+    document.addEventListener('click', function(e) {
+        if (!contextMenu.contains(e.target)) {
+            contextMenu.style.display = 'none';
+        }
+    });
+    
+    // Empêcher fermeture si clic dans le menu
+    contextMenu.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+}
+
+function afficherInfosEtudiant() {
+    if (!selectedStudentMatricule_enc) return;
+    
+    document.getElementById('contextMenuStudent').style.display = 'none';
+    
+    fetch('API_PHP/Recup_infos_etudiant.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ matricule: selectedStudentMatricule_enc })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            populateStudentModal(data.student);
+            document.getElementById('modal_Infos_Etudiant').showModal();
+        } else {
+            Ouvrir_Boite_Alert_Encodage('Erreur: ' + (data.message || 'Impossible de récupérer les informations'), 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+        Ouvrir_Boite_Alert_Encodage('Erreur lors de la récupération des informations', 'error');
+    });
+}
+
+function populateStudentModal(student) {
+    // Photo
+    const photoImg = document.getElementById('student_photo');
+    if (photoImg) {
+        photoImg.src = student.photo_url || '../Fichiers/Images/Profil.jpg';
+        photoImg.onerror = function() { this.src = '../Fichiers/Images/Profil.jpg'; };
+    }
+    
+    // Identité
+    document.getElementById('student_matricule').textContent = student.Matricule || '-';
+    document.getElementById('student_sexe').textContent = student.Sexe || '-';
+    document.getElementById('student_nom_complet').textContent = student.ident_etudiant || '-';
+    document.getElementById('student_date_naissance').textContent = student.date_naissance || '-';
+    document.getElementById('student_lieu_naissance').textContent = student.lieu_naissance || '-';
+    
+    // Contact
+    document.getElementById('student_telephone').textContent = student.telephone || '-';
+    document.getElementById('student_email').textContent = student.email || '-';
+    document.getElementById('student_adresse').textContent = student.adresse || '-';
+    
+    // Académique
+    document.getElementById('student_promotion').textContent = student.promotion || '-';
+    document.getElementById('student_annee_academique').textContent = student.annee_academique || '-';
+    document.getElementById('student_faculte').textContent = student.faculte || '-';
+    document.getElementById('student_filiere').textContent = student.filiere || '-';
+}
+
+function closeStudentModal() {
+    document.getElementById('modal_Infos_Etudiant').close();
+}
+
+function afficherHistoriqueNotes() {
+    document.getElementById('contextMenuStudent').style.display = 'none';
+    Ouvrir_Boite_Alert_Encodage('Fonctionnalité en cours de développement: Historique des notes pour ' + selectedStudentNom_enc, 'info');
+}
+
+function genererBulletin() {
+    document.getElementById('contextMenuStudent').style.display = 'none';
+    Ouvrir_Boite_Alert_Encodage('Génération du bulletin pour ' + selectedStudentNom_enc + ' en cours...', 'info');
+}
 
 /* ******************** LA FONCTION QUI R2CUPERE LMES ETUDIANTS DANS UNE PROMOTION ***********/
 /*async function Liste_Etudiants() {
@@ -78,11 +254,11 @@ async function Liste_Cotes(id_semestre) {
   return response.json();
 }
 
-async function Afficher_EC_aligne_delibe() {
+async function Afficher_EC_aligne_encodage() {
   // Récuperation des données envoyées par les API et les stockées dans un tableau
-  let tab_ECs_aligne = await Liste_Ec_Aligne(cmb_semestre_encodage.value);
+  let tab_ECs_aligne = await Liste_Ec_Aligne(cmb_semestre_encodage_enc.value);
   let tab_etudiants_aligne = await Liste_Etudiants();
-  let tab_Cotes = await Liste_Cotes(cmb_semestre_encodage.value); // Renommer la variable locale
+  let tab_Cotes = await Liste_Cotes(cmb_semestre_encodage_enc.value); // Renommer la variable locale
 
   // Vérification que les données sont bien des tableaux
   if (!Array.isArray(tab_ECs_aligne)) {
@@ -99,9 +275,9 @@ async function Afficher_EC_aligne_delibe() {
   }
 
   let table_encodage = document.getElementById("table_encodage");
-  while (table_encodage.firstChild) {
-      table_encodage.removeChild(table_encodage.firstChild);
-  }
+  
+  // Optimisation : Utiliser innerHTML pour meilleure performance avec 40+ ECs
+  table_encodage.innerHTML = '';
 
   var thead = document.createElement("thead");
   thead.classList.add("sticky-sm-top", "m-0", "fw-bold", "text-center"); // Pour ajouter la classe à un element HTMl
@@ -120,20 +296,32 @@ async function Afficher_EC_aligne_delibe() {
   td1.rowSpan = 3;
   td1.textContent = "N°";
   td1.classList.add("text-center", "header-fixed");
+  td1.style.minWidth = "50px";
+  td1.style.maxWidth = "50px";
+  td1.style.width = "50px";
 
   var td2 = document.createElement("td");
   td2.rowSpan = 3;
   td2.textContent = "NOM, POST, PRÉNOM";
   td2.classList.add("text-center", "header-fixed");
+  td2.style.minWidth = "280px";
+  td2.style.maxWidth = "280px";
+  td2.style.width = "280px";
 
   var td3 = document.createElement("td");
   td3.textContent = "EC";
-  td3.classList.add("text-center", "header-label");
+  td3.classList.add("text-center", "header-label", "header-label-sticky");
   td3.style.backgroundColor = "#2c3e50";
   td3.style.color = "white";
   td3.style.fontWeight = "700";
   td3.style.fontSize = "14px";
-  td3.style.letterSpacing = "1px"
+  td3.style.letterSpacing = "1px";
+  td3.style.position = "sticky";
+  td3.style.left = "330px";
+  td3.style.zIndex = "15";
+  td3.style.minWidth = "60px";
+  td3.style.maxWidth = "60px";
+  td3.style.width = "60px"
 
   tr1.appendChild(td1);
   tr1.appendChild(td2);
@@ -141,20 +329,32 @@ async function Afficher_EC_aligne_delibe() {
 
   var td4 = document.createElement("td");
   td4.textContent = "CEC";
-  td4.classList.add("text-center", "header-label");
+  td4.classList.add("text-center", "header-label", "header-label-sticky");
   td4.style.backgroundColor = "#34495e";
   td4.style.color = "white";
   td4.style.fontWeight = "600";
   td4.style.fontSize = "13px";
+  td4.style.position = "sticky";
+  td4.style.left = "330px";
+  td4.style.zIndex = "15";
+  td4.style.minWidth = "60px";
+  td4.style.maxWidth = "60px";
+  td4.style.width = "60px";
   tr2.appendChild(td4);
 
   var td5 = document.createElement("td");
   td5.textContent = "MAX";
-  td5.classList.add("text-center", "header-label");
+  td5.classList.add("text-center", "header-label", "header-label-sticky");
   td5.style.backgroundColor = "#3498db";
   td5.style.color = "white";
   td5.style.fontWeight = "600";
   td5.style.fontSize = "13px";
+  td5.style.position = "sticky";
+  td5.style.left = "330px";
+  td5.style.zIndex = "15";
+  td5.style.minWidth = "60px";
+  td5.style.maxWidth = "60px";
+  td5.style.width = "60px";
   tr3.appendChild(td5);
 
   // Boucle pour récuperer touts les ECs (Aligner dans un semestre ) qui sont dans la base de données
@@ -165,17 +365,36 @@ async function Afficher_EC_aligne_delibe() {
 
       const td_ec = document.createElement('td');
       td_ec.textContent = ec_s_aligne.Intutile_ec;
-      td_ec.classList.add("text-start"); // Centrer le texte
-      td_ec.style.writingMode = "vertical-rl"; // Texte vertical
-      td_ec.style.transform = "rotate(180deg)"; // Rotation du texte
+      td_ec.classList.add("text-start", "ec-header-modern");
+      td_ec.style.writingMode = "vertical-rl";
+      td_ec.style.transform = "rotate(180deg)";
+      td_ec.style.minWidth = "45px";
+      td_ec.style.maxWidth = "45px";
+      td_ec.style.width = "45px";
+      td_ec.style.padding = "15px 8px";
+      td_ec.style.height = "200px";
+      td_ec.style.whiteSpace = "nowrap";
+      td_ec.style.overflow = "hidden";
+      td_ec.style.textOverflow = "ellipsis";
+      td_ec.title = ec_s_aligne.Intutile_ec; // Tooltip pour voir le nom complet
 
       const td_ec_credit = document.createElement('td');
       td_ec_credit.textContent = ec_s_aligne.Credit;
-      td_ec_credit.classList.add("text-center"); // Centrer le texte
+      td_ec_credit.classList.add("text-center", "credit-cell-modern");
+      td_ec_credit.style.minWidth = "45px";
+      td_ec_credit.style.maxWidth = "45px";
+      td_ec_credit.style.width = "45px";
+      td_ec_credit.style.fontWeight = "700";
+      td_ec_credit.style.fontSize = "14px";
 
       const td_ec_max = document.createElement('td');
       td_ec_max.textContent = 20;
-      td_ec_max.classList.add("text-center"); // Centrer le texte
+      td_ec_max.classList.add("text-center", "max-cell-modern");
+      td_ec_max.style.minWidth = "45px";
+      td_ec_max.style.maxWidth = "45px";
+      td_ec_max.style.width = "45px";
+      td_ec_max.style.fontWeight = "700";
+      td_ec_max.style.fontSize = "14px";
 
       tr1.appendChild(td_ec);
       tr2.appendChild(td_ec_credit);
@@ -188,6 +407,12 @@ async function Afficher_EC_aligne_delibe() {
 
   /* Affichage des étudiants */
   var tbody = document.createElement("tbody");
+  
+  // Optimisation pour 40+ ECs : 
+  // - DocumentFragment pour batch insert (réduit les reflows)
+  // - table-layout: fixed en CSS (améliore le rendu)
+  // - Événements attachés individuellement (préserve la réactivité)
+  const fragment = document.createDocumentFragment();
 
   var i = 1;
   tab_etudiants_aligne.forEach(etudiant => {
@@ -195,25 +420,51 @@ async function Afficher_EC_aligne_delibe() {
       const tdnum = document.createElement("td");
       tdnum.textContent = i;
       tdnum.classList.add("text-center", "col-md-auto");
+      tdnum.style.minWidth = "50px";
+      tdnum.style.maxWidth = "50px";
+      tdnum.style.width = "50px";
 
       const td_etudiant = document.createElement('td');
       td_etudiant.classList.add("text-start");
+      td_etudiant.style.minWidth = "280px";
+      td_etudiant.style.maxWidth = "280px";
+      td_etudiant.style.width = "280px";
+      
+      // Conteneur pour nom + matricule avec retour à la ligne
+      const nameDiv = document.createElement('div');
+      nameDiv.style.display = "flex";
+      nameDiv.style.flexDirection = "column";
+      nameDiv.style.gap = "4px";
+      nameDiv.style.cursor = "context-menu";
+      
+      // Info-bulle complète pour l'étudiant
+      nameDiv.title = `${etudiant.ident_etudiant}\nMatricule: ${etudiant.Matricule}\n\n💡 Clic droit pour plus d'options`;
       
       // Créer le nom
       const nameSpan = document.createElement('span');
       nameSpan.textContent = etudiant.ident_etudiant;
       nameSpan.classList.add("student-name");
+      nameSpan.style.display = "block";
       
-      // Créer le matricule avec style moderne
+      // Créer le matricule avec style moderne (sur une ligne séparée)
       const matriculeSpan = document.createElement('span');
-      matriculeSpan.textContent = ` (${etudiant.Matricule})`;
+      matriculeSpan.textContent = etudiant.Matricule;
       matriculeSpan.classList.add("student-matricule");
       
-      td_etudiant.appendChild(nameSpan);
-      td_etudiant.appendChild(matriculeSpan);
+      nameDiv.appendChild(nameSpan);
+      nameDiv.appendChild(matriculeSpan);
+      td_etudiant.appendChild(nameDiv);
 
       const td_vide = document.createElement('td');
-      td_vide.style = "background-color:midnightblue; color:white;"
+      td_vide.classList.add("separator-column-sticky");
+      td_vide.style.backgroundColor = "midnightblue";
+      td_vide.style.color = "white";
+      td_vide.style.position = "sticky";
+      td_vide.style.left = "330px";
+      td_vide.style.zIndex = "5";
+      td_vide.style.minWidth = "60px";
+      td_vide.style.maxWidth = "60px";
+      td_vide.style.width = "60px";
 
       tr.appendChild(tdnum);
       tr.appendChild(td_etudiant);
@@ -225,6 +476,9 @@ async function Afficher_EC_aligne_delibe() {
           td_cell.classList.add("cell-wrapper");
           td_cell.style.padding = "0";
           td_cell.style.position = "relative";
+          td_cell.style.minWidth = "45px";
+          td_cell.style.maxWidth = "45px";
+          td_cell.style.width = "45px";
 
           // Créer la div éditable (comme Google Sheets)
           const editableCell = document.createElement("div");
@@ -248,7 +502,8 @@ async function Afficher_EC_aligne_delibe() {
           }
 
           // Focus : sélectionner tout le contenu et surligner ligne/colonne
-          editableCell.addEventListener('focus', (e) => {
+          editableCell.addEventListener('focus', (e) => 
+          {
             e.target.classList.add('focused');
             
             // Surligner la ligne et la colonne
@@ -282,17 +537,21 @@ async function Afficher_EC_aligne_delibe() {
             // Validation
             if (nouvelleValeur !== "") {
               const nombre = parseFloat(nouvelleValeur);
-              if (isNaN(nombre) || nombre < 0) {
+              if (isNaN(nombre)) {
                 e.target.textContent = valeurOriginale;
-                alert('⚠️ Veuillez entrer un nombre valide (≥ 0)');
                 return;
               }
               nouvelleValeur = nombre.toString();
               e.target.textContent = nouvelleValeur;
             }
             
-            // Appliquer couleur
-            applyCellColor(e.target, nouvelleValeur);
+            // Appliquer couleur SEULEMENT si la valeur n'est pas vide
+            if (nouvelleValeur !== "") {
+              applyCellColor(e.target, nouvelleValeur);
+            } else {
+              // Si vide, retirer toutes les couleurs
+              applyCellColor(e.target, "");
+            }
             
             // Sauvegarder si changement
             if (nouvelleValeur !== valeurOriginale) {
@@ -364,8 +623,12 @@ async function Afficher_EC_aligne_delibe() {
                 cell.textContent = nouvelleValeur;
               }
               
-              // Appliquer couleur
-              applyCellColor(cell, nouvelleValeur);
+              // Appliquer couleur (y compris orange pour notes > 20)
+              if (nouvelleValeur !== "") {
+                applyCellColor(cell, nouvelleValeur);
+              } else {
+                applyCellColor(cell, "");
+              }
               
               // Sauvegarder si changement
               if (nouvelleValeur !== valeurOriginale) {
@@ -437,16 +700,39 @@ async function Afficher_EC_aligne_delibe() {
           tr.appendChild(td_cell);
       });
 
-      tbody.appendChild(tr);
+      fragment.appendChild(tr);
       i++;
   });
 
+  // Insérer toutes les lignes en une seule opération (optimisation 40+ ECs)
+  tbody.appendChild(fragment);
+  
   table_encodage.appendChild(thead);
   table_encodage.appendChild(tbody);
   table_encodage.classList.add("table-bordered");
   
+  // Vérifier si le tableau nécessite un défilement horizontal (40+ ECs)
+  checkTableOverflow();
+  
   // Mettre à jour les statistiques
   updateStats(tab_etudiants_aligne.length, tab_ECs_aligne.length, tab_Cotes.length);
+}
+
+// Vérifier si le tableau déborde horizontalement
+function checkTableOverflow() {
+  const table = document.getElementById('table_encodage');
+  const wrapper = document.querySelector('.table-wrapper-encodage');
+  
+  if (table && wrapper) {
+    // Détecter si le tableau est plus large que son conteneur
+    const hasOverflow = table.scrollWidth > wrapper.clientWidth;
+    table.dataset.hasOverflow = hasOverflow;
+    
+    // Log pour débogage (peut être retiré en production)
+    if (hasOverflow) {
+      console.log(`✅ Tableau large détecté: ${table.scrollWidth}px > ${wrapper.clientWidth}px`);
+    }
+  }
 }
 
 // Fonction pour mettre à jour les statistiques
@@ -456,25 +742,77 @@ function updateStats(nbEtudiants, nbECs, nbCotes) {
   const countCotesElement = document.getElementById('count-cotes');
   
   if (countEtudiants) countEtudiants.textContent = nbEtudiants;
-  if (countEcs) countEcs.textContent = nbECs;
+  if (countEcs) {
+    countEcs.textContent = nbECs;
+    // Alerte visuelle si beaucoup d'ECs (40+)
+    if (nbECs >= 40) {
+      countEcs.parentElement.style.background = 'rgba(255, 152, 0, 0.3)';
+      countEcs.parentElement.title = `⚠️ ${nbECs} ECs - Utilisez le défilement horizontal`;
+    } else if (nbECs >= 30) {
+      countEcs.parentElement.style.background = 'rgba(255, 193, 7, 0.3)';
+    } else {
+      countEcs.parentElement.style.background = 'rgba(255, 255, 255, 0.2)';
+    }
+  }
   if (countCotesElement) countCotesElement.textContent = nbCotes;
+}
+
+// Fonction pour mettre à jour le compteur de côtes (sans recharger le tableau)
+function updateCotesCount(increment = 0) {
+  const countCotesElement = document.getElementById('count-cotes');
+  if (countCotesElement) {
+    const currentCount = parseInt(countCotesElement.textContent) || 0;
+    const newCount = currentCount + increment;
+    countCotesElement.textContent = newCount;
+    
+    // Animation de mise à jour
+    countCotesElement.parentElement.style.transform = 'scale(1.1)';
+    countCotesElement.parentElement.style.background = 'rgba(76, 175, 80, 0.4)';
+    setTimeout(() => {
+      countCotesElement.parentElement.style.transform = 'scale(1)';
+      countCotesElement.parentElement.style.background = 'rgba(255, 255, 255, 0.2)';
+    }, 300);
+  }
 }
 
 // Appliquer les couleurs selon la note (style Google Sheets)
 function applyCellColor(cell, valeur) {
+  // Retirer toutes les classes de couleur
   cell.classList.remove('note-echec', 'note-normal', 'note-excellent');
   
-  if (valeur === "" || valeur === null) return;
+  // Ne rien faire si la cellule est vide - retirer tous les styles
+  if (valeur === "" || valeur === null || valeur === undefined) {
+    cell.style.backgroundColor = "";
+    cell.style.border = "";
+    cell.style.animation = "";
+    return;
+  }
   
   const note = parseFloat(valeur);
-  if (isNaN(note)) return;
+  if (isNaN(note)) {
+    cell.style.backgroundColor = "";
+    cell.style.border = "";
+    cell.style.animation = "";
+    return;
+  }
   
-  if (note < 10) {
-    cell.classList.add('note-echec'); // Rouge
-  } else if (note >= 10 && note <= 20) {
-    cell.classList.add('note-normal'); // Blanc
-  } else if (note > 20) {
-    cell.classList.add('note-excellent'); // Vert
+  // Logique corrigée: notes valides entre 0 et 20
+  if (note < 0 || note > 20) {
+    cell.classList.add('note-excellent'); // ERREUR: note invalide (< 0 ou > 20) - orange clignotant
+    // Forcer le style inline pour être sûr
+    cell.style.backgroundColor = "#ffa94d";
+    cell.style.color = "white";
+    cell.style.border = "2px solid #fd7e14";
+  } else if (note < 10) {
+    cell.classList.add('note-echec'); // ÉCHEC: note < 10 - rouge
+    cell.style.backgroundColor = "";
+    cell.style.color = "";
+    cell.style.border = "";
+  } else {
+    cell.classList.add('note-normal'); // RÉUSSITE: note entre 10 et 20 - blanc
+    cell.style.backgroundColor = "";
+    cell.style.color = "";
+    cell.style.border = "";
   }
 }
 
@@ -557,7 +895,8 @@ async function Ajout_point_Obtenu(mat_etudiant,id_ec,cote)
             // Tester la valeur envoyée par l'API PHP
             if (response.status === "success") {
                 console.log(response.message)
-                Afficher_EC_aligne_delibe();
+                // Mettre à jour le compteur de côtes (+1)
+                updateCotesCount(1);
             } else {
               console.log(response.message)
             }
@@ -585,18 +924,8 @@ async function Suppression(mat_etudiant,id_ec_aligne)
             // Tester la valeur envoyée par l'API PHP
             if (response.status === "success") {
                 console.log(response.message)
-                // Après l'ajout, réaffichez la table tout en gardant le focus sur le bon input
-                const activeElement = document.activeElement; // Sauvegarder l'élément actif
-                Afficher_EC_aligne_delibe(); // Réafficher la table
-                console.log(" element actif "+activeElement)
-                // Rétablir le focus sur l'input actif
-                if (activeElement) {
-                    const newInput = document.querySelector(`input[value="${activeElement.value}"]`);
-                    console.log(" nouv focus "+newInput);
-                    if (newInput) {
-                        newInput.focus();
-                    }
-                }
+                // Mettre à jour le compteur de côtes (-1)
+                updateCotesCount(-1);
             } else {
               console.log(response.message)
             }
@@ -624,7 +953,7 @@ async function Modifier_cote(mat_etudiant,id_ec,cote)
             // Tester la valeur envoyée par l'API PHP
             if (response.status === "success") {
                 console.log(response.message)
-                Afficher_EC_aligne_delibe();
+                // Ne pas recharger le tableau pour garder le focus et permettre la navigation
             } else {
               console.log(response.message)
             }

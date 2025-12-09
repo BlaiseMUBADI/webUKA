@@ -174,14 +174,18 @@
                       fw-bolder text-center border ms-2"
                       style="background-color:#273746;color:white; font-weight:bold;">*
                 <?php 
-                    $req="SELECT * from annee_academique ORDER BY Annee_debut DESC";
-                    $data= $con-> query($req);
-                    while ($ligne=$data->fetch())
-                    {
+                    if (isset($con)) {
+                        $req="SELECT * from annee_academique ORDER BY Annee_debut DESC";
+                        $data= $con->query($req);
+                        if ($data) {
+                            while ($ligne=$data->fetch())
+                            {
                   ?>
                       <option value="<?php echo $ligne['idAnnee_Acad']?>"><?php echo $ligne['Annee_debut'];?>-<?php echo $ligne['Annee_fin'];?></option>
 
                  <?php 
+                            }
+                        }
                     }
                   ?>
             </select>                    
@@ -199,20 +203,24 @@
               
                       <option value='0' selected >Séléction Semestre</option>
                   <?php 
-                    //$req="SELECT * from semestre ORDER BY semestre.Id_Semestre  ASC";
-                    $req="
-                          SELECT Id_Semestre, libelle_semestre FROM semestre; order by LENGTH(Libelle_mention) asc";
-                    $stmt=$con->prepare($req);
-                    $stmt->execute();
+                    if (isset($con)) {
+                        //$req="SELECT * from semestre ORDER BY semestre.Id_Semestre  ASC";
+                        $req="
+                              SELECT Id_Semestre, libelle_semestre FROM semestre; order by LENGTH(Libelle_mention) asc";
+                        $stmt=$con->prepare($req);
+                        if ($stmt) {
+                            $stmt->execute();
 
 
-                    //$data= $con-> query($req);
-                    while ($ligne=$stmt->fetch())
-                    {
+                            //$data= $con-> query($req);
+                            while ($ligne=$stmt->fetch())
+                            {
                   ?>
                       <option value=<?php echo $ligne["Id_Semestre"];?>><?php echo $ligne['libelle_semestre']?></option>
                       
                       <?php 
+                            }
+                        }
                     }
                       ?>
             </select>                    
@@ -239,18 +247,22 @@
                           and promotion.Abréviation LIKE '%LMD%'
                           and mentions.IdFiliere=filiere.IdFiliere
                           and filiere.IdFiliere=:idFiliere order by LENGTH(Libelle_mention) asc";
-                    $stmt=$con->prepare($req);
-                    $stmt->bindParam(':idFiliere',$_SESSION['id_fac']);
-                    $stmt->execute();
+                    if (isset($con)) {
+                        $stmt=$con->prepare($req);
+                        if ($stmt) {
+                            $stmt->bindParam(':idFiliere',$_SESSION['id_fac']);
+                            $stmt->execute();
 
 
-                    //$data= $con-> query($req);
-                    while ($ligne=$stmt->fetch())
-                    {
+                            //$data= $con-> query($req);
+                            while ($ligne=$stmt->fetch())
+                            {
                   ?>
                       <option value=<?php echo $ligne["cd_prom"];?>><?php echo $ligne['lib_mention']?></option>
                       
                       <?php 
+                            }
+                        }
                     }
                       ?>
             </select>
