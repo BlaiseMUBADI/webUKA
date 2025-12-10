@@ -53,10 +53,16 @@
         <?php 
             //include("../../../Conexion_BDD/Connexion_1.php" C:\wamp64\www\webUKA\UKA_Numerique);
             include("../Connexion_BDD/Connexion_1.php");
+            require_once("D_Generale/SessionManager.php");
 
             // Variables d'initialisation
             $msgerreur='';  // Message d'erreur à afficher en cas d'échec de connexion
             $afficher_choix = false;  // Flag pour afficher la boîte de dialogue de choix de compte
+            $afficher_demande_confirmation = false; // Flag pour afficher la demande de confirmation au nouveau demandeur
+            $demande_info = null; // Informations de la demande en attente
+            
+            // Initialiser le gestionnaire de sessions
+            $sessionManager = new SessionManager($con);
             
             /**
              * Fonction centralisée de redirection selon la catégorie d'agent
@@ -188,11 +194,12 @@
             /*
              * BLOC 2: TRAITEMENT DE LA CONNEXION INITIALE
              * 
-             * Ce bloc implémente un système d'authentification duale:
+             * Ce bloc implémente un système d'authentification duale avec gestion des sessions:
              * 1. Recherche simultanée dans compte_agent ET t_membre_jury
              * 2. Validation du mot de passe (SHA1 legacy ou bcrypt moderne)
-             * 3. Détermination des comptes valides
-             * 4. Gestion de 4 cas possibles:
+             * 3. Vérification de session active existante
+             * 4. Création de demande de connexion si session active
+             * 5. Gestion de 4 cas possibles:
              *    - Aucun compte valide → Message d'erreur
              *    - Les deux comptes valides → Afficher boîte de dialogue de choix
              *    - Seulement compte jury → Connexion directe au jury
@@ -351,63 +358,132 @@
                 }
                 // --- CAS 3: SEULEMENT COMPTE JURY VALIDE ---
                 // Connexion directe en tant que membre de jury
+                // AVEC VÉRIFICATION DE SESSION ACTIVE
                 else if($compte_jury_valide && !$compte_agent_valide)
                 {
                     $ligne = $data_jury;
-                    $_SESSION['MatriculeAgent'] = $ligne['Mat_agent'];
-                    $_SESSION['Login_user'] = $ligne['login_jury'];         ;
-                    $_SESSION['Role_Jury'] = $ligne['role'];
-                    $_SESSION['Categorie'] = 'Membre_Jury/'.$ligne['role'];
-                    $_SESSION['Nom_user'] = $ligne['Nom_agent'];
-                    $_SESSION['Postnom_user'] = $ligne['Post_agent'];
-                    $_SESSION['prenom__user'] = $ligne['Prenom'];
-                    $_SESSION['Libelle_jury'] = $ligne['Libelle_jury'];
-                    $_SESSION['code_prom'] = $ligne['Code_Promotion'];
-                    $_SESSION['ID_jury'] = $ligne['ID_jury'];
-                    $_SESSION['id_annee_acad'] = $ligne['idAnnee_Acad'];
-                    $_SESSION['id_fac'] = $ligne['id_fac'];
-                    $_SESSION['libelle_fac'] = $ligne['libelle_fac'];
-                    $_SESSION['prommotion'] = $ligne['promm'];
                     
-                    // Redirection selon le rôle
-                    if($ligne['role'] == 'Président') {
-                        header('location:D_Faculte/Principale_fac.php?page=gestion_deliberation');
-                    } else if($ligne['role'] == 'Secrétaire') {
-                        header('location:D_Faculte/Principale_fac.php?page=gestion_encodage');
+                    // **NOUVEAU: Vérifier si une session active existe déjà**
+                    if($sessionManager->hasActiveSession($ligne['login_jury'], 'jury')) {
+                        // Une session est déjà active pour cet utilisateur
+                        $user_data = [
+                            'login' => $ligne['login_jury'],
+                            'matricule' => $ligne['Mat_agent'],
+                            'type_compte' => 'jury'
+                        ];
+                        
+                        $session_actuelle = $sessionManager->getActiveSession($ligne['login_jury'], 'jury');
+                        $demande = $sessionManager->createConnectionRequest($user_data, $session_actuelle['session_id']);
+                        
+                        $afficher_demande_confirmation = true;
+                        $demande_info = [
+                            'demande_id' => $demande['demande_id'],
+                            'token' => $demande['token'],
+                            'nom_complet' => $ligne['Nom_agent'] . ' ' . $ligne['Post_agent'],
+                            'login' => $ligne['login_jury']
+                        ];
+                        
+                        $msgerreur = '<i class="fas fa-info-circle"></i> Une session est déjà active. En attente de confirmation...';
                     } else {
-                        header('location:D_Faculte/Principale_fac.php?page=consultation_jury');
+                        // Aucune session active, créer une nouvelle session
+                        $user_data = [
+                            'login' => $ligne['login_jury'],
+                            'matricule' => $ligne['Mat_agent'],
+                            'type_compte' => 'jury'
+                        ];
+                        
+                        $sessionManager->createSession($user_data);
+                        
+                        $_SESSION['MatriculeAgent'] = $ligne['Mat_agent'];
+                        $_SESSION['Login_user'] = $ligne['login_jury'];
+                        $_SESSION['Role_Jury'] = $ligne['role'];
+                        $_SESSION['Categorie'] = 'Membre_Jury/'.$ligne['role'];
+                        $_SESSION['Nom_user'] = $ligne['Nom_agent'];
+                        $_SESSION['Postnom_user'] = $ligne['Post_agent'];
+                        $_SESSION['prenom__user'] = $ligne['Prenom'];
+                        $_SESSION['Libelle_jury'] = $ligne['Libelle_jury'];
+                        $_SESSION['code_prom'] = $ligne['Code_Promotion'];
+                        $_SESSION['ID_jury'] = $ligne['ID_jury'];
+                        $_SESSION['id_annee_acad'] = $ligne['idAnnee_Acad'];
+                        $_SESSION['id_fac'] = $ligne['id_fac'];
+                        $_SESSION['libelle_fac'] = $ligne['libelle_fac'];
+                        $_SESSION['prommotion'] = $ligne['promm'];
+                        
+                        // Redirection selon le rôle
+                        if($ligne['role'] == 'Président') {
+                            header('location:D_Faculte/Principale_fac.php?page=gestion_deliberation');
+                        } else if($ligne['role'] == 'Secrétaire') {
+                            header('location:D_Faculte/Principale_fac.php?page=gestion_encodage');
+                        } else {
+                            header('location:D_Faculte/Principale_fac.php?page=consultation_jury');
+                        }
+                        exit;
                     }
-                    exit;
                 }
 
 
                 // --- CAS 4: SEULEMENT COMPTE AGENT VALIDE ---
                 // Connexion directe en tant qu'agent selon la catégorie
+                // AVEC VÉRIFICATION DE SESSION ACTIVE
                 else if($compte_agent_valide && !$compte_jury_valide)
                 {
                     $ligne = $data_agent;
-                
-                                //$_SESSION['MatriculeAgent'] = $ligne['mat_agent'];
-                                $_SESSION['MatriculeAgent'] = $ligne['mat_agent'];
-                                $_SESSION['Login_user'] = $ligne['login_agent'];
-                                $_SESSION['Categorie'] = $ligne['categorie'];
-                                $_SESSION['id_fac'] = $ligne['id_fac'];
-                                $_SESSION['libelle_fac'] = $ligne['libelle_fac'];
-                                $_SESSION['Nom_user'] = $ligne['nom_agent'];
-                                $_SESSION['Postnom_user'] = $ligne['postnom'];
-                                $_SESSION['prenom__user'] = $ligne['prenom'];
-                                $_SESSION['Photo_profil'] = $ligne['photo'];
+                    
+                    // **NOUVEAU: Vérifier si une session active existe déjà**
+                    if($sessionManager->hasActiveSession($ligne['login_agent'], 'agent')) {
+                        // Une session est déjà active pour cet utilisateur
+                        // Créer une demande de connexion
+                        $user_data = [
+                            'login' => $ligne['login_agent'],
+                            'matricule' => $ligne['mat_agent'],
+                            'type_compte' => 'agent'
+                        ];
+                        
+                        $session_actuelle = $sessionManager->getActiveSession($ligne['login_agent'], 'agent');
+                        $demande = $sessionManager->createConnectionRequest($user_data, $session_actuelle['session_id']);
+                        
+                        // Stocker les informations pour afficher la modal de confirmation
+                        $afficher_demande_confirmation = true;
+                        $demande_info = [
+                            'demande_id' => $demande['demande_id'],
+                            'token' => $demande['token'],
+                            'nom_complet' => $ligne['nom_agent'] . ' ' . $ligne['postnom'],
+                            'login' => $ligne['login_agent']
+                        ];
+                        
+                        // Message d'information
+                        $msgerreur = '<i class="fas fa-info-circle"></i> Une session est déjà active. En attente de confirmation...';
+                    } else {
+                        // Aucune session active, créer une nouvelle session
+                        $user_data = [
+                            'login' => $ligne['login_agent'],
+                            'matricule' => $ligne['mat_agent'],
+                            'type_compte' => 'agent'
+                        ];
+                        
+                        $sessionManager->createSession($user_data);
+                        
+                        // Établir les sessions PHP normales
+                        $_SESSION['MatriculeAgent'] = $ligne['mat_agent'];
+                        $_SESSION['Login_user'] = $ligne['login_agent'];
+                        $_SESSION['Categorie'] = $ligne['categorie'];
+                        $_SESSION['id_fac'] = $ligne['id_fac'];
+                        $_SESSION['libelle_fac'] = $ligne['libelle_fac'];
+                        $_SESSION['Nom_user'] = $ligne['nom_agent'];
+                        $_SESSION['Postnom_user'] = $ligne['postnom'];
+                        $_SESSION['prenom__user'] = $ligne['prenom'];
+                        $_SESSION['Photo_profil'] = $ligne['photo'];
+                        $_SESSION['prommotion'] = $ligne['promm'];
+                        $_SESSION['code_prom'] = $ligne['Code_promotion'];
+                        $_SESSION['id_annee_acad'] = $ligne['id_annee_academique'];
 
-                                $_SESSION['prommotion'] = $ligne['promm'];
-                                $_SESSION['code_prom'] = $ligne['Code_promotion'];
-                                $_SESSION['id_annee_acad'] = $ligne['id_annee_academique'];
-
-                                // Redirection selon catégorie
-                                if (!rediriger_selon_categorie($ligne['categorie'])) {
-                                    // Catégorie inconnue, redirection par défaut
-                                    header('location:Page_Principale.php?page=Dashboard');
-                                    exit;
-                                }
+                        // Redirection selon catégorie
+                        if (!rediriger_selon_categorie($ligne['categorie'])) {
+                            // Catégorie inconnue, redirection par défaut
+                            header('location:Page_Principale.php?page=Dashboard');
+                            exit;
+                        }
+                    }
                 }
             }
             
@@ -654,6 +730,264 @@
                 }
             }
         </style>
+        <?php endif; ?>
+        
+        <!-- Modal de confirmation pour le nouveau demandeur -->
+        <?php if($afficher_demande_confirmation && $demande_info): ?>
+        <div id="modal_demande_confirmation" style="
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            animation: fadeIn 0.3s ease-out;">
+            
+            <div style="
+                background: white;
+                border-radius: 20px;
+                padding: 0;
+                max-width: 550px;
+                width: 90%;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+                animation: slideDown 0.3s ease-out;
+                overflow: hidden;">
+                
+                <!-- En-tête -->
+                <div style="
+                    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+                    padding: 30px;
+                    text-align: center;
+                    color: white;">
+                    <i class="fas fa-hourglass-half" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.9;"></i>
+                    <h2 style="margin: 0 0 10px 0; font-size: 1.8rem; font-weight: 700;">Session déjà active</h2>
+                    <p style="margin: 0; opacity: 0.9; font-size: 0.95rem;">En attente d'autorisation</p>
+                </div>
+                
+                <!-- Contenu -->
+                <div style="padding: 40px 30px;">
+                    <p style="
+                        text-align: center;
+                        color: #64748b;
+                        margin-bottom: 25px;
+                        font-size: 1rem;
+                        line-height: 1.6;">
+                        Bonjour <strong style="color: #1e293b;"><?php echo htmlspecialchars($demande_info['nom_complet']); ?></strong>,<br>
+                        Une session est déjà active sur un autre appareil.<br>
+                        L'utilisateur actuel a été notifié de votre demande.
+                    </p>
+                    
+                    <div style="
+                        background: #fef3c7;
+                        border-left: 4px solid #f59e0b;
+                        padding: 15px 20px;
+                        border-radius: 8px;
+                        margin-bottom: 25px;">
+                        <p style="margin: 0; color: #92400e; font-size: 0.9rem; line-height: 1.5;">
+                            <i class="fas fa-info-circle"></i> Cette fenêtre se mettra à jour automatiquement lorsque l'utilisateur actuel répondra à votre demande.
+                        </p>
+                    </div>
+                    
+                    <div id="statut_demande" style="
+                        text-align: center;
+                        padding: 20px;
+                        background: #f8fafc;
+                        border-radius: 10px;
+                        margin-bottom: 20px;">
+                        <div style="
+                            display: inline-block;
+                            width: 40px;
+                            height: 40px;
+                            border: 4px solid #f59e0b;
+                            border-top-color: transparent;
+                            border-radius: 50%;
+                            animation: spin 1s linear infinite;
+                        "></div>
+                        <p style="margin: 15px 0 0 0; color: #64748b; font-size: 0.9rem;">
+                            Vérification du statut...
+                        </p>
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        <button onclick="annulerDemande()" style="
+                            padding: 12px 30px;
+                            background: #64748b;
+                            color: white;
+                            border: none;
+                            border-radius: 8px;
+                            cursor: pointer;
+                            font-size: 14px;
+                            transition: all 0.3s;">
+                            <i class="fas fa-times"></i> Annuler et retourner
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <style>
+            @keyframes spin {
+                to { transform: rotate(360deg); }
+            }
+        </style>
+        
+        <script>
+            const demandeId = <?php echo $demande_info['demande_id']; ?>;
+            const demandeToken = '<?php echo $demande_info['token']; ?>';
+            let checkInterval;
+            
+            // Vérifier le statut de la demande toutes les 3 secondes
+            function verifierStatutDemande() {
+                fetch('API/check_request_status.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        demande_id: demandeId,
+                        token: demandeToken
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const statutDiv = document.getElementById('statut_demande');
+                        
+                        if (data.expired) {
+                            clearInterval(checkInterval);
+                            statutDiv.innerHTML = `
+                                <i class="fas fa-times-circle" style="font-size: 3rem; color: #dc2626;"></i>
+                                <p style="margin: 15px 0 0 0; color: #dc2626; font-weight: bold;">
+                                    Demande expirée
+                                </p>
+                                <p style="margin: 10px 0 0 0; color: #64748b; font-size: 0.9rem;">
+                                    Temps d'attente dépassé. Veuillez réessayer.
+                                </p>
+                            `;
+                            setTimeout(() => window.location.reload(), 3000);
+                        }
+                        else if (data.can_confirm) {
+                            // L'utilisateur actuel a accepté, demander confirmation
+                            clearInterval(checkInterval);
+                            afficherConfirmation();
+                        }
+                        else if (data.statut_demande === 'refusee') {
+                            clearInterval(checkInterval);
+                            statutDiv.innerHTML = `
+                                <i class="fas fa-ban" style="font-size: 3rem; color: #dc2626;"></i>
+                                <p style="margin: 15px 0 0 0; color: #dc2626; font-weight: bold;">
+                                    Demande refusée
+                                </p>
+                                <p style="margin: 10px 0 0 0; color: #64748b; font-size: 0.9rem;">
+                                    L'utilisateur actuel a refusé votre demande.
+                                </p>
+                            `;
+                            setTimeout(() => window.location.reload(), 3000);
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                });
+            }
+            
+            // Afficher la demande de confirmation finale
+            function afficherConfirmation() {
+                const statutDiv = document.getElementById('statut_demande');
+                statutDiv.innerHTML = `
+                    <i class="fas fa-check-circle" style="font-size: 3rem; color: #10b981;"></i>
+                    <p style="margin: 15px 0; color: #059669; font-weight: bold;">
+                        Demande acceptée !
+                    </p>
+                    <p style="margin: 15px 0; color: #64748b; font-size: 0.95rem;">
+                        Voulez-vous activer votre session maintenant ?
+                    </p>
+                    <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
+                        <button onclick="refuserActivation()" style="
+                            padding: 10px 20px;
+                            background: #64748b;
+                            color: white;
+                            border: none;
+                            border-radius: 5px;
+                            cursor: pointer;">
+                            <i class="fas fa-times"></i> Non, annuler
+                        </button>
+                        <button onclick="confirmerActivation()" style="
+                            padding: 10px 20px;
+                            background: #10b981;
+                            color: white;
+                            border: none;
+                            border-radius: 5px;
+                            cursor: pointer;">
+                            <i class="fas fa-check"></i> Oui, activer
+                        </button>
+                    </div>
+                `;
+            }
+            
+            // Confirmer l'activation de la session
+            function confirmerActivation() {
+                fetch('API/confirm_new_session.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        demande_id: demandeId,
+                        token: demandeToken,
+                        action: 'accepte'
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.redirect) {
+                        alert('Session activée avec succès !');
+                        window.location.reload();
+                    } else {
+                        alert('Erreur: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    alert('Erreur lors de l\'activation');
+                });
+            }
+            
+            // Refuser l'activation
+            function refuserActivation() {
+                fetch('API/confirm_new_session.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        demande_id: demandeId,
+                        token: demandeToken,
+                        action: 'refuse'
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.reload();
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                });
+            }
+            
+            // Annuler la demande
+            function annulerDemande() {
+                if (confirm('Voulez-vous vraiment annuler votre demande de connexion ?')) {
+                    clearInterval(checkInterval);
+                    refuserActivation();
+                }
+            }
+            
+            // Démarrer la vérification
+            checkInterval = setInterval(verifierStatutDemande, 3000);
+            verifierStatutDemande(); // Première vérification immédiate
+        </script>
         <?php endif; ?>
         
     </body>

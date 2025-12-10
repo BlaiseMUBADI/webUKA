@@ -122,7 +122,7 @@
    
   <script type="text/javascript" src="../D_Generale/JavaScript/Fonctions.js"></script>
     
-  <script type="text/javascript" src="../D_Generale/JavaScript/Deconnexion_inactiviter.js"></script>
+  <?php include('../D_Generale/include_session_monitor.php'); ?>
   
   <script type="text/javascript" src="JavaScript/Manip_UE.js"></script>
   <script type="text/javascript" src="JavaScript/Manip_Jury.js"></script>

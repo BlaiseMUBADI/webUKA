@@ -22,6 +22,9 @@ include("../../Connexion_BDD/Connexion_1.php");
         <link rel="stylesheet" type="text/css" href="code.css"/>  
         <link rel="stylesheet" href="style.css">
         <link rel="stylesheet" href="test.css">
+        
+        <!-- Session Monitor -->
+        <?php include('../D_Generale/include_session_monitor.php'); ?>
     </head>
     <body >
 <section data-bs-version="5.1" class="font-family-base text-dark" id="image2-l">

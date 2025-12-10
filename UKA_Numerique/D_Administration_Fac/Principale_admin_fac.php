@@ -111,7 +111,7 @@
   <script type="text/javascript" src="../D_Generale/JavaScript/Fonctions.js"></script>
   
   <script type="text/javascript" src="../D_Generale/JavaScript/recup_promotion_et_etudiant.js"></script>  
-  <script type="text/javascript" src="../D_Generale/JavaScript/Deconnexion_inactiviter.js"></script>
+  <?php include('../D_Generale/include_session_monitor.php'); ?>
   
   <script type="text/javascript" src="JavaScript/Manip_Compte_Agent.js"></script>
   <script type="text/javascript" src="../D_Perception/JavaScript/Entree_rapport_paie.js"></script>  
