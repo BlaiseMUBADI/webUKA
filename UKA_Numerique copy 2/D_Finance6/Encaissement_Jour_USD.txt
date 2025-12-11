@@ -1,0 +1,157 @@
+<?php
+// 🔁 Exemple de données (à remplacer plus tard par un SELECT SQL)
+$donnees = [
+    ['id' => 1, 'numero' => '001', 'motif' => 'Fournitures', 'montant' => 150, 'date' => '2025-04-15', 'service' => 'Achat'],
+    ['id' => 2, 'numero' => '002', 'motif' => 'Déplacement', 'montant' => 320, 'date' => '2025-04-12', 'service' => 'RH'],
+];
+?>
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Tableau de Suivi</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f8f9fa; }
+        table {
+            width: 90%;
+            margin: 40px auto;
+            border-collapse: collapse;
+            background: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px 12px;
+            text-align: center;
+        }
+        th {
+            background-color: #2c3e50;
+            color: white;
+        }
+        .icon {
+            cursor: pointer;
+            font-size: 18px;
+        }
+        .edit { color: #f39c12; }
+        .delete { color: #e74c3c; }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background: #fff;
+            padding: 20px;
+            width: 400px;
+            margin: 100px auto;
+            border-radius: 6px;
+            position: relative;
+        }
+        .close {
+            position: absolute;
+            top: 10px; right: 15px;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 6px;
+            margin-bottom: 12px;
+        }
+        button {
+            padding: 10px 16px;
+            background: #3498db;
+            border: none;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+    </style>
+</head>
+<body>
+
+<h2 style="text-align:center;">Tableau des Dépenses</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Numéro</th>
+            <th>Motif</th>
+            <th>Montant</th>
+            <th>Date</th>
+            <th>Libellé Service</th>
+            <th>Modifier</th>
+            <th>Supprimer</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php foreach ($donnees as $ligne): ?>
+            <tr data-id="<?= $ligne['id'] ?>"
+                data-numero="<?= $ligne['numero'] ?>"
+                data-motif="<?= $ligne['motif'] ?>"
+                data-montant="<?= $ligne['montant'] ?>"
+                data-date="<?= $ligne['date'] ?>"
+                data-service="<?= $ligne['service'] ?>">
+                <td><?= $ligne['numero'] ?></td>
+                <td><?= $ligne['motif'] ?></td>
+                <td><?= $ligne['montant'] ?> €</td>
+                <td><?= $ligne['date'] ?></td>
+                <td><?= $ligne['service'] ?></td>
+                <td><span class="icon edit" onclick="openModal(this)">✏️</span></td>
+                <td><span class="icon delete" onclick="supprimer(<?= $ligne['id'] ?>)">🗑️</span></td>
+            </tr>
+        <?php endforeach; ?>
+    </tbody>
+</table>
+
+<!-- MODAL -->
+<div class="modal" id="editModal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <form method="post" action="update.php">
+            <input type="hidden" name="id" id="editId">
+            <label>Numéro</label>
+            <input type="text" name="numero" id="editNumero">
+            <label>Motif</label>
+            <input type="text" name="motif" id="editMotif">
+            <label>Montant (€)</label>
+            <input type="number" name="montant" id="editMontant">
+            <label>Date</label>
+            <input type="date" name="date" id="editDate">
+            <label>Libellé Service</label>
+            <input type="text" name="service" id="editService">
+            <button type="submit">Enregistrer</button>
+        </form>
+    </div>
+</div>
+
+<script>
+function openModal(elem) {
+    const row = elem.closest('tr');
+    document.getElementById('editId').value = row.dataset.id;
+    document.getElementById('editNumero').value = row.dataset.numero;
+    document.getElementById('editMotif').value = row.dataset.motif;
+    document.getElementById('editMontant').value = row.dataset.montant;
+    document.getElementById('editDate').value = row.dataset.date;
+    document.getElementById('editService').value = row.dataset.service;
+    document.getElementById('editModal').style.display = 'block';
+}
+function closeModal() {
+    document.getElementById('editModal').style.display = 'none';
+}
+function supprimer(id) {
+    if (confirm("Confirmer la suppression ?")) {
+        window.location.href = "delete.php?id=" + id;
+    }
+}
+</script>
+
+</body>
+</html>

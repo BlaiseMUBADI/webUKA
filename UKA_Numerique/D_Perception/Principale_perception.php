@@ -76,7 +76,7 @@
 
    
   <script type="text/javascript" src="../D_Generale/JavaScript/Fonctions.js"></script>  
-  <?php include('../D_Generale/include_session_monitor.php'); ?>  
+  <script type="text/javascript" src="../D_Generale/JavaScript/Deconnexion_inactiviter.js"></script>  
 
   
   <script type="text/javascript" src="JavaScript/Paiement_nouveau_frais.js"></script>

@@ -36,8 +36,6 @@
     <link rel="stylesheet" type="text/css" href="D_Finance/css/style_finance_complet.css" />
     <link rel="stylesheet" type="text/css" href="D_Finance/css/select2.min.css" />
   
-    <!-- Session Monitor -->
-    <?php include('D_Generale/include_session_monitor.php'); ?>
 </head>
 
 <body >
