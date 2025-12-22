@@ -9,6 +9,12 @@ error_reporting(E_ALL);
 
 include("../../../Connexion_BDD/Connexion_1.php");
 
+// Vérifier la connexion à la base de données
+if (!isset($con) || $con === null) {
+    echo json_encode(["status" => "error", "message" => "Erreur de connexion à la base de données"]);
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Lire le JSON brut envoyé par fetch
     $input = file_get_contents('php://input');

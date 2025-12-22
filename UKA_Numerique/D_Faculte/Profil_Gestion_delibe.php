@@ -15,8 +15,9 @@
           else if($_GET['page']=="gestion_Aligne_ECs") echo "Faculté : ".$_SESSION['libelle_fac']." (ALign_ECs) ";
           else if($_GET['page']=="gestion_Enseignants") echo "Faculté : ".$_SESSION['libelle_fac']." (G_Enseignants) ";
           else if($_GET['page']=="gestion_jury") echo "Faculté : ".$_SESSION['libelle_fac']." (G_Jury) ";
-          else if($_GET['page']=="gestion_encodage") echo "Encodage côte  : ".$_SESSION['prommotion']." / En :  ".$_SESSION['libelle_fac'];
-          else if($_GET['page']=="gestion_deliberation") echo "Délibération  : ".$_SESSION['prommotion']." / En :  ".$_SESSION['libelle_fac'];
+          else if($_GET['page']=="gestion_encodage") echo "Encodage côte  : ".$_SESSION['prommotion']." - (".$_SESSION['annee_academique'].") / En :  ".$_SESSION['libelle_fac'];
+          else if($_GET['page']=="gestion_deliberation") echo "Délibération  : ".$_SESSION['prommotion']." - (".$_SESSION['annee_academique'].") / En :  ".$_SESSION['libelle_fac'];
+
         }
       ?>
     </span>

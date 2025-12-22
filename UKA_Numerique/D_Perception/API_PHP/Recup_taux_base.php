@@ -1,6 +1,6 @@
 <?php
 //include("../../D_Generale/Connexion.php");
-include("../../../Connexion_BDD/Connexion_1.php");
+require_once("../../../Connexion_BDD/Connexion_1.php");
 
 //echo " je suis dans min fichier";
 

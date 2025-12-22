@@ -80,7 +80,7 @@
                     'Recteur' => 'Page_Principale_Finance.php?page=Dash_Board',
                     'Caissière principale' => 'Page_Principale_Finance.php?page=Dash_Board_Caisse',
                     'Encodeur' => 'D_Encodage/index.php',
-                    'Comptable' => 'D_Perception/Principale_perception.php',
+                    'Comptable' => 'D_Budget/Principale_Budget.php',
                     'Contrôleur interne' => 'Page_Principale_Finance.php?page=Dash_Board',
                     'Assistant AB' => 'Page_Principale_Finance.php?page=autorisation',
                     'Academique' => 'D_Academique/index.php',
@@ -134,6 +134,7 @@
                     $_SESSION['prommotion'] = $ligne['promm'];
                     $_SESSION['code_prom'] = $ligne['Code_promotion'];
                     $_SESSION['id_annee_acad'] = $ligne['id_annee_academique'];
+                    $_SESSION['annee_academique'] = $ligne['annee_academique'];
                     
                     // Nettoyer les sessions temporaires (plus nécessaires après le choix)
                     unset($_SESSION['choix_compte_agent']);
@@ -164,6 +165,7 @@
                     $_SESSION['code_prom'] = $ligne['Code_Promotion'];
                     $_SESSION['ID_jury'] = $ligne['ID_jury'];
                     $_SESSION['id_annee_acad'] = $ligne['idAnnee_Acad'];
+                    $_SESSION['annee_academique'] = $ligne['Annee_debut'] . ' - ' . $ligne['Annee_fin'];
                     $_SESSION['id_fac'] = $ligne['id_fac'];
                     $_SESSION['libelle_fac'] = $ligne['libelle_fac'];
                     $_SESSION['prommotion'] = $ligne['promm'];
@@ -222,12 +224,17 @@
                         agent.Post_agent as postnom,
 
                         filiere.Idfiliere as id_fac,
-                        filiere.Libelle_Filiere as libelle_fac
+                        filiere.Libelle_Filiere as libelle_fac,
+                        
+                        annee_acad.Annee_debut,
+                        annee_acad.Annee_fin,
+                        CONCAT(annee_acad.Annee_debut, ' - ', annee_acad.Annee_fin) as annee_academique
                     FROM compte_agent
                     INNER JOIN agent ON compte_agent.Mat_agent = agent.Mat_agent
                     LEFT JOIN filiere ON compte_agent.Id_filiere = filiere.IdFiliere
                     LEFT JOIN promotion promo ON compte_agent.Code_promotion = promo.Code_Promotion
                     LEFT JOIN mentions ON mentions.idMentions = promo.idMentions
+                    LEFT JOIN annee_academique annee_acad ON compte_agent.id_annee_academique = annee_acad.idAnnee_Acad
                     WHERE compte_agent.Login = ?";
              
                 $stat_agent = $con->prepare($sql_agent);
@@ -255,13 +262,17 @@
                         a.Prenom,
                         f.IdFiliere as id_fac,
                         f.Libelle_Filiere as libelle_fac,
-                        CONCAT(p.Abréviation, ' ', me.Libelle_mention) as promm
+                        CONCAT(p.Abréviation, ' ', me.Libelle_mention) as promm,
+                        annee_acad.Annee_debut,
+                        annee_acad.Annee_fin,
+                        CONCAT(annee_acad.Annee_debut, ' - ', annee_acad.Annee_fin) as annee_academique
                     FROM t_membre_jury m
                     INNER JOIN t_jury_deliberation j ON m.ID_jury = j.ID_jury
                     INNER JOIN agent a ON m.Mat_agent = a.Mat_agent
                     LEFT JOIN promotion p ON j.Code_Promotion = p.Code_Promotion
                     LEFT JOIN mentions me ON p.idMentions = me.idMentions
                     LEFT JOIN filiere f ON me.IdFiliere = f.IdFiliere
+                    LEFT JOIN annee_academique annee_acad ON j.idAnnee_Acad = annee_acad.idAnnee_Acad
                     WHERE m.Login = ? AND m.Statut = 'Actif'";
                 
                 $stat_jury = $con->prepare($sql_jury);
@@ -365,6 +376,7 @@
                     $_SESSION['code_prom'] = $ligne['Code_Promotion'];
                     $_SESSION['ID_jury'] = $ligne['ID_jury'];
                     $_SESSION['id_annee_acad'] = $ligne['idAnnee_Acad'];
+                    $_SESSION['annee_academique'] = $ligne['Annee_debut'] . ' - ' . $ligne['Annee_fin'];
                     $_SESSION['id_fac'] = $ligne['id_fac'];
                     $_SESSION['libelle_fac'] = $ligne['libelle_fac'];
                     $_SESSION['prommotion'] = $ligne['promm'];
@@ -401,6 +413,7 @@
                                 $_SESSION['prommotion'] = $ligne['promm'];
                                 $_SESSION['code_prom'] = $ligne['Code_promotion'];
                                 $_SESSION['id_annee_acad'] = $ligne['id_annee_academique'];
+                                $_SESSION['annee_academique'] = $ligne['annee_academique'];
 
                                 // Redirection selon catégorie
                                 if (!rediriger_selon_categorie($ligne['categorie'])) {

@@ -298,6 +298,9 @@ function Affichage_promotion(Idfiliere, comboId = "promo")
     }
 
     target_combo.innerHTML = "";
+    const option = document.createElement("option");
+    option.textContent = "Selectionner la promotion";
+    target_combo.appendChild(option);
   
     
     // Contacte de l'API PHP - Chemin absolu depuis la racine pour fonctionner partout

@@ -6,6 +6,12 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+// Vérifier la connexion à la base de données
+if (!isset($con) || $con === null) {
+    echo json_encode(["status" => "error", "message" => "Erreur de connexion à la base de données"]);
+    exit;
+}
+
 $data = json_decode(file_get_contents('php://input'), true);
 
 // Vérifier que toutes les données nécessaires sont présentes

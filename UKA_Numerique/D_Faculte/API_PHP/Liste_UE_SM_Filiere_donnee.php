@@ -1,6 +1,12 @@
 <?php
 session_start();
-include("../../../Connexion_BDD/Connexion_1.php");
+require_once("../../../Connexion_BDD/Connexion_1.php");
+
+// Vérifier la connexion à la base de données
+if (!isset($con) || $con === null) {
+    echo json_encode(["status" => "error", "message" => "Erreur de connexion à la base de données"]);
+    exit;
+}
 
 $id_semestre=$_GET['id_semestre'];
 $id_filiere=$_SESSION['id_fac'];

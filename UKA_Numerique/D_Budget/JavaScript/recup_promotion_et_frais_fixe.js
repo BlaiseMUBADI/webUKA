@@ -103,7 +103,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
   // Chargement du taux de base
   if(div_contenaire_taux !== null) {
-    const url = '/webUKA/UKA_Numerique/D_Budget/API_PHP/Recup_taux_base.php';
+    const url = 'API_PHP/Recup_taux_base.php';
     
     fetch(url) 
       .then(response => response.json())
@@ -189,7 +189,7 @@ function Affichage_Frais_par_promotion(code_promo,Id_an_acad)
     var tbody = document.createElement("tbody");
     
     // Contacter l'API pour avoir les frais fixés - Chemin absolu depuis la racine
-    var url='/webUKA/UKA_Numerique/D_Budget/API_PHP/liste_frais_fixer.php?Id_annee_acad='+Id_an_acad+'&code_promo='+code_promo;
+    var url='API_PHP/liste_frais_fixer.php?Id_annee_acad='+Id_an_acad+'&code_promo='+code_promo;
         
     var i=1;
     fetch(url) 
@@ -324,7 +324,7 @@ function Nouveau_Frais()
 
 
   var xhr = new XMLHttpRequest();
-  xhr.open("POST", "/webUKA/UKA_Numerique/D_Budget/API_PHP/Nouveau_frais_fixer.php", true);
+  xhr.open("POST", "API_PHP/Nouveau_frais_fixer.php", true);
 
   xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
   xhr.onreadystatechange = function() 
@@ -393,7 +393,7 @@ function Nouveau_Taux()
   
   
   var xhr = new XMLHttpRequest();
-  xhr.open("POST", "/webUKA/UKA_Numerique/D_Budget/API_PHP/Nouveau_taux.php", true);
+  xhr.open("POST", "API_PHP/Nouveau_taux.php", true);
 
   xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
   xhr.onreadystatechange = function() 

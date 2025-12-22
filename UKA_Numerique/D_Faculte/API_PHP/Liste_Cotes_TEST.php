@@ -8,7 +8,7 @@ header('Content-Type: application/json');
 // Génère quelques côtes aléatoires pour tester
 // ============================================
 
-include("../../../Connexion_BDD/Connexion_1.php");
+require_once("../../../Connexion_BDD/Connexion_1.php");
 
 $promotion = $_SESSION['code_prom'];
 $annee_acad = $_SESSION['id_annee_acad'];

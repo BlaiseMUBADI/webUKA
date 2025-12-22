@@ -1,8 +1,13 @@
 <?php
     session_start();
-    include("../../../Connexion_BDD/Connexion_1.php");
+    require_once("../../../Connexion_BDD/Connexion_1.php");
 
-    
+// Vérifier la connexion à la base de données
+if (!isset($con) || $con === null) {
+    echo json_encode(["status" => "error", "message" => "Erreur de connexion à la base de données"]);
+    exit;
+}
+
     $code_ec=$_POST['code_ec'];
     $code_prom=$_POST['code_prom'];
     $mat_agent=$_POST['mat_enseignant'];

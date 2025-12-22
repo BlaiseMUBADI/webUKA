@@ -94,6 +94,16 @@
       <?php
       
           include("../../Connexion_BDD/Connexion_1.php");
+          
+          // Vérifier la connexion à la base de données
+          if (!isset($con) || $con === null) {
+              die("<div style='text-align:center; margin-top:50px; color:red; font-size:24px;'>
+                   <i class='fas fa-exclamation-triangle'></i><br>
+                   Erreur de connexion à la base de données<br>
+                   <small style='font-size:16px;'>Veuillez contacter l'administrateur système</small>
+                   </div>");
+          }
+          
           require_once 'Menu_Gauche_Faculte.php';
           
 

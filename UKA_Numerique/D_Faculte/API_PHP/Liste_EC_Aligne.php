@@ -1,10 +1,14 @@
 <?php
 session_start();
-include("../../../Connexion_BDD/Connexion_1.php");
+require_once("../../../Connexion_BDD/Connexion_1.php");
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+if (!isset($con) || $con === null) {
+    echo json_encode(["status" => "error", "message" => "Erreur de connexion à la base de données"]);
+    exit;
+}
 
 // ...existing code...
 $id_filiere = $_SESSION['id_fac'];

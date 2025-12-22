@@ -31,8 +31,8 @@
 
           
           <label style="color: white;">Promotion:</label>
-          <select id="promo"  class="text-center" name="Code_promo" style="width: 30%;">
-            <option value="" style="border:1px solsid red;"></option>
+            <select id="promo"  class="text-center" name="Code_promo" style="width: 30%;">
+              <option value="" style="border:1px solsid red;"></option>
           </select>
 
 

@@ -1,5 +1,11 @@
 <?php
-include("../../../Connexion_BDD/Connexion_1.php");
+require_once("../../../Connexion_BDD/Connexion_1.php");
+
+// Vérifier la connexion à la base de données
+if (!isset($con) || $con === null) {
+    echo json_encode(["status" => "error", "message" => "Erreur de connexion à la base de données"]);
+    exit;
+}
 
 $mat_agent=$_GET['mat_agent'];
 

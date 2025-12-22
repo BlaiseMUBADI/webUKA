@@ -158,6 +158,14 @@
 <section class="home-section" style="height: 100%; "style="border:solid 1px red;">
       <?php
         require_once 'Profil_Gestion_delibe.php';
+        
+        // Vérifier la connexion à la base de données
+        if (!isset($con) || $con === null) {
+            echo "<div style='text-align:center; margin-top:50px; color:red; font-size:20px;'>
+                  <i class='fas fa-exclamation-triangle'></i><br>
+                  Erreur de connexion à la base de données</div>";
+            exit;
+        }
       ?>
   <div class="home-content m-0 me-3 ms-3 " id="div_gen_Aligne_Enseignant">
 

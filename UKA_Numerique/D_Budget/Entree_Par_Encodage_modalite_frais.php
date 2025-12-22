@@ -2,7 +2,7 @@
 
 <section class="home-section" style="height: 100%;">
       <?php
-        require_once '../D_Perception/Profil_Guichet.php';
+        require_once 'Profil_Budget.php';
       ?>
   <div class="home-content me-3 ms-3">
 

@@ -139,6 +139,171 @@
     </div>
   </div>
 
+  <!------------Menu contextuel pour les Côtes (Compensation,Infos de transaction) ----------------------------->
+  <div id="contextMenuCote" style="display: none; position: absolute; background: white; border: 1px solid #ddd; border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,0.2); z-index: 10000; min-width: 250px; overflow: hidden;">
+    <!-- En-tête du menu -->
+    <div class="context-menu-title" style="padding: 12px 16px; background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); color: white; font-weight: bold; font-size: 0.9rem; border-bottom: 1px solid rgba(255,255,255,0.2);">
+      <i class="fas fa-calculator me-2"></i>Note: --/20
+    </div>
+    <!-- Option Compensation -->
+    <div class="context-menu-compensation menu-item" style="padding: 12px 16px; cursor: pointer; display: none; align-items: center; transition: all 0.2s; border-left: 3px solid transparent;"
+         onmouseover="this.style.background='#fff3cd'; this.style.borderLeftColor='#ffc107'; this.style.paddingLeft='20px';"
+         onmouseout="this.style.background='white'; this.style.borderLeftColor='transparent'; this.style.paddingLeft='16px';"
+         onclick="proposerCompensation()">
+      <i class="fas fa-exchange-alt" style="margin-right: 12px; color: #ffc107; width: 20px;"></i>
+      <div>
+        <div style="font-size: 0.95rem; font-weight: 500;">Compenser cette note</div>
+        <small style="color: #6c757d; font-size: 0.75rem;">Utiliser un autre EC de l'UE</small>
+      </div>
+    </div>
+    <!-- Option Infos de transaction -->
+    <div class="context-menu-info-transaction menu-item" style="padding: 12px 16px; cursor: pointer; display: none; align-items: center; transition: all 0.2s; border-left: 3px solid transparent;"
+         onmouseover="this.style.background='#e3f7fa'; this.style.borderLeftColor='#17a2b8'; this.style.paddingLeft='20px';"
+         onmouseout="this.style.background='white'; this.style.borderLeftColor='transparent'; this.style.paddingLeft='16px';"
+         onclick="ouvrirModalTransaction()">
+      <i class="fas fa-info-circle" style="margin-right: 12px; color: #17a2b8; width: 20px;"></i>
+      <div>
+        <div style="font-size: 0.95rem; font-weight: 500;">Voir la transaction</div>
+        <small class="context-menu-transaction-detail" style="color: #6c757d; font-size: 0.75rem; margin-top: 4px; display: block;"></small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal d'infos de transaction (style moderne) -->
+  <dialog id="modal_transaction_info" 
+    class="shadow-lg p-0 rounded" 
+    style="border: none; max-width: 500px; width: 95%; background: linear-gradient(135deg, #17a2b8 0%, #43a047 100%);">
+    <div class="container" style="background: white; border-radius: 8px; overflow: hidden;">
+      <div class="modal-header" style="background: linear-gradient(135deg, #17a2b8 0%, #43a047 100%); color: white; border: none; padding: 20px;">
+        <div style="display: flex; align-items: center; width: 100%;">
+          <i class="fas fa-info-circle me-3" style="font-size: 1.5rem;"></i>
+          <h5 class="modal-title mb-0" style="flex: 1;">Détail de la Transaction</h5>
+          <button type="button" class="btn-close btn-close-white" onclick="fermerModalTransaction()" 
+                  style="filter: brightness(0) invert(1);"></button>
+        </div>
+      </div>
+      <div class="modal-body p-4" style="max-height: 60vh; overflow-y: auto;">
+        <div class="row g-3">
+          <div class="col-12">
+            <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #e0f7fa15 0%, #e8f5e915 100%);">
+              <div class="card-body" id="transaction_info_content">
+                <!-- Squelette moderne pour transaction, rempli dynamiquement par JS -->
+                <div class="text-center py-2">
+                  <span id="transaction_type_icon" style="font-size:2rem; vertical-align:middle;"></span>
+                  <span id="transaction_type_label" style="font-size:1.2em; font-weight:600; margin-left:8px;"></span>
+                </div>
+                <div class="text-center my-2">
+                  <span id="transaction_ec_label" style="color:#333;"></span><br>
+                  <span id="transaction_ec_intitule" class="badge" style="font-size:1em; margin-top:4px;"></span>
+                </div>
+                <div class="text-center my-2">
+                  <span id="transaction_note_label" style="font-weight:500;"></span>
+                  <span id="transaction_note_value" class="badge bg-warning" style="font-size:1.1em; margin-left:6px;"></span>
+                </div>
+                <div class="text-center mt-2" style="color:#607d8b; font-size:0.95em;">
+                  Référence transaction : <b id="transaction_ref"></b>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="border-top: 1px solid #e9ecef; padding: 15px 20px;">
+        <button type="button" class="btn btn-secondary" onclick="fermerModalTransaction()" 
+                style="background: #6c757d; border: none; padding: 8px 20px;">
+          <i class="fas fa-times me-2"></i>Fermer
+        </button>
+      </div>
+    </div>
+  </dialog>
+  </div>
+
+  <!------------Modal Compensation ----------------------------->
+  <dialog id="modal_Compensation" 
+    class="shadow-lg p-0 rounded" 
+    style="border: none; max-width: 800px; width: 90%; background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);">
+    
+    <div class="container" style="background: white; border-radius: 8px; overflow: hidden;">
+      <div class="modal-header" style="background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%); color: white; border: none; padding: 20px;">
+        <div style="display: flex; align-items: center; width: 100%;">
+          <i class="fas fa-exchange-alt me-3" style="font-size: 1.5rem;"></i>
+          <h5 class="modal-title mb-0" style="flex: 1;">Compensation de Note</h5>
+          <button type="button" class="btn-close btn-close-white" onclick="fermerModalCompensation()" 
+                  style="filter: brightness(0) invert(1);"></button>
+        </div>
+      </div>
+
+      <div class="modal-body p-4" style="max-height: 70vh; overflow-y: auto;">
+
+        <!-- Bloc fusionné UE + EC à compenser -->
+        <div class="card mb-3" style="border: 2px solid #ffc107; border-radius: 10px; overflow: hidden;">
+          <div class="card-header" style="background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%); border-bottom: 2px solid #ffc107; display: flex; align-items: center; justify-content: space-between;">
+            <div>
+              <h6 class="mb-0" style="color: #f57c00; font-weight: bold; display: inline-block;">
+                <i class="fas fa-layer-group me-2"></i>Unité d'Enseignement
+              </h6>
+              <span class="badge ms-3" style="background: #ff9800; font-size: 0.85rem; vertical-align: middle;">
+                <span id="comp_ue_code">-</span>
+              </span>
+            </div>
+            <div style="color: #7f8c8d; font-size: 0.9rem;">
+              <i class="fas fa-tag me-1"></i>Catégorie: <strong id="comp_ue_categorie">-</strong>
+            </div>
+          </div>
+          <div class="card-body" style="background: #fffef7;">
+            <div class="row g-2 align-items-center">
+              <div class="col-md-6">
+                <strong style="color: #2c3e50; font-size: 1.1rem;" id="comp_ue_intitule">-</strong>
+                <div class="mb-2" id="comp_ec_beneficiaire_info" style="color: #2c3e50; font-size: 0.95rem;"></div>
+              </div>
+              <div class="col-md-3 text-center">
+                <div style="font-size: 0.85rem; color: #7f8c8d; margin-bottom: 5px;">Note actuelle:</div>
+                <div style="font-size: 2rem; font-weight: bold; color: #e74c3c;">
+                  <span id="comp_cote_actuelle">-</span>/20
+                </div>
+              </div>
+              <div class="col-md-3 text-end">
+                <div style="font-size: 0.85rem; color: #7f8c8d; margin-bottom: 5px;">Déficit:</div>
+                <div style="font-size: 1.5rem; font-weight: bold; color: #e67e22;">
+                  -<span id="comp_deficit">-</span> pts
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Liste des ECs compensables -->
+        <div class="card" style="border: 2px solid #4CAF50; border-radius: 10px;">
+          <div class="card-header" style="background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); border-bottom: 2px solid #4CAF50;">
+            <h6 class="mb-0" style="color: #2e7d32; font-weight: bold;">
+              <i class="fas fa-list-check me-2"></i>ECs Disponibles (même crédit ou même UE)
+            </h6>
+          </div>
+          <div class="card-body" style="background: #f9fdf9; max-height: 400px; overflow-y: auto;" id="liste_ecs_compensables">
+            <!-- Rempli dynamiquement par JavaScript -->
+          </div>
+        </div>
+
+        <div class="alert alert-info mt-3 mb-0" style="background: #e3f2fd; border: 1px solid #90caf9; border-radius: 8px;">
+          <i class="fas fa-info-circle me-2" style="color: #1976d2;"></i>
+          <small style="color: #1565c0;">
+            <strong>Règles de compensation :</strong><br>
+            • Note à compenser entre <strong>8 et 9.99</strong><br>
+            • Même UE et même crédit<br>
+            • EC cédant doit avoir une note <strong>> 10/20</strong><br>
+            • Seuls les ECs ayant le <strong>même nombre de crédits</strong> peuvent compenser entre eux
+          </small>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="background: #f8f9fa; border-top: 2px solid #dee2e6;">
+        <button type="button" class="btn btn-secondary" onclick="fermerModalCompensation()">
+          <i class="fas fa-times me-2"></i>Annuler
+        </button>
+      </div>
+    </div>
+  </dialog>
+
   <!------------Modal Informations Étudiant ----------------------------->
   <dialog id="modal_Infos_Etudiant" 
     class="shadow-lg p-0 rounded" 

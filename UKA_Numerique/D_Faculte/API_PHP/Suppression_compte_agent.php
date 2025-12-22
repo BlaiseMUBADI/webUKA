@@ -3,7 +3,12 @@
     
     include("../../../Connexion_BDD/Connexion_1.php");
 
-    
+// Vérifier la connexion à la base de données
+if (!isset($con) || $con === null) {
+    echo json_encode(["status" => "error", "message" => "Erreur de connexion à la base de données"]);
+    exit;
+}
+
     $id_compte_agent=$_POST['id_compte_agent'];
 
     // Ici récuperaion de JSON envoyé depuis javascript

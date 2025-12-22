@@ -39,7 +39,7 @@
   <body style="height:auto; " >
       <?php
          
-          include("../../Connexion_BDD/Connexion_1.php");
+          require_once("../../Connexion_BDD/Connexion_1.php");
           require_once 'Menu_Gauche_Perception.php';
           
           if(@$_GET['page'])

@@ -1,9 +1,19 @@
+
 console.log("🎓 Module Délibération chargé")
 
 // ==================== Variables Module Délibération ====================
 let cmb_semestre_encodage_delib;
 let selectedStudentMatricule_delib = null;
 let selectedStudentNom_delib = null;
+
+// Variables pour le menu contextuel des côtes
+let selectedCoteMatricule = null;
+let selectedCoteEcAligne = null;
+let selectedCoteValeur = null;
+let selectedCoteCell = null;
+
+// Variable globale pour toutes les cotes (pour menu contextuel)
+let tab_Cotes = [];
 
 // ==================== Initialisation ====================
 document.addEventListener("DOMContentLoaded", function(event) {
@@ -54,6 +64,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
         // Initialiser le menu contextuel
         initializeContextMenu();
+        initializeContextMenuCote();
         
         // Restaurer la préférence du menu
         restoreMenuPreference();
@@ -125,6 +136,103 @@ function Ouvrir_Boite_Alert_Encodage(text_a_afficher, type = 'info') {
     }
     
     boite.showModal();
+}
+
+
+// Ouvre le modal d'infos de transaction (doit être global pour le HTML)
+function ouvrirModalTransaction() 
+{    
+    // Fonction utilitaire pour extraire l'id_ec_aligne depuis la référence
+    function Extraire_ID_EC_dans_REF(ref) 
+    {
+        if (typeof ref === 'string' && ref.includes('_')) {
+            const parts = ref.split('_');
+            return parts[parts.length - 1];
+        }
+        return null;
+    }
+
+    const c = window._transactionCoteObj;
+    const id_Ec_Cedant_ou_compensé = Extraire_ID_EC_dans_REF(c.Ligne_touchee_Matricule_id_ec_aligne);
+
+    // Correction : récupérer les éléments du DOM pour le modal et le contenu
+    const modal = document.getElementById('modal_transaction_info');
+    const content = document.getElementById('transaction_info_content');
+    if (!modal || !content || !window._transactionCoteObj) return;
+    
+    // Recherche des intitulés des EC cédant et bénéficiaire
+    // TEST: Afficher l'intitulé de l'EC cédant (id_Ec_Cedant_ou_compensé) via tab_ECs_aligne
+    let ecIntituleCedant = '-';
+    let ecIntituleBenef = '-';
+    if (id_Ec_Cedant_ou_compensé && Array.isArray(window.tab_ECs_aligne)) {
+        const ec = window.tab_ECs_aligne.find(e => String(e.id_ec_aligne).trim() === String(id_Ec_Cedant_ou_compensé).trim());
+        
+        if (ec && ec.Intutile_ec) {
+            ecIntituleCedant = ec.Intutile_ec;
+        }
+    }
+
+    if (c.id_ec_aligne && Array.isArray(window.tab_ECs_aligne)) {
+        const ec = window.tab_ECs_aligne.find(e => String(e.id_ec_aligne).trim() === String(c.id_ec_aligne).trim());
+        
+        if (ec && ec.Intutile_ec) {
+            ecIntituleBenef = ec.Intutile_ec;
+        }
+    }
+
+    
+   
+
+    // Remplir les champs du modal moderne
+    // Exemples d'IDs à adapter selon le HTML du modal :
+    // #transaction_type_label, #transaction_type_icon, #transaction_ec_intitule, #transaction_note_label, #transaction_note_value, #transaction_ref
+    let refTransactionAffichee = (typeof c.Ligne_touchee_Matricule_id_ec_aligne !== 'undefined') ? c.Ligne_touchee_Matricule_id_ec_aligne : '(non renseignée)';
+    if (window._transactionType === 'compensee') 
+    {
+
+        
+        document.getElementById('transaction_type_label').textContent = 'Compensation reçue';
+        document.getElementById('transaction_type_icon').className = 'fas fa-arrow-down me-2';
+        document.getElementById('transaction_type_icon').style.color = '#43a047';
+        document.getElementById('transaction_ec_label').innerHTML = `Cet EC (<b>${ecIntituleBenef}</b>) a reçu des points de : <b>${ecIntituleCedant}</b>`;
+        //document.getElementById('transaction_ec_intitule').textContent = ecIntituleBenef;
+        document.getElementById('transaction_ec_intitule').className = 'badge bg-success';
+        document.getElementById('transaction_note_label').textContent = 'Note compensée :';
+        document.getElementById('transaction_note_value').textContent = c.cote_compensee || '-';
+        document.getElementById('transaction_ref').textContent = refTransactionAffichee;
+    } 
+    else if (window._transactionType === 'cedee') 
+    {
+        document.getElementById('transaction_type_label').textContent = 'Points cédés';
+        document.getElementById('transaction_type_icon').className = 'fas fa-arrow-up me-2';
+        document.getElementById('transaction_type_icon').style.color = '#e65100';
+        document.getElementById('transaction_ec_label').innerHTML = `Cet EC (<b>${ecIntituleBenef}</b>) a cédé des points à : <b>${ecIntituleCedant}</b>`;
+        //document.getElementById('transaction_ec_intitule').textContent = ecIntituleCedant;
+        document.getElementById('transaction_ec_intitule').className = 'badge bg-primary';
+        document.getElementById('transaction_note_label').textContent = 'Note après cession :';
+        document.getElementById('transaction_note_value').textContent = c.cote_reste_apres_cedee || '-';
+        document.getElementById('transaction_ref').textContent = refTransactionAffichee;
+    } 
+    else 
+    {
+        document.getElementById('transaction_type_label').textContent = 'Aucune information de transaction disponible';
+        document.getElementById('transaction_type_icon').className = '';
+        document.getElementById('transaction_type_icon').style.color = '';
+        document.getElementById('transaction_ec_label').textContent = '';
+        document.getElementById('transaction_ec_intitule').textContent = '';
+        document.getElementById('transaction_ec_intitule').className = '';
+        document.getElementById('transaction_note_label').textContent = '';
+        document.getElementById('transaction_note_value').textContent = '';
+        document.getElementById('transaction_ref').textContent = '';
+    }
+    modal.showModal();
+   
+}
+
+function fermerModalTransaction() {
+    window.fermerModalTransaction = fermerModalTransaction;
+    const modal = document.getElementById('modal_transaction_info');
+    if (modal) modal.close();
 }
 
 function Fermer_Boite_Alert_Encodage() {
@@ -241,7 +349,298 @@ function afficherHistoriqueNotes() {
 
 function genererBulletin() {
     document.getElementById('contextMenuStudent').style.display = 'none';
-    Ouvrir_Boite_Alert_Encodage('Génération du bulletin pour ' + selectedStudentNom_delib + ' en cours...', 'info');
+    // Ouvre le bulletin PDF dans un nouvel onglet, possibilité de passer le matricule en GET
+    if (selectedStudentMatricule_delib) {
+        window.open(
+            '../Impression/Docs_a_imprimer/bulletin_semestriel.php?matricule=' + encodeURIComponent(selectedStudentMatricule_delib),
+            '_blank'
+        );
+    } else {
+        Ouvrir_Boite_Alert_Encodage('Aucun étudiant sélectionné.', 'error');
+    }
+}
+
+// ==================== Menu Contextuel Côte (pour Compensation) ====================
+function initializeContextMenuCote() {
+    const table = document.getElementById('table_deliberation');
+    const contextMenuCote = document.getElementById('contextMenuCote');
+    
+    if (!table || !contextMenuCote) return;
+    
+    // Événement clic droit sur les cellules éditables
+    table.addEventListener('contextmenu', function(e) {
+        const editableCell = e.target.closest('.cell-editable');
+        if (!editableCell) return;
+        e.preventDefault();
+        // Récupérer les données de la cellule
+        const matricule = editableCell.dataset.matricule;
+        const ecAligne = editableCell.dataset.ecAligne;
+        const valeur = editableCell.textContent.trim();
+        if (!valeur || valeur === '') return;
+        // Chercher la cote dans tab_Cotes
+        let coteObj = null;
+        if (Array.isArray(tab_Cotes)) {
+            coteObj = tab_Cotes.find(c =>
+                String(c.Matricule).trim() === String(matricule).trim() &&
+                String(c.id_ec_aligne).trim() === String(ecAligne).trim()
+            );
+        }
+        // Déterminer le type de la cellule
+        let isDeficitaire = false, isCompensee = false, isCede = false, refTransaction = null;
+        if (coteObj) {
+            if (coteObj.cote_compensee !== undefined && coteObj.cote_compensee !== null && coteObj.cote_compensee !== "") {
+                isCompensee = true;
+                refTransaction = coteObj.Ligne_touchee_Matricule_id_ec_aligne || null;
+            } else if (coteObj.cote_reste_apres_cedee !== undefined && coteObj.cote_reste_apres_cedee !== null && coteObj.cote_reste_apres_cedee !== "" && coteObj.cote_reste_apres_cedee !== coteObj.Cote) {
+                isCede = true;
+                refTransaction = coteObj.Ligne_touchee_Matricule_id_ec_aligne || null;
+            } else if (coteObj.Cote !== undefined && coteObj.Cote !== null && coteObj.Cote !== "") {
+                const n = parseFloat(coteObj.Cote);
+                if (!isNaN(n) && n < 10) isDeficitaire = true;
+            }
+        }
+        selectedCoteMatricule = matricule;
+        selectedCoteEcAligne = ecAligne;
+        selectedCoteValeur = valeur;
+        selectedCoteCell = editableCell;
+        // Mettre à jour le menu (plus de debug)
+        const menuTitle = contextMenuCote.querySelector('.context-menu-title');
+        let menuHtml = `<i class=\"fas fa-calculator me-2\"></i>Note: ${valeur}/20`;
+        if (isDeficitaire) menuHtml += ` <span style=\"color: #ff6b6b; font-weight: bold;\">(< 10)</span>`;
+        if (menuTitle) menuTitle.innerHTML = menuHtml;
+        // Afficher les options selon le cas
+        const optionComp = contextMenuCote.querySelector('.context-menu-compensation');
+        const optionInfo = contextMenuCote.querySelector('.context-menu-info-transaction');
+        if (optionComp) optionComp.style.display = isDeficitaire ? 'block' : 'none';
+        if (optionInfo) optionInfo.style.display = (isCompensee || isCede) ? 'block' : 'none';
+        // Si info transaction, remplir le détail
+        const infoDetail = contextMenuCote.querySelector('.context-menu-transaction-detail');
+        if ((isCompensee || isCede) && infoDetail) {
+            if (refTransaction) {
+                // Afficher la référence brute, ou décoder si besoin
+                infoDetail.textContent = isCompensee ? `Compensé par: ${refTransaction}` : `A cédé à: ${refTransaction}`;
+            } else {
+                infoDetail.textContent = "Aucune information de transaction disponible.";
+            }
+        } else if (infoDetail) {
+            infoDetail.textContent = "";
+        }
+        // Rendre la fonction transaction globale pour le menu
+        if (optionInfo) {
+            optionInfo.onclick = function() {
+                window._transactionCoteObj = coteObj;
+                // Initialisation explicite du paramètre Ligne_touchee_Matricule_id_ec_aligne si absent
+                if (window._transactionCoteObj && typeof window._transactionCoteObj.Ligne_touchee_Matricule_id_ec_aligne === 'undefined') {
+                    // On tente de générer une référence à partir du matricule et de l'id_ec_aligne
+                    if (window._transactionCoteObj.Matricule && window._transactionCoteObj.id_ec_aligne) {
+                        window._transactionCoteObj.Ligne_touchee_Matricule_id_ec_aligne = window._transactionCoteObj.Matricule + '_' + window._transactionCoteObj.id_ec_aligne;
+                    } else {
+                        window._transactionCoteObj.Ligne_touchee_Matricule_id_ec_aligne = '';
+                    }
+                }
+                window._transactionType = isCompensee ? 'compensee' : (isCede ? 'cedee' : '');
+                ouvrirModalTransaction();
+            };
+        }
+        // Positionner le menu
+        contextMenuCote.style.left = e.pageX + 'px';
+        contextMenuCote.style.top = e.pageY + 'px';
+        contextMenuCote.style.display = 'block';
+    });
+    
+    // Fermer le menu si clic ailleurs
+    document.addEventListener('click', function(e) {
+        if (!contextMenuCote.contains(e.target)) {
+            contextMenuCote.style.display = 'none';
+        }
+    });
+    
+    // Empêcher fermeture si clic dans le menu
+    contextMenuCote.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+}
+
+async function proposerCompensation() {
+    const contextMenu = document.getElementById('contextMenuCote');
+    if (contextMenu) contextMenu.style.display = 'none';
+    
+    if (!selectedCoteMatricule || !selectedCoteEcAligne) {
+        Ouvrir_Boite_Alert_Encodage('Aucune note sélectionnée', 'error');
+        return;
+    }
+    
+    // Récupérer le semestre actuel
+    const id_semestre = cmb_semestre_encodage_delib.value;
+    if (!id_semestre || id_semestre === '0') {
+        Ouvrir_Boite_Alert_Encodage('Veuillez sélectionner un semestre', 'warning');
+        return;
+    }
+    
+    // Afficher un message de chargement
+    Ouvrir_Boite_Alert_Encodage('🔍 Recherche des ECs compensables...', 'info');
+    
+    try {
+        const response = await fetch('API_PHP/Recup_EC_Compensables.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                matricule: selectedCoteMatricule,
+                ec_beneficiaire: selectedCoteEcAligne,
+                id_semestre: id_semestre
+            })
+        });
+        
+        const data = await response.json();
+        
+        Fermer_Boite_Alert_Encodage();
+        
+        if (!data.success) {
+            Ouvrir_Boite_Alert_Encodage(data.message || 'Erreur lors de la récupération des ECs', 'error');
+            return;
+        }
+        
+        if (data.count === 0) {
+            const creditInfo = data.ec_beneficiaire && data.ec_beneficiaire.credit 
+                ? `${data.ec_beneficiaire.credit} crédits` 
+                : 'même crédit';
+            
+            Ouvrir_Boite_Alert_Encodage(
+                `Aucun EC disponible pour compenser.\n\n` +
+                `📌 Pour qu'un EC puisse compenser, il doit:\n` +
+                `• Être dans la même UE (${data.ue.intitule})\n` +
+                `• Avoir le MÊME nombre de crédits (${creditInfo})\n` +
+                `• Avoir une note > 10/20\n` +
+                `• Ne pas avoir déjà cédé tous ses points`,
+                'warning'
+            );
+            return;
+        }
+        
+        // Afficher le modal avec les ECs compensables
+        afficherModalCompensation(data);
+        
+    } catch (error) {
+        console.error('Erreur:', error);
+        Fermer_Boite_Alert_Encodage();
+        Ouvrir_Boite_Alert_Encodage('Erreur lors de la communication avec le serveur', 'error');
+    }
+}
+
+function afficherModalCompensation(data) {
+    const modal = document.getElementById('modal_Compensation');
+    if (!modal) return;
+    
+    // Remplir les informations de l'UE
+    document.getElementById('comp_ue_intitule').textContent = data.ue.intitule;
+    document.getElementById('comp_ue_code').textContent = data.ue.code;
+    document.getElementById('comp_ue_categorie').textContent = data.ue.categorie;
+    
+    // Afficher la note actuelle, le déficit et le crédit
+    const ecBenefInfo = document.getElementById('comp_ec_beneficiaire_info');
+    if (ecBenefInfo && data.ec_beneficiaire.intitule) {
+        ecBenefInfo.innerHTML = `
+            <strong>${data.ec_beneficiaire.intitule}</strong>
+            <span class="badge bg-primary ms-2">${data.ec_beneficiaire.credit} Crédits</span>
+        `;
+    }
+    
+    document.getElementById('comp_cote_actuelle').textContent = data.ec_beneficiaire.cote_actuelle;
+    document.getElementById('comp_deficit').textContent = data.ec_beneficiaire.deficit.toFixed(2);
+    // Générer dynamiquement la liste des ECs compensables
+    const listeEcsDiv = document.getElementById('liste_ecs_compensables');
+    if (listeEcsDiv) {
+        listeEcsDiv.innerHTML = '';
+        if (Array.isArray(data.ecs_compensables) && data.ecs_compensables.length > 0) {
+            data.ecs_compensables.forEach(ec => {
+                // Créer un bloc pour chaque EC cédant
+                const ecDiv = document.createElement('div');
+                ecDiv.className = 'ec-compensable-item card mb-2 p-2';
+                ecDiv.style.display = 'flex';
+                ecDiv.style.alignItems = 'center';
+                ecDiv.style.justifyContent = 'space-between';
+                ecDiv.style.border = '1px solid #c8e6c9';
+                ecDiv.style.background = '#f9fdf9';
+
+                // Infos EC
+                const infoDiv = document.createElement('div');
+                infoDiv.innerHTML = `
+                    <strong>${ec.intitule}</strong>
+                    <span class="badge bg-success ms-2">${ec.credit} Crédits</span>
+                    <span class="badge bg-info ms-2">Note: ${ec.cote_actuelle}/20</span>
+                    <span class="badge bg-secondary ms-2">Disponible: ${ec.points_disponibles} pts</span>
+                `;
+
+                // Bouton d'action
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-outline-success btn-sm';
+                btn.innerHTML = '<i class="fas fa-exchange-alt me-1"></i>Utiliser pour compenser';
+                btn.onclick = () => appliquerCompensation(ec.id_ec_aligne);
+                btn.title = `Céder des points de cet EC pour compenser`;
+
+                ecDiv.appendChild(infoDiv);
+                ecDiv.appendChild(btn);
+                listeEcsDiv.appendChild(ecDiv);
+            });
+        } else {
+            // Aucun EC compensable trouvé (ce cas ne devrait pas arriver ici normalement)
+            listeEcsDiv.innerHTML = '<div class="alert alert-warning">Aucun EC disponible pour compenser.</div>';
+        }
+    }
+    modal.showModal();
+}
+
+function fermerModalCompensation() {
+    const modal = document.getElementById('modal_Compensation');
+    if (modal) modal.close();
+}
+
+async function appliquerCompensation(ec_cedant_id) {
+    // Confirmer l'action
+    if (!confirm('⚠️ Confirmer la compensation?\n\nCette action modifiera les deux notes de façon permanente.')) {
+        return;
+    }
+    
+    fermerModalCompensation();
+    Ouvrir_Boite_Alert_Encodage('⏳ Application de la compensation en cours...', 'info');
+    
+    try {
+        const response = await fetch('API_PHP/Compenser_Cote.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                matricule: selectedCoteMatricule,
+                ec_beneficiaire: selectedCoteEcAligne,
+                ec_cedant: ec_cedant_id
+            })
+        });
+        
+        const data = await response.json();
+        
+        Fermer_Boite_Alert_Encodage();
+        
+        if (data.success) {
+            Ouvrir_Boite_Alert_Encodage(
+                `✅ Compensation réussie!\n\n` +
+                `📈 EC bénéficiaire: ${data.beneficiaire.cote_avant} → ${data.beneficiaire.cote_apres} (+${data.beneficiaire.points_recus})\n` +
+                `📉 EC cédant: ${data.cedant.cote_avant} → ${data.cedant.cote_apres} (-${data.cedant.points_cedes})`,
+                'success'
+            );
+            
+            // Recharger les données pour mettre à jour l'affichage
+            setTimeout(() => {
+                Fermer_Boite_Alert_Encodage();
+                Afficher_EC_aligne_deliberation();
+            }, 2000);
+        } else {
+            Ouvrir_Boite_Alert_Encodage('❌ ' + (data.message || 'Erreur lors de la compensation'), 'error');
+        }
+        
+    } catch (error) {
+        console.error('Erreur:', error);
+        Fermer_Boite_Alert_Encodage();
+        Ouvrir_Boite_Alert_Encodage('Erreur lors de la communication avec le serveur', 'error');
+    }
 }
 
 // ==================== Search Filter ====================
@@ -315,8 +714,6 @@ function updateStats() {
             return value !== '' && value !== null && value !== undefined;
         }).length;
     
-    // Debug: afficher dans la console
-    console.log(`📊 Stats Délibération - Étudiants: ${etudiantsCount}, ECs: ${ecsCount}, Côtes: ${cotesCount}/${allEditableCells.length}`);
     
     document.getElementById('count-etudiants').textContent = etudiantsCount;
     document.getElementById('count-ecs').textContent = ecsCount;
@@ -356,9 +753,14 @@ async function Liste_Cotes(id_semestre) {
 
 async function Afficher_EC_aligne_deliberation() {
     // Récupération des données
-    let tab_ECs_aligne = await Liste_Ec_Aligne(cmb_semestre_encodage_delib.value);
+    window.tab_ECs_aligne = await Liste_Ec_Aligne(cmb_semestre_encodage_delib.value);
+    let tab_ECs_aligne = window.tab_ECs_aligne;
     let tab_etudiants_aligne = await Liste_Etudiants();
-    let tab_Cotes = await Liste_Cotes(cmb_semestre_encodage_delib.value);
+    tab_Cotes = await Liste_Cotes(cmb_semestre_encodage_delib.value);
+    if (!Array.isArray(tab_Cotes)) {
+        console.error("Erreur récupération des cotes :", tab_Cotes);
+        tab_Cotes = [];
+    }
 
     let table_encodage = document.getElementById("table_deliberation");
     table_encodage.innerHTML = '';
@@ -432,9 +834,25 @@ async function Afficher_EC_aligne_deliberation() {
     td15.style.height = "200px";
     td15.style.borderRight = "1px solid rgba(255, 255, 255, 0.2)";
 
+
+    // Récupérer le numéro du semestre sélectionné (affichage humain)
+    let numSemestre = '';
+    if (cmb_semestre_encodage_delib) {
+        // Essayer de trouver le texte du semestre sélectionné
+        const selectedOption = cmb_semestre_encodage_delib.options[cmb_semestre_encodage_delib.selectedIndex];
+        if (selectedOption) {
+            // Cherche un numéro dans le libellé (ex: S1, Semestre 1, etc.)
+            const match = selectedOption.textContent.match(/([0-9]+)/);
+            if (match) numSemestre = match[1];
+            else numSemestre = cmb_semestre_encodage_delib.value;
+        } else {
+            numSemestre = cmb_semestre_encodage_delib.value;
+        }
+    }
+
     var td16 = document.createElement("td");
     td16.rowSpan = 3;
-    td16.textContent = "Moyenne du " + cmb_semestre_encodage_delib.value + "è Semestre";
+    td16.textContent = "Moyenne du SM " + numSemestre;
     td16.classList.add("text-start", "ec-header-modern");
     td16.style.backgroundColor = "midnightblue";
     td16.style.color = "white";
@@ -449,7 +867,7 @@ async function Afficher_EC_aligne_deliberation() {
 
     var td17 = document.createElement("td");
     td17.rowSpan = 3;
-    td17.textContent = "Mention";
+    td17.textContent = "Mention SM " + numSemestre;
     td17.classList.add("text-start", "ec-header-modern");
     td17.style.backgroundColor = "midnightblue";
     td17.style.color = "white";
@@ -464,7 +882,7 @@ async function Afficher_EC_aligne_deliberation() {
 
     var td18 = document.createElement("td");
     td18.rowSpan = 3;
-    td18.textContent = "Décision";
+    td18.textContent = "Décision SM " + numSemestre;
     td18.classList.add("text-start", "ec-header-modern");
     td18.style.backgroundColor = "midnightblue";
     td18.style.color = "white";
@@ -690,6 +1108,7 @@ async function Afficher_EC_aligne_deliberation() {
         tr.appendChild(td_etudiant);
         tr.appendChild(td_vide);
         
+
         // Boucle pour afficher les notes (ÉDITABLE - avec DIV comme Encodage)
         tab_ECs_aligne.forEach((ec_s_aligne, index) => {
             const td_note = document.createElement('td');
@@ -706,12 +1125,83 @@ async function Afficher_EC_aligne_deliberation() {
 
             // Vérifier si une cote existe
             let cote = tab_Cotes.find(c => c.Matricule === etudiant.Matricule && c.id_ec_aligne === ec_s_aligne.id_ec_aligne);
-            
-            if (cote && cote.Cote !== "" && cote.Cote !== null) {
-                editableCell.textContent = cote.Cote;
-                editableCell.dataset.valeurOriginale = cote.Cote;
+
+            // Affichage spécial pour la compensation
+            let valeurAffichee = '';
+            let isCompensee = false;
+            if (cote) {
+                // Si la cote est compensée (EC déficitaire), on affiche la cote compensée et badge
+                if (cote.cote_compensee !== undefined && cote.cote_compensee !== null && cote.cote_compensee !== "") {
+                    valeurAffichee = cote.cote_compensee;
+                    isCompensee = true;
+                }
+                // Sinon, si l'EC a cédé des points, on affiche la cote restante après cession et badge
+                else if (cote.cote_reste_apres_cedee !== undefined && cote.cote_reste_apres_cedee !== null && cote.cote_reste_apres_cedee !== "" && cote.cote_reste_apres_cedee !== cote.Cote) {
+                    valeurAffichee = cote.cote_reste_apres_cedee;
+                    isCompensee = false;
+                }
+                // Sinon, cote normale
+                else if (cote.Cote !== undefined && cote.Cote !== null && cote.Cote !== "") {
+                    valeurAffichee = cote.Cote;
+                }
+            }
+
+            if (valeurAffichee !== '') {
+                editableCell.textContent = valeurAffichee;
+                editableCell.dataset.valeurOriginale = valeurAffichee;
                 editableCell.dataset.coteExiste = "true";
-                applyCellColorDelib(editableCell, cote.Cote);
+                applyCellColorDelib(editableCell, valeurAffichee);
+                if (isCompensee) {
+                    // Optimisation de l'affichage : flex colonne, centré
+                    editableCell.classList.add('cote-compensee-badge');
+                    editableCell.title = 'Cote compensée';
+                    editableCell.textContent = '';
+                    editableCell.style.display = 'flex';
+                    editableCell.style.flexDirection = 'column';
+                    editableCell.style.alignItems = 'center';
+                    editableCell.style.justifyContent = 'center';
+                    editableCell.style.padding = '2px 0';
+                    // Cote centrée
+                    const coteSpan = document.createElement('span');
+                    coteSpan.textContent = valeurAffichee;
+                    coteSpan.style.fontWeight = 'bold';
+                    coteSpan.style.fontSize = '1em';
+                    coteSpan.style.display = 'block';
+                    editableCell.appendChild(coteSpan);
+                    // Badge en dessous
+                    const badge = document.createElement('span');
+                    badge.textContent = 'Comp.';
+                    badge.className = 'badge bg-warning mt-1';
+                    badge.style.fontSize = '0.7em';
+                    badge.style.marginTop = '2px';
+                    badge.style.display = 'inline-block';
+                    editableCell.appendChild(badge);
+                } else if (cote.cote_reste_apres_cedee !== undefined && cote.cote_reste_apres_cedee !== null && cote.cote_reste_apres_cedee !== "" && cote.cote_reste_apres_cedee !== cote.Cote) {
+                    // Optimisation de l'affichage : flex colonne, centré
+                    editableCell.classList.add('cote-cedee-badge');
+                    editableCell.title = 'EC a cédé des points';
+                    editableCell.textContent = '';
+                    editableCell.style.display = 'flex';
+                    editableCell.style.flexDirection = 'column';
+                    editableCell.style.alignItems = 'center';
+                    editableCell.style.justifyContent = 'center';
+                    editableCell.style.padding = '2px 0';
+                    // Cote centrée
+                    const coteSpan = document.createElement('span');
+                    coteSpan.textContent = valeurAffichee;
+                    coteSpan.style.fontWeight = 'bold';
+                    coteSpan.style.fontSize = '1em';
+                    coteSpan.style.display = 'block';
+                    editableCell.appendChild(coteSpan);
+                    // Badge en dessous
+                    const badgeCede = document.createElement('span');
+                    badgeCede.textContent = 'Cédé';
+                    badgeCede.className = 'badge bg-info mt-1';
+                    badgeCede.style.fontSize = '0.7em';
+                    badgeCede.style.marginTop = '2px';
+                    badgeCede.style.display = 'inline-block';
+                    editableCell.appendChild(badgeCede);
+                }
             } else {
                 editableCell.dataset.coteExiste = "false";
             }
@@ -787,19 +1277,75 @@ async function Afficher_EC_aligne_deliberation() {
                     e.target.textContent = nouvelleValeur;
                 }
                 
-                // Appliquer couleur
+                // Appliquer couleur et réafficher badge si compensée/cédée
                 if (nouvelleValeur !== "") {
                     applyCellColorDelib(e.target, nouvelleValeur);
+                    // Si la cellule est compensée ou cédée, régénérer l'affichage spécial
+                    const coteObj = tab_Cotes.find(c => String(c.Matricule) === String(e.target.dataset.matricule) && String(c.id_ec_aligne) === String(e.target.dataset.ecAligne));
+                    if (coteObj) {
+                        // Effacer le contenu
+                        e.target.textContent = '';
+                        // Cote compensée
+                        if (coteObj.cote_compensee !== undefined && coteObj.cote_compensee !== null && coteObj.cote_compensee !== "") {
+                            e.target.classList.add('cote-compensee-badge');
+                            e.target.title = 'Cote compensée';
+                            e.target.style.display = 'flex';
+                            e.target.style.flexDirection = 'column';
+                            e.target.style.alignItems = 'center';
+                            e.target.style.justifyContent = 'center';
+                            e.target.style.padding = '2px 0';
+                            // Cote centrée
+                            const coteSpan = document.createElement('span');
+                            coteSpan.textContent = coteObj.cote_compensee;
+                            coteSpan.style.fontWeight = 'bold';
+                            coteSpan.style.fontSize = '1em';
+                            coteSpan.style.display = 'block';
+                            e.target.appendChild(coteSpan);
+                            // Badge en dessous
+                            const badge = document.createElement('span');
+                            badge.textContent = 'Comp.';
+                            badge.className = 'badge bg-warning mt-1';
+                            badge.style.fontSize = '0.7em';
+                            badge.style.marginTop = '2px';
+                            badge.style.display = 'inline-block';
+                            e.target.appendChild(badge);
+                        } else if (coteObj.cote_reste_apres_cedee !== undefined && coteObj.cote_reste_apres_cedee !== null && coteObj.cote_reste_apres_cedee !== "" && coteObj.cote_reste_apres_cedee !== coteObj.Cote) {
+                            e.target.classList.add('cote-cedee-badge');
+                            e.target.title = 'EC a cédé des points';
+                            e.target.style.display = 'flex';
+                            e.target.style.flexDirection = 'column';
+                            e.target.style.alignItems = 'center';
+                            e.target.style.justifyContent = 'center';
+                            e.target.style.padding = '2px 0';
+                            // Cote centrée
+                            const coteSpan = document.createElement('span');
+                            coteSpan.textContent = coteObj.cote_reste_apres_cedee;
+                            coteSpan.style.fontWeight = 'bold';
+                            coteSpan.style.fontSize = '1em';
+                            coteSpan.style.display = 'block';
+                            e.target.appendChild(coteSpan);
+                            // Badge en dessous
+                            const badgeCede = document.createElement('span');
+                            badgeCede.textContent = 'Cédé';
+                            badgeCede.className = 'badge bg-info mt-1';
+                            badgeCede.style.fontSize = '0.7em';
+                            badgeCede.style.marginTop = '2px';
+                            badgeCede.style.display = 'inline-block';
+                            e.target.appendChild(badgeCede);
+                        } else {
+                            // Sinon, valeur simple
+                            e.target.textContent = nouvelleValeur;
+                        }
+                    }
                 } else {
                     applyCellColorDelib(e.target, "");
                 }
                 
                 // Sauvegarder si changement
+                const matricule = e.target.dataset.matricule;
+                const ecAligne = e.target.dataset.ecAligne;
+                const coteExiste = e.target.dataset.coteExiste === "true";
                 if (nouvelleValeur !== valeurOriginale) {
-                    const matricule = e.target.dataset.matricule;
-                    const ecAligne = e.target.dataset.ecAligne;
-                    const coteExiste = e.target.dataset.coteExiste === "true";
-                    
                     if (coteExiste && nouvelleValeur === "") {
                         Suppression(matricule, ecAligne);
                         e.target.dataset.coteExiste = "false";
@@ -810,10 +1356,9 @@ async function Afficher_EC_aligne_deliberation() {
                         e.target.dataset.coteExiste = "true";
                     }
                     e.target.dataset.valeurOriginale = nouvelleValeur;
-                    
-                    // Recalculer les crédits validés
-                    recalculerCreditsValides(tr, tab_ECs_aligne, tab_Cotes);
                 }
+                // Toujours recalculer la décision dynamiquement
+                recalculerCreditsValides(tr, tab_ECs_aligne, tab_Cotes);
             });
 
             // Validation en temps réel
@@ -934,23 +1479,28 @@ async function Afficher_EC_aligne_deliberation() {
         const td_credits_valides = document.createElement('td');
         td_credits_valides.classList.add("text-center", "cell-calculated");
         
-        let totalCreditsValides = 0;
+        let totalCreditsValidesDecision = 0;
         tab_ECs_aligne.forEach((ec_s_aligne) => {
             // Trouver la cote de l'étudiant pour cet EC
             let cote = tab_Cotes.find(c => c.Matricule === etudiant.Matricule && c.id_ec_aligne === ec_s_aligne.id_ec_aligne);
-            
-            if (cote && cote.Cote !== "" && cote.Cote !== null) {
-                let numericCote = parseFloat(cote.Cote);
-                // Si la note est >= 10, ajouter le crédit de cet EC
-                if (!isNaN(numericCote) && numericCote >= 10) {
-                    totalCreditsValides += parseFloat(ec_s_aligne.Credit);
+            let valeurPourCredit = null;
+            if (cote) {
+                if (cote.cote_compensee !== undefined && cote.cote_compensee !== null && cote.cote_compensee !== "") {
+                    valeurPourCredit = parseFloat(cote.cote_compensee);
+                } else if (cote.cote_reste_apres_cedee !== undefined && cote.cote_reste_apres_cedee !== null && cote.cote_reste_apres_cedee !== "" && cote.cote_reste_apres_cedee !== cote.Cote) {
+                    valeurPourCredit = parseFloat(cote.cote_reste_apres_cedee);
+                } else if (cote.Cote !== undefined && cote.Cote !== null && cote.Cote !== "") {
+                    valeurPourCredit = parseFloat(cote.Cote);
                 }
+            }
+            if (valeurPourCredit !== null && !isNaN(valeurPourCredit) && valeurPourCredit >= 10) {
+                totalCreditsValidesDecision += parseFloat(ec_s_aligne.Credit);
             }
         });
         
-        td_credits_valides.textContent = totalCreditsValides;
+        td_credits_valides.textContent = totalCreditsValidesDecision;
         td_credits_valides.style.fontWeight = "700";
-        td_credits_valides.style.color = totalCreditsValides >= 30 ? "#2ecc71" : "#e74c3c"; // Vert si >= 30, rouge sinon
+        td_credits_valides.style.color = totalCreditsValidesDecision >= 30 ? "#2ecc71" : "#e74c3c"; // Vert si >= 30, rouge sinon
         tr.appendChild(td_credits_valides);
 
         // Total notes pondérées = Somme de (cote × crédit de chaque EC)
@@ -1004,7 +1554,75 @@ async function Afficher_EC_aligne_deliberation() {
         // Décision
         const td_decision = document.createElement('td');
         td_decision.classList.add("text-center", "cell-calculated");
-        td_decision.textContent = "-";
+
+        // --- Logique décision du semestre ---
+        // 1. DEF : s'il manque une note (absence de note sur un EC)
+        let defaillant = false;
+        let tousEcsValides = true;
+        for (const ec of tab_ECs_aligne) {
+            const cote = tab_Cotes.find(c => c.Matricule === etudiant.Matricule && c.id_ec_aligne === ec.id_ec_aligne);
+            let valeurPourCredit = null;
+            if (!cote || (!cote.Cote && !cote.cote_compensee && !cote.cote_reste_apres_cedee)) {
+                defaillant = true;
+                tousEcsValides = false;
+                break;
+            }
+            if (cote) {
+                if (cote.cote_compensee !== undefined && cote.cote_compensee !== null && cote.cote_compensee !== "") {
+                    valeurPourCredit = parseFloat(cote.cote_compensee);
+                } else if (cote.cote_reste_apres_cedee !== undefined && cote.cote_reste_apres_cedee !== null && cote.cote_reste_apres_cedee !== "" && cote.cote_reste_apres_cedee !== cote.Cote) {
+                    valeurPourCredit = parseFloat(cote.cote_reste_apres_cedee);
+                } else if (cote.Cote !== undefined && cote.Cote !== null && cote.Cote !== "") {
+                    valeurPourCredit = parseFloat(cote.Cote);
+                }
+                if (valeurPourCredit === null || isNaN(valeurPourCredit) || valeurPourCredit < 10) {
+                    tousEcsValides = false;
+                }
+            } else {
+                tousEcsValides = false;
+            }
+        }
+
+        // 2. Calculer crédits validés et s'il y a eu compensation
+        let totalCreditsValides = 0;
+        let aCompensation = false;
+        for (const ec of tab_ECs_aligne) {
+            const cote = tab_Cotes.find(c => c.Matricule === etudiant.Matricule && c.id_ec_aligne === ec.id_ec_aligne);
+            let valeurPourCredit = null;
+            if (cote) {
+                if (cote.cote_compensee !== undefined && cote.cote_compensee !== null && cote.cote_compensee !== "") {
+                    valeurPourCredit = parseFloat(cote.cote_compensee);
+                    aCompensation = true;
+                } else if (cote.cote_reste_apres_cedee !== undefined && cote.cote_reste_apres_cedee !== null && cote.cote_reste_apres_cedee !== "" && cote.cote_reste_apres_cedee !== cote.Cote) {
+                    valeurPourCredit = parseFloat(cote.cote_reste_apres_cedee);
+                } else if (cote.Cote !== undefined && cote.Cote !== null && cote.Cote !== "") {
+                    valeurPourCredit = parseFloat(cote.Cote);
+                }
+            }
+            if (valeurPourCredit !== null && !isNaN(valeurPourCredit) && valeurPourCredit >= 10) {
+                totalCreditsValidesDecision += parseFloat(ec.Credit);
+            }
+        }
+        // Crédit requis pour valider le semestre (ex: 30)
+        let creditsRequis = 0;
+        tab_ECs_aligne.forEach(ec => { creditsRequis += parseFloat(ec.Credit); });
+
+        let decision = "-";
+        if (defaillant) {
+            decision = "DEF";
+        } else if (totalCreditsValidesDecision >= creditsRequis && tousEcsValides) {
+            // SVC : tous les EC validés (>=10 après compensation) ET au moins une compensation
+            if (aCompensation) {
+                decision = "SVC";
+            } else {
+                decision = "SM";
+            }
+        } else {
+            decision = "SNV";
+        }
+        td_decision.textContent = decision;
+        td_decision.style.fontWeight = "700";
+        td_decision.style.fontSize = "16px";
         tr.appendChild(td_decision);
 
         tbody.appendChild(tr);
@@ -1180,6 +1798,57 @@ function recalculerCreditsValides(row, tab_ECs_aligne, tab_Cotes) {
         } else {
             cellsCalculated[3].style.backgroundColor = "";
         }
+    }
+
+    // Cinquième cellule = Décision dynamique (même logique que crédits validés, moyenne, mention)
+    if (cellsCalculated[4]) {
+        let defaillant = false;
+        let tousEcsValides = true;
+        let totalCreditsValidesDecision = 0;
+        let aCompensation = false;
+        for (let i = 0; i < tab_ECs_aligne.length; i++) {
+            const ec = tab_ECs_aligne[i];
+            const cell = cellsNotes[i];
+            const valeur = cell ? cell.textContent.trim() : "";
+            if (valeur === "") {
+                defaillant = true;
+                tousEcsValides = false;
+                break;
+            }
+            const note = parseFloat(valeur);
+            if (isNaN(note)) {
+                defaillant = true;
+                tousEcsValides = false;
+                break;
+            }
+            // Recherche la compensation dans tab_Cotes pour ce matricule et cet EC
+            const coteObj = tab_Cotes.find(c => String(c.Matricule) === String(matricule) && String(c.id_ec_aligne) === String(ec.id_ec_aligne));
+            if (coteObj && coteObj.cote_compensee !== undefined && coteObj.cote_compensee !== null && coteObj.cote_compensee !== "") {
+                aCompensation = true;
+            }
+            if (note < 10) {
+                tousEcsValides = false;
+            } else {
+                totalCreditsValidesDecision += parseFloat(ec.Credit);
+            }
+        }
+        let creditsRequis = 0;
+        tab_ECs_aligne.forEach(ec => { creditsRequis += parseFloat(ec.Credit); });
+        let decision = "-";
+        if (defaillant) {
+            decision = "DEF";
+        } else if (totalCreditsValidesDecision >= creditsRequis && tousEcsValides) {
+            if (aCompensation) {
+                decision = "SVC";
+            } else {
+                decision = "SM";
+            }
+        } else {
+            decision = "SNV";
+        }
+        cellsCalculated[4].textContent = decision;
+        cellsCalculated[4].style.fontWeight = "700";
+        cellsCalculated[4].style.fontSize = "16px";
     }
 }
 
