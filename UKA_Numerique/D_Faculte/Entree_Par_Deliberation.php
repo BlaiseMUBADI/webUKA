@@ -156,6 +156,17 @@
         <small style="color: #6c757d; font-size: 0.75rem;">Utiliser un autre EC de l'UE</small>
       </div>
     </div>
+    <!-- Option Annuler la compensation (affiché dynamiquement) -->
+    <div class="context-menu-annuler-compensation menu-item" style="padding: 12px 16px; cursor: pointer; display: none; align-items: center; transition: all 0.2s; border-left: 3px solid transparent;"
+         onmouseover="this.style.background='#ffeaea'; this.style.borderLeftColor='#e53935'; this.style.paddingLeft='20px';"
+         onmouseout="this.style.background='white'; this.style.borderLeftColor='transparent'; this.style.paddingLeft='16px';"
+         onclick="annulerCompensationDepuisMenu()">
+      <i class="fas fa-undo-alt" style="margin-right: 12px; color: #e53935; width: 20px;"></i>
+      <div>
+        <div style="font-size: 0.95rem; font-weight: 500;">Annuler la compensation</div>
+        <small style="color: #e53935; font-size: 0.75rem;">Restaurer la note initiale</small>
+      </div>
+    </div>
     <!-- Option Infos de transaction -->
     <div class="context-menu-info-transaction menu-item" style="padding: 12px 16px; cursor: pointer; display: none; align-items: center; transition: all 0.2s; border-left: 3px solid transparent;"
          onmouseover="this.style.background='#e3f7fa'; this.style.borderLeftColor='#17a2b8'; this.style.paddingLeft='20px';"

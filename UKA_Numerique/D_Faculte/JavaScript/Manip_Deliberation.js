@@ -115,15 +115,14 @@ function restoreMenuPreference() {
 }
 
 // ==================== Boîte d'Alerte Moderne ====================
-function Ouvrir_Boite_Alert_Encodage(text_a_afficher, type = 'info') {
+// Boîte d'alerte/confirmation moderne
+// Si onConfirm est fourni, affiche Oui/Non, sinon simple alerte OK
+function Ouvrir_Boite_Alert_Encodage(text_a_afficher, type = 'info', onConfirm = null) {
     const boite = document.getElementById('boite_alert_encodage');
     const texte = document.getElementById('text_alert_boite_encodage');
     const icon = document.getElementById('alert_icon_type_encodage');
-    
     if (!boite || !texte || !icon) return;
-    
-    texte.innerText = text_a_afficher;
-    
+    texte.innerHTML = text_a_afficher;
     // Changer l'icône selon le type
     if (type === 'success') {
         icon.className = 'fas fa-check-circle';
@@ -134,7 +133,29 @@ function Ouvrir_Boite_Alert_Encodage(text_a_afficher, type = 'info') {
     } else {
         icon.className = 'fas fa-info-circle';
     }
-    
+    // Nettoyer anciens boutons
+    let btns = boite.querySelector('.alert-confirm-btns');
+    if (btns) btns.remove();
+    // Ajouter boutons si confirmation
+    if (typeof onConfirm === 'function') {
+        btns = document.createElement('div');
+        btns.className = 'alert-confirm-btns';
+        btns.style = 'display:flex;gap:18px;justify-content:center;margin:18px 0 8px 0;';
+        const btnOui = document.createElement('button');
+        btnOui.className = 'btn btn-success';
+        btnOui.innerHTML = '<i class="fas fa-check me-1"></i>Oui';
+        btnOui.onclick = function() {
+            boite.close();
+            onConfirm();
+        };
+        const btnNon = document.createElement('button');
+        btnNon.className = 'btn btn-secondary';
+        btnNon.innerHTML = '<i class="fas fa-times me-1"></i>Non';
+        btnNon.onclick = function() { boite.close(); };
+        btns.appendChild(btnOui);
+        btns.appendChild(btnNon);
+        boite.querySelector('.modal-body').appendChild(btns);
+    }
     boite.showModal();
 }
 
@@ -411,8 +432,10 @@ function initializeContextMenuCote() {
         // Afficher les options selon le cas
         const optionComp = contextMenuCote.querySelector('.context-menu-compensation');
         const optionInfo = contextMenuCote.querySelector('.context-menu-info-transaction');
+        const optionAnnuler = contextMenuCote.querySelector('.context-menu-annuler-compensation');
         if (optionComp) optionComp.style.display = isDeficitaire ? 'block' : 'none';
         if (optionInfo) optionInfo.style.display = (isCompensee || isCede) ? 'block' : 'none';
+        if (optionAnnuler) optionAnnuler.style.display = (isCompensee || isCede) ? 'block' : 'none';
         // Si info transaction, remplir le détail
         const infoDetail = contextMenuCote.querySelector('.context-menu-transaction-detail');
         if ((isCompensee || isCede) && infoDetail) {
@@ -461,7 +484,10 @@ function initializeContextMenuCote() {
     });
 }
 
-async function proposerCompensation() {
+
+
+async function proposerCompensation() 
+{
     const contextMenu = document.getElementById('contextMenuCote');
     if (contextMenu) contextMenu.style.display = 'none';
     
@@ -526,6 +552,8 @@ async function proposerCompensation() {
         Ouvrir_Boite_Alert_Encodage('Erreur lors de la communication avec le serveur', 'error');
     }
 }
+
+
 
 function afficherModalCompensation(data) {
     const modal = document.getElementById('modal_Compensation');
@@ -596,52 +624,113 @@ function fermerModalCompensation() {
 }
 
 async function appliquerCompensation(ec_cedant_id) {
-    // Confirmer l'action
-    if (!confirm('⚠️ Confirmer la compensation?\n\nCette action modifiera les deux notes de façon permanente.')) {
+    // Utiliser la boîte moderne pour confirmation
+    Ouvrir_Boite_Alert_Encodage(
+        '⚠️ Confirmer la compensation ?<br><br>Cette action modifiera les deux notes de façon permanente.',
+        'warning',
+        async () => {
+            fermerModalCompensation();
+            Ouvrir_Boite_Alert_Encodage('⏳ Application de la compensation en cours...', 'info');
+            try {
+                const response = await fetch('API_PHP/Compenser_Cote.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        matricule: selectedCoteMatricule,
+                        ec_beneficiaire: selectedCoteEcAligne,
+                        ec_cedant: ec_cedant_id
+                    })
+                });
+                const data = await response.json();
+                Fermer_Boite_Alert_Encodage();
+                if (data.success) {
+                    Ouvrir_Boite_Alert_Encodage(
+                        `✅ Compensation réussie!<br><br>` +
+                        `📈 EC bénéficiaire: ${data.beneficiaire.cote_avant} → ${data.beneficiaire.cote_apres} (+${data.beneficiaire.points_recus})<br>` +
+                        `📉 EC cédant: ${data.cedant.cote_avant} → ${data.cedant.cote_apres} (-${data.cedant.points_cedes})`,
+                        'success'
+                    );
+                    setTimeout(() => {
+                        Fermer_Boite_Alert_Encodage();
+                        Afficher_EC_aligne_deliberation();
+                    }, 2000);
+                } else {
+                    Ouvrir_Boite_Alert_Encodage('❌ ' + (data.message || 'Erreur lors de la compensation'), 'error');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                Fermer_Boite_Alert_Encodage();
+                Ouvrir_Boite_Alert_Encodage('Erreur lors de la communication avec le serveur', 'error');
+            }
+        }
+    );
+}
+
+
+// La fonction annulerCompensationDepuisMenu est maintenant globale
+// Fonction globale pour annuler la compensation depuis le menu contextuel
+async function annulerCompensationDepuisMenu() 
+{
+    const contextMenu = document.getElementById('contextMenuCote');
+    if (contextMenu) contextMenu.style.display = 'none';
+    // Contrôle de sécurité sur les paramètres
+    if (!selectedCoteMatricule || !selectedCoteEcAligne || String(selectedCoteMatricule).trim() === '' || String(selectedCoteEcAligne).trim() === '') {
+        Ouvrir_Boite_Alert_Encodage('Impossible d\'annuler : paramètres manquants ou invalides.<br>Merci de sélectionner une note valide.', 'error');
         return;
     }
-    
-    fermerModalCompensation();
-    Ouvrir_Boite_Alert_Encodage('⏳ Application de la compensation en cours...', 'info');
-    
-    try {
-        const response = await fetch('API_PHP/Compenser_Cote.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                matricule: selectedCoteMatricule,
-                ec_beneficiaire: selectedCoteEcAligne,
-                ec_cedant: ec_cedant_id
-            })
-        });
-        
-        const data = await response.json();
-        
-        Fermer_Boite_Alert_Encodage();
-        
-        if (data.success) {
-            Ouvrir_Boite_Alert_Encodage(
-                `✅ Compensation réussie!\n\n` +
-                `📈 EC bénéficiaire: ${data.beneficiaire.cote_avant} → ${data.beneficiaire.cote_apres} (+${data.beneficiaire.points_recus})\n` +
-                `📉 EC cédant: ${data.cedant.cote_avant} → ${data.cedant.cote_apres} (-${data.cedant.points_cedes})`,
-                'success'
-            );
-            
-            // Recharger les données pour mettre à jour l'affichage
-            setTimeout(() => {
-                Fermer_Boite_Alert_Encodage();
-                Afficher_EC_aligne_deliberation();
-            }, 2000);
-        } else {
-            Ouvrir_Boite_Alert_Encodage('❌ ' + (data.message || 'Erreur lors de la compensation'), 'error');
-        }
-        
-    } catch (error) {
-        console.error('Erreur:', error);
-        Fermer_Boite_Alert_Encodage();
-        Ouvrir_Boite_Alert_Encodage('Erreur lors de la communication avec le serveur', 'error');
+    // Récupérer l'id de l'EC cédant depuis la référence de compensation
+    let coteObj = null;
+    if (Array.isArray(tab_Cotes)) {
+        coteObj = tab_Cotes.find(c =>
+            String(c.Matricule).trim() === String(selectedCoteMatricule).trim() &&
+            String(c.id_ec_aligne).trim() === String(selectedCoteEcAligne).trim()
+        );
     }
+    let ec_cedant_id = null;
+    if (coteObj && coteObj.Ligne_touchee_Matricule_id_ec_aligne) {
+        // Format attendu : MATRICULE_idECcedant
+        const ref = coteObj.Ligne_touchee_Matricule_id_ec_aligne;
+        const parts = ref.split('_');
+        ec_cedant_id = parts[parts.length - 1];
+    }
+    if (!ec_cedant_id) {
+        Ouvrir_Boite_Alert_Encodage('Impossible de retrouver l\'EC cédant pour annuler la compensation.', 'error');
+        return;
+    }
+    Ouvrir_Boite_Alert_Encodage(
+        'Voulez-vous vraiment annuler cette compensation ?',
+        'warning',
+        async () => {
+            try {
+                Ouvrir_Boite_Alert_Encodage('Annulation en cours...', 'info');
+                const response = await fetch('API_PHP/Annuler_Compensation.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        matricule: selectedCoteMatricule,
+                        ec_beneficiaire: selectedCoteEcAligne,
+                        ec_cedant: ec_cedant_id
+                    })
+                });
+                const data = await response.json();
+                Fermer_Boite_Alert_Encodage();
+                if (data.success) {
+                    Ouvrir_Boite_Alert_Encodage('Compensation annulée avec succès', 'success');
+                    if (typeof Liste_Etudiants === 'function') Liste_Etudiants();
+                    if (typeof Afficher_EC_aligne_deliberation === 'function') Afficher_EC_aligne_deliberation();
+                } else {
+                    Ouvrir_Boite_Alert_Encodage(data.message || 'Erreur lors de l\'annulation', 'error');
+                }
+            } catch (error) {
+                Fermer_Boite_Alert_Encodage();
+                Ouvrir_Boite_Alert_Encodage('Erreur lors de la communication avec le serveur', 'error');
+            }
+        }
+    );
 }
+
+
+
 
 // ==================== Search Filter ====================
 function normalizeString(str) {
