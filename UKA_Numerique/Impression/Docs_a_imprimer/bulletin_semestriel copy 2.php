@@ -268,31 +268,6 @@ $pdf->SetTextColor(0,0,0);
 
 // ==================== RÉCUPÉRATION DYNAMIQUE DES EC ALIGNÉS ====================
 // Appel de la procédure stockée Liste_EC_aligner_delibee (comme dans la délibération JS)
-
-// 1. Récupérer toutes les cotes de l'étudiant pour ce semestre/promotion
-$cotes_ec = [];
-if ($code_promotion && $semestre && $matricule) {
-    try {
-        $sqlCote = "CALL Liste_cote_etudiant(:promotion, :id_semestre, :matricule)";
-        $stmtCote = $con->prepare($sqlCote);
-        $stmtCote->bindParam(':promotion', $code_promotion);
-        $stmtCote->bindParam(':id_semestre', $semestre);
-        $stmtCote->bindParam(':matricule', $matricule);
-        $stmtCote->execute();
-        while ($rowCote = $stmtCote->fetch(PDO::FETCH_ASSOC)) {
-            if (isset($rowCote['id_ec_aligne'])) {
-                $cotes_ec[$rowCote['id_ec_aligne']] = $rowCote;
-            }
-        }
-        $stmtCote->closeCursor();
-    } catch (PDOException $e) {
-        $pdf->SetTextColor(200,0,0);
-        $pdf->SetFont('Arial', 'B', 8);
-        $pdf->MultiCell(0, 6, $pdf->t('Erreur SQL lors de la récupération des cotes :\n' . $e->getMessage()), 1, 'L');
-        $pdf->SetTextColor(0,0,0);
-    }
-}
-
 $ues = [];
 if ($code_promotion && $id_annee_acad && $semestre) 
 {
@@ -318,20 +293,15 @@ if ($code_promotion && $id_annee_acad && $semestre)
                     'ecs' => []
                 ];
             }
-            // Ajout de l'id_ec_aligne pour le mapping
-            $id_ec_aligne = isset($row['id_ec_aligne']) ? $row['id_ec_aligne'] : null;
-            $intitule_ec = isset($row['Intutile_ec']) ? $row['Intutile_ec'] : '';
-            $credit_ec = isset($row['Credit']) ? $row['Credit'] : '';
-            $note_ec = '';
-            if ($id_ec_aligne && isset($cotes_ec[$id_ec_aligne])) {
-                $note_ec = $cotes_ec[$id_ec_aligne]['Cote'] ?? '';
-            }
-            $ues[$code_ue]['ecs'][] = [
-                $intitule_ec,
-                $credit_ec,
-                $note_ec,
-                $id_ec_aligne // Pour debug ou usage ultérieur
-            ];
+                // Correction : récupération stricte du champ Intitule_ec
+                $intitule_ec = isset($row['Intutile_ec']) ? $row['Intutile_ec'] : '';
+                $credit_ec = isset($row['Credit']) ? $row['Credit'] : '';
+                
+                $ues[$code_ue]['ecs'][] = [
+                    $intitule_ec,
+                    $credit_ec,
+                    '' // Note EC (à compléter si besoin)
+                ];
         }
     } catch (PDOException $e) {
         $pdf->Cell(0, 10, $pdf->t('Erreur lors de la récupération des EC alignés : ' . $e->getMessage()), 0, 1, 'C');

@@ -86,6 +86,12 @@
         </table>
       </div>
     </div>
+    <!-- Lien vers le bulletin semestriel -->
+    <div style="margin: 20px 0; text-align: center;">
+      <a href="../Impression/Docs_a_imprimer/bulletin_semestriel.php" target="_blank" class="btn btn-primary">
+        <i class="fas fa-file-pdf"></i> Voir le Bulletin Semestriel (PDF)
+      </a>
+    </div>
   </div>
 
 </section>

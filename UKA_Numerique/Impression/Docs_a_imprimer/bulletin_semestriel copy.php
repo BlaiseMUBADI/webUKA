@@ -152,13 +152,18 @@ $pdf->SetY($y_info + 22);
 
 // --- TABLEAU DES NOTES (Largeur totale 190mm) ---
 $pdf->SetFont('Arial', 'B', 8);
-
+// Définition des largeurs pour atteindre 190mm : 20 + 80 + 20 + 25 + 20 + 25 = 190
 $w_code = 20;
 $w_ue   = 102;
 $w_cred = 16;
 $w_note = 16;
 $w_moy  = 18;
 $w_val  = 18;
+
+
+
+$x_header = $pdf->GetX();
+$y_header = $pdf->GetY();
 
 // Fonction pour simuler la hauteur d'un MultiCell
 function simulateMultiCellHeight($pdf, $width, $text, $fontSize = 8) {
@@ -167,51 +172,32 @@ function simulateMultiCellHeight($pdf, $width, $text, $fontSize = 8) {
     return max(10, count($lines) * 5); // 5 est la hauteur approximative d'une ligne
 }
 
+// Refactorisation : titres et largeurs des colonnes
 $headerColumns = [
     ['title' => $pdf->t('Code UE'), 'width' => $w_code],
-    ['title' => $pdf->t("UE & Eléments Constitutifs"), 'width' => $w_ue],
+    ['title' => $pdf->t('UE & Eléments Constitutifs'), 'width' => $w_ue],
     ['title' => $pdf->t('Crédit'), 'width' => $w_cred],
-    ['title' => $pdf->t("Note EC/20"), 'width' => $w_note],
+    ['title' => $pdf->t('Note EC/20'), 'width' => $w_note],
     ['title' => $pdf->t('Moy UE/20'), 'width' => $w_moy],
-    ['title' => $pdf->t("Crédits validés"), 'width' => $w_val],
+    ['title' => $pdf->t('Crédits validés'), 'width' => $w_val],
 ];
 
-// ==================== DEBUT DU BLOC A INSERER ====================
-
-// 1. Calcul de la hauteur maximale (pour que toutes les cases soient égales)
+// Calcul de la hauteur maximale de l'en-tête
 $headerMaxHeight = 0;
 foreach ($headerColumns as $col) {
     $h = simulateMultiCellHeight($pdf, $col['width'], $col['title']);
     if ($h > $headerMaxHeight) $headerMaxHeight = $h;
 }
 
-// 2. Affichage de l'en-tête (Style "Ligne Unique")
-$pdf->SetFont('Arial', 'B', 8);
-$x_header = 10; 
-$y_header = $pdf->GetY();
-
-// Dessine le cadre extérieur unique (Rectangle de 190mm)
-$pdf->Rect($x_header, $y_header, 190, $headerMaxHeight);
-
-$currentX = $x_header;
+// Affichage de l'en-tête du tableau
+$x = $x_header;
+$y = $y_header;
 foreach ($headerColumns as $col) {
-    $pdf->SetXY($currentX, $y_header);
-    
-    // MultiCell sans bordures ('0') car le Rect() fait le contour
-    // On ajoute 'L' pour les séparations verticales intérieures
-    $pdf->MultiCell($col['width'], 5, $col['title'], 'L', 'C');
-    
-    // On force la ligne verticale à descendre jusqu'en bas
-    $pdf->Line($currentX, $y_header, $currentX, $y_header + $headerMaxHeight);
-    
-    $currentX += $col['width'];
+    $pdf->SetXY($x, $y);
+    $pdf->MultiCell($col['width'], $headerMaxHeight, $col['title'], 1, 'C');
+    $x += $col['width'];
 }
-
-// Ligne verticale de fermeture à droite (à 200mm)
-$pdf->Line(200, $y_header, 200, $y_header + $headerMaxHeight);
-
-// On descend le curseur pour commencer les données
-$pdf->SetY($y_header + $headerMaxHeight);
+$pdf->SetXY($x_header, $y_header + $headerMaxHeight);
 
 function DrawUERow($pdf, $code, $ue_name, $total_credit_ue, $ecs, $moy_ue, $credits_valides, $w) {
     $h = 7;
@@ -268,31 +254,6 @@ $pdf->SetTextColor(0,0,0);
 
 // ==================== RÉCUPÉRATION DYNAMIQUE DES EC ALIGNÉS ====================
 // Appel de la procédure stockée Liste_EC_aligner_delibee (comme dans la délibération JS)
-
-// 1. Récupérer toutes les cotes de l'étudiant pour ce semestre/promotion
-$cotes_ec = [];
-if ($code_promotion && $semestre && $matricule) {
-    try {
-        $sqlCote = "CALL Liste_cote_etudiant(:promotion, :id_semestre, :matricule)";
-        $stmtCote = $con->prepare($sqlCote);
-        $stmtCote->bindParam(':promotion', $code_promotion);
-        $stmtCote->bindParam(':id_semestre', $semestre);
-        $stmtCote->bindParam(':matricule', $matricule);
-        $stmtCote->execute();
-        while ($rowCote = $stmtCote->fetch(PDO::FETCH_ASSOC)) {
-            if (isset($rowCote['id_ec_aligne'])) {
-                $cotes_ec[$rowCote['id_ec_aligne']] = $rowCote;
-            }
-        }
-        $stmtCote->closeCursor();
-    } catch (PDOException $e) {
-        $pdf->SetTextColor(200,0,0);
-        $pdf->SetFont('Arial', 'B', 8);
-        $pdf->MultiCell(0, 6, $pdf->t('Erreur SQL lors de la récupération des cotes :\n' . $e->getMessage()), 1, 'L');
-        $pdf->SetTextColor(0,0,0);
-    }
-}
-
 $ues = [];
 if ($code_promotion && $id_annee_acad && $semestre) 
 {
@@ -318,20 +279,15 @@ if ($code_promotion && $id_annee_acad && $semestre)
                     'ecs' => []
                 ];
             }
-            // Ajout de l'id_ec_aligne pour le mapping
-            $id_ec_aligne = isset($row['id_ec_aligne']) ? $row['id_ec_aligne'] : null;
-            $intitule_ec = isset($row['Intutile_ec']) ? $row['Intutile_ec'] : '';
-            $credit_ec = isset($row['Credit']) ? $row['Credit'] : '';
-            $note_ec = '';
-            if ($id_ec_aligne && isset($cotes_ec[$id_ec_aligne])) {
-                $note_ec = $cotes_ec[$id_ec_aligne]['Cote'] ?? '';
-            }
-            $ues[$code_ue]['ecs'][] = [
-                $intitule_ec,
-                $credit_ec,
-                $note_ec,
-                $id_ec_aligne // Pour debug ou usage ultérieur
-            ];
+                // Correction : récupération stricte du champ Intitule_ec
+                $intitule_ec = isset($row['Intutile_ec']) ? $row['Intutile_ec'] : '';
+                $credit_ec = isset($row['Credit']) ? $row['Credit'] : '';
+                
+                $ues[$code_ue]['ecs'][] = [
+                    $intitule_ec,
+                    $credit_ec,
+                    '' // Note EC (à compléter si besoin)
+                ];
         }
     } catch (PDOException $e) {
         $pdf->Cell(0, 10, $pdf->t('Erreur lors de la récupération des EC alignés : ' . $e->getMessage()), 0, 1, 'C');

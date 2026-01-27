@@ -370,12 +370,36 @@ function afficherHistoriqueNotes() {
 
 function genererBulletin() {
     document.getElementById('contextMenuStudent').style.display = 'none';
-    // Ouvre le bulletin PDF dans un nouvel onglet, possibilité de passer le matricule en GET
+    // Utilise l'API pour récupérer les vraies infos de l'étudiant avant d'ouvrir le bulletin
     if (selectedStudentMatricule_delib) {
-        window.open(
-            '../Impression/Docs_a_imprimer/bulletin_semestriel.php?matricule=' + encodeURIComponent(selectedStudentMatricule_delib),
-            '_blank'
-        );
+        fetch('API_PHP/Recup_infos_etudiant.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ matricule: selectedStudentMatricule_delib })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.student) {
+                const student = data.student;
+                // Utilise les vrais identifiants (pas juste les labels)
+                const promotion = student.id_promotion || student.promotion || '';
+                const annee = student.id_annee_academique || student.annee_academique || '';
+                // Récupérer le semestre sélectionné (toujours depuis le select)
+                const semestre = cmb_semestre_encodage_delib ? cmb_semestre_encodage_delib.value : '';
+                // Construire l'URL avec tous les paramètres
+                const url = '../Impression/Docs_a_imprimer/bulletin_semestriel.php?matricule=' + encodeURIComponent(selectedStudentMatricule_delib)
+                    + '&promotion=' + encodeURIComponent(promotion)
+                    + '&annee=' + encodeURIComponent(annee)
+                    + '&semestre=' + encodeURIComponent(semestre);
+                window.open(url, '_blank');
+            } else {
+                Ouvrir_Boite_Alert_Encodage('Impossible de récupérer les informations de l\'étudiant pour le bulletin.', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            Ouvrir_Boite_Alert_Encodage('Erreur lors de la récupération des informations de l\'étudiant.', 'error');
+        });
     } else {
         Ouvrir_Boite_Alert_Encodage('Aucun étudiant sélectionné.', 'error');
     }
