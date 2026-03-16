@@ -1,137 +1,166 @@
 <?php
-// Connexion à la base de données
 include("../../../Connexion_BDD/Connexion_1.php");
 
-// Définir l'en-tête pour le retour en JSON
 header('Content-Type: application/json');
 
-// Vérifier que les paramètres sont bien fournis
+// Vérification du paramètre type
 if (!isset($_GET['type'])) {
     echo json_encode(["error" => "Le paramètre 'type' est requis"]);
     exit;
 }
 
-$typeEncaissement = $_GET['type'];
+$type = $_GET['type'];
 
-if (($typeEncaissement === "USD" || $typeEncaissement === "CDF") && 
-    (!isset($_GET['date1'], $_GET['date2']))) {
-    echo json_encode(["error" => "Les paramètres date1 et date2 sont requis pour les types USD et CDF"]);
+// Vérification des dates
+if (($type === "USD" || $type === "CDF") &&
+    (!isset($_GET['date1'], $_GET['date2']))) 
+{
+    echo json_encode(["error" => "Les paramètres date1 et date2 sont requis"]);
     exit;
 }
 
-
-// Récupérer les paramètres
-
-
-$typeEncaissement = $_GET['type'];
-
 try {
-    if ($typeEncaissement === "USD") {
+
+    if ($type === "USD") {
+
         $date1 = $_GET['date1'] . " 00:00:00";
         $date2 = $_GET['date2'] . " 23:59:59";
-        $prefix = "Dec_usd_";
+
+        $prefixDec = "Dec_usd_";
+        $prefixEnc = "Enc_usd_";
         $statut = "Effectuée";
 
-        $query = " SELECT Imputation, SUM(Montant) AS MontantTotal,Intitul_compte
-          FROM decaissement_caisse, t_imputation
-          WHERE Num_piece LIKE :prefix 
-            AND Statut = :statut
-            AND Date_Oper BETWEEN :date1 AND :date2
-            AND decaissement_caisse.Imputation=t_imputation.Num_imputation 
-          GROUP BY Imputation
-          ORDER BY Imputation ASC";
+        // 🔥 Requête décaissements USD
+        $sqlDec = "
+            SELECT 
+                d.Imputation,
+                SUM(d.Montant) AS MontantTotal,
+                t.Intitul_compte
+            FROM decaissement_caisse d
+            JOIN t_imputation t ON d.Imputation = t.Num_imputation
+            WHERE d.Num_piece LIKE :prefixDec
+              AND d.Statut = :statut
+              AND d.Date_Oper BETWEEN :date1 AND :date2
+            GROUP BY d.Imputation
+            ORDER BY d.Imputation ASC
+        ";
 
-        $stmt = $con->prepare($query);
-        $stmt->execute([
-            ':prefix' => $prefix . '%',
+        // 🔥 Requête encaissements USD (corrigée)
+        $sqlEnc = "
+            SELECT 
+                e.Imputation,
+                SUM(e.Montant) AS MontantTotal,
+                t.Intitul_compte
+            FROM encaissement_caisse e
+            JOIN t_imputation t ON e.Imputation = t.Num_imputation
+            WHERE e.Numero_pce LIKE :prefixEnc
+              AND e.Statut = :statut
+              AND e.Date_Oper BETWEEN :date1 AND :date2
+            GROUP BY e.Imputation
+            ORDER BY e.Imputation ASC
+        ";
+
+        // 👉 Préparer & exécuter
+        $stmtDec = $con->prepare($sqlDec);
+        $stmtEnc = $con->prepare($sqlEnc);
+
+        $paramsDec = [
+            ':prefixDec' => $prefixDec . '%',
             ':statut' => $statut,
             ':date1' => $date1,
             ':date2' => $date2
-        ]);
+        ];
 
-        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        echo json_encode($result); // Renvoie les résultats au format JSON
-    }
-    elseif ($typeEncaissement === "CDF") {
-        $date1 = $_GET['date1'] . " 00:00:00";
-        $date2 = $_GET['date2'] . " 23:59:59";
-        $prefix = "Dec_cdf_";
-        $statut = "Effectuée";
-        
-        $query = "SELECT Imputation, SUM(Montant) AS MontantTotal,Intitul_compte
-          FROM decaissement_caisse, t_imputation
-          WHERE Num_piece LIKE :prefix 
-            AND Statut = :statut
-            AND Date_Oper BETWEEN :date1 AND :date2
-            AND decaissement_caisse.Imputation = t_imputation.Num_imputation 
-          GROUP BY Imputation
-          ORDER BY Imputation ASC";
-        
-        $stmt = $con->prepare($query);
-        $stmt->execute([
-            ':prefix' => $prefix . '%',
+        $paramsEnc = [
+            ':prefixEnc' => $prefixEnc . '%',
             ':statut' => $statut,
             ':date1' => $date1,
             ':date2' => $date2
+        ];
+
+        $stmtDec->execute($paramsDec);
+        $stmtEnc->execute($paramsEnc);
+
+        $decaissements = $stmtDec->fetchAll(PDO::FETCH_ASSOC);
+        $encaissements = $stmtEnc->fetchAll(PDO::FETCH_ASSOC);
+
+        // 🔥 Retour JSON propre
+        echo json_encode([
+            "decaissements_usd" => $decaissements,
+            "encaissements_usd" => $encaissements
         ]);
-        
-
-        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        echo json_encode($result); // Renvoie les résultats au format JSON
-    }
-    elseif ($typeEncaissement === "modifier") {
-        
-        $Motif = $_GET["Motif"];
-        $Montant = $_GET["Montant"];
-        //$Date_Encaiss = date("Y-m-d H:i:s");
-        $beneficiaire = $_GET["Beneficiaire"];
-        $numero_piece = $_GET["Num_Pce"]; // Assure-toi qu'il est bien passé dans l'URL
-    
-        $update = "UPDATE decaissement_caisse 
-                   SET Motif = :Motif, 
-                       Montant = :Montant, 
-                       Beneficiaire = :depos 
-                   WHERE Num_piece = :Num_pce";
-    
-        $stmtUpdate = $con->prepare($update);
-        $stmtUpdate->bindParam(':Motif', $Motif);
-        $stmtUpdate->bindParam(':Montant', $Montant);
-        $stmtUpdate->bindParam(':depos', $beneficiaire);
-        $stmtUpdate->bindParam(':Num_pce', $numero_piece);
-    
-        if ($stmtUpdate->execute()) {
-            echo json_encode(["success" => true, "message" => "Modification effectuée avec succès"]);
-        } else {
-            echo json_encode(["success" => false, "message" => "Erreur lors de la mise à jour"]);
-        }
-    }
-    elseif ($typeEncaissement === "statut") {
-        
-       
-        $statut_op = "Annulée";
-        $numero_piece = $_GET["Num_Pce"]; // Assure-toi qu'il est bien passé dans l'URL
-    
-        $update = "UPDATE decaissement_caisse 
-                   SET Statut = :statut 
-                   WHERE Num_piece = :Num_pce";
-    
-        $stmtUpdate = $con->prepare($update);
-        $stmtUpdate->bindParam(':statut', $statut_op);
-        $stmtUpdate->bindParam(':Num_pce', $numero_piece);
-    
-        if ($stmtUpdate->execute()) {
-            echo json_encode(["success" => true, "message" => "Encaissement mis à jour avec succès"]);
-        } else {
-            echo json_encode(["success" => false, "message" => "Erreur lors de la mise à jour"]);
-        }
     }
 
+    if ($type === "CDF") {
 
-     else {
-        echo json_encode(["error" => "Type d'encaissement non géré."]);
+        $date1 = $_GET['date1'] . " 00:00:00";
+        $date2 = $_GET['date2'] . " 23:59:59";
+
+        $prefixDec = "Dec_cdf_";
+        $prefixEnc = "Enc_cdf_";
+        $statut = "Effectuée";
+
+        // 🔥 Requête décaissements USD
+        $sqlDec = "
+            SELECT 
+                d.Imputation,
+                SUM(d.Montant) AS MontantTotal,
+                t.Intitul_compte
+            FROM decaissement_caisse d
+            JOIN t_imputation t ON d.Imputation = t.Num_imputation
+            WHERE d.Num_piece LIKE :prefixDec
+              AND d.Statut = :statut
+              AND d.Date_Oper BETWEEN :date1 AND :date2
+            GROUP BY d.Imputation
+            ORDER BY d.Imputation ASC
+        ";
+
+        // 🔥 Requête encaissements USD (corrigée)
+        $sqlEnc = "
+            SELECT 
+                e.Imputation,
+                SUM(e.Montant) AS MontantTotal,
+                t.Intitul_compte
+            FROM encaissement_caisse e
+            JOIN t_imputation t ON e.Imputation = t.Num_imputation
+            WHERE e.Numero_pce LIKE :prefixEnc
+              AND e.Statut = :statut
+              AND e.Date_Oper BETWEEN :date1 AND :date2
+            GROUP BY e.Imputation
+            ORDER BY e.Imputation ASC
+        ";
+
+        // 👉 Préparer & exécuter
+        $stmtDec = $con->prepare($sqlDec);
+        $stmtEnc = $con->prepare($sqlEnc);
+
+        $paramsDec = [
+            ':prefixDec' => $prefixDec . '%',
+            ':statut' => $statut,
+            ':date1' => $date1,
+            ':date2' => $date2
+        ];
+
+        $paramsEnc = [
+            ':prefixEnc' => $prefixEnc . '%',
+            ':statut' => $statut,
+            ':date1' => $date1,
+            ':date2' => $date2
+        ];
+
+        $stmtDec->execute($paramsDec);
+        $stmtEnc->execute($paramsEnc);
+
+        $decaissements = $stmtDec->fetchAll(PDO::FETCH_ASSOC);
+        $encaissements = $stmtEnc->fetchAll(PDO::FETCH_ASSOC);
+
+        // 🔥 Retour JSON propre
+        echo json_encode([
+            "decaissements_cdf" => $decaissements,
+            "encaissements_cdf" => $encaissements
+        ]);
     }
+
 } catch (PDOException $e) {
     echo json_encode(["error" => "Erreur SQL : " . $e->getMessage()]);
 }

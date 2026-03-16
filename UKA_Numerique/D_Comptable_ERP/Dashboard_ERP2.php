@@ -28,6 +28,20 @@
 <div class="container-fluid pt-4 px-4" style="display: block;" id="graphique_1">
     <div class="row g-4 text-primary">
         <?php
+
+
+                 /*  
+                 $anneeQuery = $con->query("
+                SELECT idAnnee_Acad, Annee_debut 
+                FROM annee_academique 
+                WHERE idAnnee_Acad = (SELECT MAX(idAnnee_Acad) FROM annee_academique)
+            ");
+
+            $anneeRow = $anneeQuery->fetch(PDO::FETCH_ASSOC);
+            $lastAnnee = $anneeRow['idAnnee_Acad'];
+            $annee_debut = $anneeRow['Annee_debut'];
+                */
+
         // Connexion déjà ouverte avec $con
         $anneeQuery = $con->query("SELECT MAX(idAnnee_Acad) AS last_year FROM annee_academique");
         $anneeRow = $anneeQuery->fetch(PDO::FETCH_ASSOC);

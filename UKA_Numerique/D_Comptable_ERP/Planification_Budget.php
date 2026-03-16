@@ -49,7 +49,7 @@
       
                 <?php
                     include("D_Comptable_ERP/budget.php");
-                    include("D_Comptable_ERP/compte.php");
+                    // include("D_Comptable_ERP/compte.php");
                     include("D_Comptable_ERP/resultat.php");
               
                 

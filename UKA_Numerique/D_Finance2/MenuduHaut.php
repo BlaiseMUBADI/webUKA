@@ -1,3 +1,9 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    ...
+
 <!-- Navbar Start -->
             <nav class="navbar navbar-expand bg-light navbar-light sticky-top px-4 py-0">
                 <a href="index.html" class="navbar-brand d-flex d-lg-none me-4">
@@ -75,12 +81,12 @@
                             <hr class="dropdown-divider">
                             <a href="#" class="dropdown-item text-center">See all notifications</a>
                         </div>
-                    </div>
+                    </div> 
                     <div class="nav-item dropdown">
                         <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
 
                             <img class="rounded-circle me-lg-2" src="D_Finance/API/Selection_image_profil.php" alt="" style="width: 50px; height: 50px;">
-                            <span class="d-none d-lg-inline-flex"><?php echo $_SESSION['prenom__user']." ".$_SESSION['Nom_user']; ?></span>
+                            <span class="d-none d-lg-inline-flex mt-0"><?php echo $_SESSION['prenom__user']." ".$_SESSION['Nom_user']."<br> Matricule ".$_SESSION['MatriculeAgent']; ?></span>
                         </a>
                         <div class="dropdown-menu dropdown-menu-end bg-light border-0 rounded-0 rounded-bottom m-0">
                            

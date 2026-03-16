@@ -1,6 +1,14 @@
 <?php
+
+
+
   include("Fonctions_PHP/profil_session.php");
   include("../Connexion_BDD/Connexion_1.php");
+  
+  if (!isset($_SESSION['prenom__user']) || !isset($_SESSION['Nom_user'])) {
+    header("Location: ../Fonctions_PHP/Deconnexion.php");
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -39,6 +47,20 @@
 </head>
 
 <body >
+
+<div id="overlay-connexion" style="display:none;">
+    <div class="overlay-content text-center">
+        <div class="spinner-border text-light mb-3" role="status"></div>
+        <h4>Connexion au serveur perdue</h4>
+        <p>Veuillez patienter, tentative de reconnexion…</p>
+    </div>
+</div>
+<style>
+
+</style>
+
+
+
     <div class="container-fluid position-relative d-flex p-0">
 
         <!-- Début Menu Gauche -->
@@ -63,6 +85,8 @@
             elseif($_GET['page']=="statistique")require_once 'D_Finance/Statistique.php';
             elseif($_GET['page']=="Dash_Board_Caisse")require_once 'D_Finance/Dash_board_Caisse.php';
             elseif($_GET['page']=="Gerer_Encaissement")require_once 'D_Finance/Gerer_Encaissement.php';
+            elseif($_GET['page']=="Afficher_Encaissement")require_once 'D_Finance/Afficher_Encaissement.php';
+            elseif($_GET['page']=="Afficher_Decaissement")require_once 'D_Finance/Afficher_Decaissement.php';
             elseif($_GET['page']=="Gerer_Decaissement")require_once 'D_Finance/Gerer_Decaissement.php';
             elseif($_GET['page']=="Gerer_Encaissement_Dec")require_once 'D_Finance/Livre_Caisse_USD.php';
             elseif($_GET['page']=="RapportCaisse")require_once 'D_Finance/Rapport_Caisse.php';
@@ -75,8 +99,9 @@
             elseif($_GET['page']=="Suivi_autorisation")require_once 'D_Finance/Liste_Autorisations_Envoyees.php';
             elseif($_GET['page']=="Afficher")require_once 'D_Finance/Saisie_Bon.php';
             elseif($_GET['page']=="Modif")require_once 'D_Finance/Mise_a_jour_Autoriz.php';
+            elseif($_GET['page']=="Sortie_caisse")require_once 'D_Finance/Sortie_Caisse.php';
             
-           
+            else if($_GET['page']=="non_acces")require_once 'D_Generale/Entree_Erreur.php';
             
 
             //ERICK
@@ -87,8 +112,6 @@
             elseif($_GET['page']=="rubriques")require_once 'D_Comptable_ERP/rubrique.php';
             elseif($_GET['page']=="repartition")require_once 'D_Comptable_ERP/repartition.php';
             elseif($_GET['page']=="imputation")require_once 'D_Comptable_ERP/compte.php';
-
-            else if($_GET['page']=="non_acces")require_once 'D_Generale/Entree_Erreur.php';
         
             
           }
@@ -141,6 +164,84 @@
     <script src="D_Comptable_ERP/JavaScript/pooper.min.js"></script>
     <script src="D_Comptable_ERP/JavaScript/affichage_tableau_budget.js"></script>
     <script src="D_Comptable_ERP/JavaScript/fonction.js"></script>
+
+
+
+<script>
+let serveurDown = false;
+
+function bloquerPage() {
+    $("#overlay-connexion").fadeIn(300);
+}
+
+function debloquerPage() {
+    $("#overlay-connexion").fadeOut(300);
+}
+
+function testerConnexionServeur() {
+    $.ajax({
+        url: "../Fonctions_PHP/test_connection.php",
+        method: "GET",
+        dataType: "json",
+        timeout: 3000,
+
+        success: function (response) {
+
+            // ❌ Connexion perdue
+            if (response.status === "error") {
+                if (!serveurDown) {
+                    serveurDown = true;
+                    bloquerPage();
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Connexion perdue',
+                        text: response.message,
+                        allowOutsideClick: false,
+                        allowEscapeKey: false
+                    });
+                }
+            } 
+            // ✅ Connexion rétablie
+            else {
+                if (serveurDown) {
+                    serveurDown = false;
+                    debloquerPage();
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Connexion rétablie',
+                        text: 'Le serveur est de nouveau disponible',
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
+                }
+            }
+        },
+
+        // ❌ Serveur totalement inaccessible
+        error: function () {
+            if (!serveurDown) {
+                serveurDown = true;
+                bloquerPage();
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Serveur inaccessible',
+                    text: 'Impossible de joindre le serveur',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false
+                });
+            }
+        }
+    });
+}
+
+// Vérification toutes les 5 secondes
+setInterval(testerConnexionServeur, 5000);
+</script>
+
+
 
 </body>
 

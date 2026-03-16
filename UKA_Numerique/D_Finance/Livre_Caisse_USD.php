@@ -3,6 +3,20 @@
     .text-right {
         text-align: right;
     }
+
+   
+.table-container table {
+    width: 100% !important;
+    height: 100%;
+    border-collapse: collapse;
+}
+
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
 </style>
 
 </style>
@@ -67,9 +81,10 @@
 <div class="table-container"id="Print_Livre_Caisse">
   <div class="table-header"> <u></u>
      <button id="btn-action" class="action-button">Exporter</button>
-     <button id="btn-print" class="action-butto" onclick="imprimer_livre_caisse()"><i class="fas fa-print icon-style"style="font-size:1.3em;"> </i></button></div>
+     <button id="btn-print" class="action-butto" onclick="imprimer_livre_caisse()"><i class="fas fa-print icon-style"style="font-size:1.3em;"> </i></button>
+    </div>
      
-  <table class="table" id="tableEncaissement_Dec">
+  <table class="table w-100 border border-primary " id="tableEncaissement_Dec">
     <thead>
       
     </thead>

@@ -1,6 +1,6 @@
 <?php
 
-require_once("../../../Connexion_BDD/Connexion_1.php");
+include("../../../Connexion_BDD/Connexion_1.php");
 
 $num_bordereau=$_GET['num_bordereau'];
 

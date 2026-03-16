@@ -4,40 +4,43 @@ document.addEventListener("DOMContentLoaded", function () {
     // 📌 Champs USD
     const date1 = document.getElementById("dateDec1");
     const date2 = document.getElementById("dateDec2");
-    const encaissement = document.getElementById("decaissementSelect");
+    const decaissement = document.getElementById("decaissementSelect");
   
     // 🔧 Champs du modal
-    const modalEdit = document.getElementById("modalEdit");
-    const editForm = document.getElementById("editForm");
-    const editBeneficiaire = document.getElementById("editBeneficiaire");
+    const editId = document.getElementById("editId");
+    const editBeneficiaire = document.getElementById("editBen");
     const editMotif = document.getElementById("editMotif");
     const editMontant = document.getElementById("editMontant");
     const editDate = document.getElementById("editDate");
     const editNumeroPce = document.getElementById("editNumeroPce");
-    const cancelEdit = document.getElementById("cancelEdi");
-    const editBtnGlobal = document.getElementById("editer");
-  
+    const modalEdit = document.getElementById("modalEdit");
+    modalEditInstance = new bootstrap.Modal(modalEdit);
     let rowBeingEdited = null;
   
+
     // Initialiser les dates à aujourd'hui
     const today = new Date().toISOString().split('T')[0];
     if (date1) date1.value = today;
     if (date2) date2.value = today;
   
-    // Bouton Annuler
-    if (cancelEdit) {
-        cancelEdit.addEventListener("click", function () {
-          if (modalEdit) modalEdit.style.display = "none";
-          rowBeingEdited = null;
-        });
-      }
+    
   
     // Écouteurs
-    if (encaissement) {
-      encaissement.addEventListener('change', AfficherDecaissement);
-    }
-    if (date1) date1.addEventListener("change", AfficherDecaissement);
-    if (date2) date2.addEventListener("change", AfficherDecaissement);
+      document.getElementById('decaissementSelect').addEventListener('change', function () {
+        AfficherDecaissement(); 
+      });
+
+      date1.addEventListener("change", function () {
+        AfficherDecaissement(); 
+      });
+      date2.addEventListener("change", function () {
+        AfficherDecaissement(); 
+      });
+
+    function formatForDateTimeLocal(mysqlDateTime) {
+    // mysqlDateTime = "2026-02-09 14:35:00"
+    return mysqlDateTime.replace(' ', 'T').slice(0, 16);
+}
   
     if (editForm) {
       editForm.addEventListener("submit", function (e) {
@@ -50,19 +53,22 @@ document.addEventListener("DOMContentLoaded", function () {
           tds[4].textContent = editDate.value;
           tds[5].textContent = editNumeroPce.value;
   
-          modalEdit.style.display = "none";
+          
           rowBeingEdited = null;
         }
       });
     }
   
-    if (editBtnGlobal) {
-      editBtnGlobal.addEventListener('click', function () {
+    document.getElementById('editer').addEventListener('click', function () {
         let Num_Pce = editNumeroPce.value;
-        let MotifVersementUSD = editMotif.value;
-        let Montant_USD = editMontant.value;
-        let Date_vers_USD = editDate.value;
-        let Beneficiaire_usd = editBeneficiaire.value;
+        let Id_op = editId.value;
+        let MotifDecaissement = editMotif.value;
+        let Montant_Decaissement = editMontant.value;
+        //let Date_Decaissement = editDate.value;
+        let Date_Decaissement = editDate.value.replace('T', ' ') + ':00';
+
+        let Beneficiaire = editBeneficiaire.value;
+        let Dev=decaissement.value;
         let type_oper = "modifier";
   
         Swal.fire({
@@ -76,11 +82,11 @@ document.addEventListener("DOMContentLoaded", function () {
           cancelButtonText: "Annuler"
         }).then((result) => {
           if (result.isConfirmed) {
-            editionEncaissement(Num_Pce, MotifVersementUSD, Montant_USD, Date_vers_USD, Beneficiaire_usd, type_oper);
+            ModidfierDecaissement(Num_Pce,Id_op, MotifDecaissement, Montant_Decaissement, Date_Decaissement, Beneficiaire, Dev, type_oper);
           }
         });
       });
-    }
+    
   
     // Afficher les décaissements au chargement
     AfficherDecaissement();
@@ -88,37 +94,38 @@ document.addEventListener("DOMContentLoaded", function () {
     // FONCTIONS
   
     function AfficherDecaissement() {
-      let Date1 = document.getElementById("dateDec1").value;
-  let Date2 = document.getElementById("dateDec2").value;
-  let type_oper = document.getElementById("decaissementSelect").value;
+      
+      let Date1 = date1.value;
+      let Date2 = date2.value;
+      let type_oper = decaissement.value;
 
-  let TabListeDecaissement = document.getElementById("tableEncaissement");
+      let TabListeDecaissement = document.getElementById("tableDecaissement");
 
-  // Nettoyer le tableau avant d'afficher les nouvelles données
-  while (TabListeDecaissement.firstChild) {
-    TabListeDecaissement.removeChild(TabListeDecaissement.firstChild);
-  }
+      // Nettoyer le tableau avant d'afficher les nouvelles données
+      while (TabListeDecaissement.firstChild) {
+        TabListeDecaissement.removeChild(TabListeDecaissement.firstChild);
+      }
 
-  // Création de l'en-tête du tableau
-  var thead = document.createElement("thead");
-  thead.classList.add("sticky-sm-top", "m-0", "fw-bold");
+      // Création de l'en-tête du tableau
+      var thead = document.createElement("thead");
+      thead.classList.add("sticky-sm-top", "m-0", "fw-bold");
 
-  var tr1 = document.createElement("tr");
-  tr1.style = "background-color:darkred; color:white;";
+      var tr1 = document.createElement("tr");
+      tr1.style = "background-color:darkred; color:white;";
 
-  var headers = ["N°", "Imputation", "Bénéficiaire", "Motif", "Montant", "Date opération", "Numéro pièce", "Bon de sortie", "Modifier", "Supprimer"];
-  headers.forEach(headerText => {
-    var th = document.createElement("th");
-    th.textContent = headerText;
-    tr1.appendChild(th);
-  });
+      var headers = ["N°","Id", "Imputation", "Bénéficiaire", "Motif", "Montant", "Date opération", "Numéro pièce", "Bon de sortie", "Modifier", "Supprimer"];
+      headers.forEach(headerText => {
+        var th = document.createElement("th");
+        th.textContent = headerText;
+        tr1.appendChild(th);
+      });
 
-  thead.appendChild(tr1);
-  TabListeDecaissement.appendChild(thead);
+      thead.appendChild(tr1);
+      TabListeDecaissement.appendChild(thead);
 
-  var tbody = document.createElement("tbody");
+      var tbody = document.createElement("tbody");
 
-  var url = 'D_Finance/API/API_Select_Operation_Decaissement.php?date1=' + Date1 + '&date2=' + Date2 + '&type=' + type_oper;
+      var url = 'D_Finance/API/API_Select_Operation_Decaissement.php?date1=' + Date1 + '&date2=' + Date2 + '&type=' + type_oper;
 
   var i = 1;
   fetch(url)
@@ -143,6 +150,7 @@ document.addEventListener("DOMContentLoaded", function () {
           const tdnum = document.createElement("td");
           tdnum.textContent = i++;
 
+          const id = document.createElement("td");
           const tdimputation = document.createElement("td");
           const tdbenef = document.createElement("td");
           const tdmotif = document.createElement("td");
@@ -150,14 +158,16 @@ document.addEventListener("DOMContentLoaded", function () {
           const tddate = document.createElement("td");
           const tdnumpce = document.createElement("td");
 
+          id.textContent = infos.Id;
           tdimputation.textContent = infos.Imputation;
           tdbenef.textContent = infos.Beneficiaire;
           tdmotif.textContent = infos.Motif;
           tdmontant.textContent = infos.Montant;
-          tddate.textContent = infos.Date_Oper.split(' ')[0]; // 🔹 Enlever l'heure
+          tddate.textContent = infos.Date_Oper;//.split(' ')[0];  🔹 Enlever l'heure
           tdnumpce.textContent = numPce;
 
           tr.appendChild(tdnum);
+          tr.appendChild(id);
           tr.appendChild(tdimputation);
           tr.appendChild(tdbenef);
           tr.appendChild(tdmotif);
@@ -212,58 +222,83 @@ document.addEventListener("DOMContentLoaded", function () {
             tr.appendChild(tdrecu);
           }
 
-          // ✅ Boutons Modifier et Supprimer
-          const tdEdit = document.createElement("td");
-          const editBtn = document.createElement("button");
-          editBtn.innerHTML = "✏️";
-          editBtn.disabled = true;
-          editBtn.classList.add("btn", "btn-secondary", "btn-sm");
-          tdEdit.appendChild(editBtn);
-          tr.appendChild(tdEdit);
+              // ✅ Boutons Modifier et Supprimer
+              const tdEdit = document.createElement("td");
+              const editBtn = document.createElement("button");
+              editBtn.innerHTML = "✏️";
+              editBtn.disabled = false;
+              editBtn.classList.add("btn", "btn-secondary", "btn-sm");
+              tdEdit.appendChild(editBtn);
+              tr.appendChild(tdEdit);
 
-          const tdDelete = document.createElement("td");
-          const deleteBtn = document.createElement("button");
-          deleteBtn.innerHTML = "❌";
-          deleteBtn.disabled = true;
-          deleteBtn.classList.add("btn", "btn-danger", "btn-sm");
-          tdDelete.appendChild(deleteBtn);
-          tr.appendChild(tdDelete);
+              editBtn.addEventListener("click", function () {
+                    rowBeingEdited = tr;
 
-          tbody.appendChild(tr);
-        });
-      });
-    })
-    .catch(error => {
-      console.log("Erreur lors de la récupération des décaissements :", error);
-    });
+                    editId.value = infos.Id;
+                    editBeneficiaire.value = infos.Beneficiaire;
+                    editMotif.value = infos.Motif;
+                    editMontant.value = infos.Montant;
+                    editDate.value = formatForDateTimeLocal(infos.Date_Oper);
+                    editNumeroPce.value = numPce;
+                    modalEditInstance.show();
+                    });
 
-  TabListeDecaissement.appendChild(tbody);
-    }
-  
-    function editionEncaissement(Num_Pce, MotifVersementUSD, Montant_USD, Date_vers_USD, Beneficiaire_usd, type_oper) {
-      const lien = 'D_Finance/API/API_Select_Operation_Decaissement.php?Num_Pce=' + encodeURIComponent(Num_Pce) +
-        '&Motif=' + encodeURIComponent(MotifVersementUSD) +
-        '&Montant=' + encodeURIComponent(Montant_USD) +
-        '&Date_op=' + encodeURIComponent(Date_vers_USD) +
-        '&Beneficiaire=' + encodeURIComponent(Beneficiaire_usd) +
-        '&type=' + encodeURIComponent(type_oper);
-  
-      fetch(lien)
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            Swal.fire("✅ Succès", "Modification effectuée avec succès", "success");
-            AfficherDecaissement();
-            modalEdit.style.display = "none";
-          } else {
-            Swal.fire("❌ Erreur", data.message || "Une erreur est survenue", "error");
-          }
+
+
+              const tdDelete = document.createElement("td");
+              const deleteBtn = document.createElement("button");
+              deleteBtn.innerHTML = "❌";
+              deleteBtn.disabled = true;
+              deleteBtn.classList.add("btn", "btn-danger", "btn-sm");
+              tdDelete.appendChild(deleteBtn);
+              tr.appendChild(tdDelete);
+
+              tbody.appendChild(tr);
+            });
+          });
         })
         .catch(error => {
+          console.log("Erreur lors de la récupération des décaissements :", error);
+        });
+
+      TabListeDecaissement.appendChild(tbody);
+    }
+  
+    //********************* ENVOYER LES NOUVELLES DONNEES POUR MODIFICATION */
+
+function ModidfierDecaissement(Num_Pce,Id,MotifDecaissement,Montant_Decaissement,Date_Decaissement,Beneficiaire_Dec,Dev,type_oper) 
+  {
+  
+    const lien = 'D_Finance/API/Modifier_Op_Dec.php?Num_Pce=' + encodeURIComponent(Num_Pce) +
+      
+      '&Motif=' + encodeURIComponent(MotifDecaissement) +
+      '&Montant=' + encodeURIComponent(Montant_Decaissement) +
+      '&Date_op=' + encodeURIComponent(Date_Decaissement)+
+      '&Ben=' + encodeURIComponent(Beneficiaire_Dec)+
+      '&dev=' + encodeURIComponent(Dev)+
+      '&type=' + encodeURIComponent(type_oper)+
+      '&id_op=' + encodeURIComponent(Id);
+
+    fetch(lien)
+      .then(response => response.json())
+      .then(data => {
+          console.log("✅ Réponse API :", data);
+          if (data.success) {
+              Swal.fire("✅ Succès", "Modification effectué avec succès", "success");
+              AfficherDecaissement(); 
+           
+              
+          } else if (data.error) {
+              Swal.fire("❌ Erreur: Modification non effectuée", data.message || "Une erreur est survenue.", "error");
+          } else {
+              Swal.fire("❗ Réponse inattendue", "Le serveur n'a pas renvoyé de message clair.", "warning");
+          }
+      })
+      .catch(error => {
           console.error("❌ Erreur de requête :", error);
           Swal.fire("❌ Erreur réseau", "Impossible de contacter le serveur.", "error");
-        });
-    }
+      });
+  }
   
     function Annuler_Operation(Num_Pce, type_oper) {
       const lien = 'D_Finance/API/API_Select_Operation_Decaissement.php?Num_Pce=' + encodeURIComponent(Num_Pce) +
@@ -275,7 +310,6 @@ document.addEventListener("DOMContentLoaded", function () {
           if (data.success) {
             Swal.fire("✅ Succès", "Opération annulée avec succès", "success");
             AfficherDecaissement();
-            modalEdit.style.display = "none";
           } else {
             Swal.fire("❌ Erreur", data.message || "Une erreur est survenue", "error");
           }

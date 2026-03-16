@@ -106,7 +106,10 @@ document.addEventListener('DOMContentLoaded', function () {
             <?php if ($categorie == "Caissière principale") : ?>
                 <div class="navbar-nav w-100 ">
                    
-                    <a href="Page_Principale_Finance.php?page=Dash_Board_Caisse" class="nav-item nav-link bloc"><i class="fa fa-exchange-alt me-2 text-primary"></i>Opérations</a>
+                    <a href="Page_Principale_Finance.php?page=Dash_Board_Caisse" class="nav-item nav-link bloc"><i class="fa fa-exchange-alt me-2 text-primary"></i>Entrée</a>
+                    <a href="Page_Principale_Finance.php?page=AutoValide" class="nav-item nav-link bloc mt-2"hidden><i class="fa fa-exchange-alt me-2 text-primary"></i>Sortie</a>
+                    <a href="Page_Principale_Finance.php?page=Sortie_caisse" class="nav-item nav-link bloc mt-2"><i class="fa fa-exchange-alt me-2 text-primary"></i>Sortie</a>
+                    <a href="Page_Principale_Finance.php?page=Change" class="nav-item nav-link bloc mt-2"><i class="fa fa-exchange-alt me-2 text-primary"></i>Change</a>
                     <div class="nav-item  dropdown">
                         <a href="#" class="nav-link dropdown-toggle  bloc" data-bs-toggle="dropdown"><i class="fa fa-book me-2 text-primary "></i>Journal de Caisse</a>
                         <div class="dropdown-menu bg-transparent border-0">
@@ -136,14 +139,24 @@ document.addEventListener('DOMContentLoaded', function () {
                 <?php elseif ($categorie == "Administrateur de Budget") : ?>
                 <div class="navbar-nav w-100 ">
                    
-                    <a href="Page_Principale_Finance.php?page=Dash_Board" class="nav-item nav-link bloc"><i class="fa fa me-2 text-primary">📊</i> Tableau de Bord</a>
-                    <a href="Page_Principale_Finance.php?page=autorisation" class="nav-item nav-link bloc mt-1"><i class="fa fa me-2 text-primary">📊</i> Autorisation</a>
+                    <a href="Page_Principale_Finance.php?page=Dash_Board" class="nav-item nav-link bloc"><i class="fa fa me-1 text-primary">📊</i> Tableau de Bord</a>
+                    
+                    <div class="nav-item dropdown">
+                        <a href="#" class="nav-link dropdown-toggle text-white bloc" data-bs-toggle="dropdown"><i class="fa fa me-2 text-primary">⚙️</i> Autorisations</a>
+                        <div class="dropdown-menu bg-transparent border-0">
+                            <a href="Page_Principale_Finance.php?page=autorisation" class=" dropdown-item text-white a_menu" id="liste" style="color:white;"><i class="fa fa-plus-circle text-primary me-2"></i>Enregistrement</a>
+                            <a href="Page_Principale_Finance.php?page=Autoriser" class=" dropdown-item text-white a_menu" id="liste" style="color:white;"><i class="fa fa-check-circle text-primary me-2"></i>Validation </a>
+                            <a href="Page_Principale_Finance.php?page=Suivi_autorisation" class=" dropdown-item text-white a_menu" id="liste" style="color:white;"><i class="fa fa-clock me-2"></i>Suivi status </a>
+                            <a href="Page_Principale_Finance.php?page=Modif" class=" dropdown-item text-white a_menu" id="liste" style="color:white;"><i class="fa fa-sync-alt me-2"></i>Modifier Autoriz </a>
+                        </div>
+                    </div>
+
                     <div class="nav-item dropdown">
                         <a href="#" class="nav-link dropdown-toggle text-white bloc" data-bs-toggle="dropdown"><i class="fa fa me-2 text-primary">💰</i> Opérations Fin.</a>
                         <div class="dropdown-menu bg-transparent border-0">
                             <a href="Page_Principale_Finance.php?page=Gerer_Encaissement" class=" dropdown-item text-white a_menu" id="liste" style="color:white;"><i class="fa fa-money-bill-wave me-2"></i>Encaissements du Jour</a>
                             <a href="Page_Principale_Finance.php?page=Gerer_Decaissement" class=" dropdown-item text-white a_menu" id="liste" style="color:white;"><i class="fa fa-arrow-down me-2"></i>Décaissements du Jour </a>
-                            <a href="Page_Principale_Finance.php?page=Rapport_guichet" class=" dropdown-item text-white a_menu" id="liste" style="color:white;"><i class="fa fa-university me-2"></i>Opérations aux Guichets </a>
+                            <a href="Page_Principale_Finance.php?page=" class=" dropdown-item text-white a_menu" id="liste" style="color:white;"><i class="fa fa-university me-2"></i>Opérations aux Guichets </a>
                         </div>
                     </div>
                     <div class="nav-item dropdown">
@@ -180,6 +193,45 @@ document.addEventListener('DOMContentLoaded', function () {
                         </div>
                     </div>                  
                 </div>
+                <?php elseif ($categorie == "Recteur") : ?>
+                <div class="navbar-nav w-100 ">
+                   
+                    <a href="Page_Principale_Finance.php?page=Dash_Board" class="nav-item nav-link bloc"><i class="fa fa me-2 text-primary">📊</i> Tableau de Bord</a>
+                    <div class="nav-item dropdown">
+                        <a href="#" class="nav-link dropdown-toggle text-white bloc" data-bs-toggle="dropdown"><i class="fa fa me-2 text-primary">💰</i> Autorisations</a>
+                        <div class="dropdown-menu bg-transparent border-0">
+                            <a href="Page_Principale_Finance.php?page=Autoriser" class=" dropdown-item text-white a_menu" id="liste" style="color:white;"><i class="fa fa-arrow-down me-2"></i>Validation </a>
+                            <a href="Page_Principale_Finance.php?page=Suivi_autorisation" class=" dropdown-item text-white a_menu" id="liste" style="color:white;"><i class="fa fa-university me-2"></i>Suivi status </a>
+                        </div>
+                    </div>
+                    
+                    <div class="nav-item dropdown">
+                        <a href="#" class="nav-link dropdown-toggle text-white bloc" data-bs-toggle="dropdown"><i class="fa fa me-2 text-primary">💰</i> Opérations Fin.</a>
+                        <div class="dropdown-menu bg-transparent border-0">
+                            <a href="Page_Principale_Finance.php?page=Gerer_Encaissement" class=" dropdown-item text-white a_menu" id="liste" style="color:white;"><i class="fa fa-money-bill-wave me-2"></i>Encaissements du Jour</a>
+                            <a href="Page_Principale_Finance.php?page=Gerer_Decaissement" class=" dropdown-item text-white a_menu" id="liste" style="color:white;"><i class="fa fa-arrow-down me-2"></i>Décaissements du Jour </a>
+                            <a href="Page_Principale_Finance.php?page=" class=" dropdown-item text-white a_menu" id="liste" style="color:white;"><i class="fa fa-university me-2"></i>Opérations aux Guichets </a>
+                        </div>
+                    </div>
+                    <div class="nav-item dropdown">
+                       <a href="#" class="nav-link dropdown-toggle text-white bloc" data-bs-toggle="dropdown"><i class="fa fa me-2 text-primary">🧾</i>Doc Comptables</a>
+                       
+                       <div class="dropdown-menu bg-transparent border-0">
+                            <a href="Page_Principale_Finance.php?page=Gerer_Encaissement_Dec" class=" dropdown-item text-white a_menu" id="liste" style="color:white;"><i class="fa fa-book me-2"></i>Livre de Caisse
+                            <a href="Page_Principale_Finance.php?page=RapportCaisse" class=" dropdown-item text-white a_menu" id="liste" style="color:white;"><i class="fa fa-file-alt me-2"></i>Rapport de Caisse</a>
+                        </div>
+                    </div>   
+                    <div class="nav-item dropdown">
+                       <a href="#" class="nav-link dropdown-toggle text-white bloc" data-bs-toggle="dropdown"><i class="fa fa me-2 text-primary">📒</i> Gestion Budg.</a>
+                       
+                       <div class="dropdown-menu bg-transparent border-0">
+                            <a href="Page_Principale_Finance.php?page=Planification_Budget" class=" dropdown-item text-white a_menu" id="liste" style="color:white;"><i class="fa me-2">👁️</i>Visualiser le Budget
+                            <a href="Page_Principale_Finance.php?page=RapportCaisse" class=" dropdown-item text-white a_menu" id="liste" style="color:white;"><i class="fa fa-file-alt me-2"></i>Rapport de Caisse</a>
+                        </div>
+                    </div>
+                                    
+                </div> 
+                
                 <?php elseif ($categorie == "Comptable") : ?>
                 <div class="navbar-nav w-100 ">
                    
@@ -275,6 +327,18 @@ document.addEventListener('DOMContentLoaded', function () {
                         </div>
                     </div>                  
                 </div>
+                <?php elseif ($categorie == "Assistant AB") : ?>
+                <div class="navbar-nav w-100 ">
+                   
+                    <a href="Page_Principale_Finance.php?page=autorisation" class="nav-item nav-link bloc"><i class="fa fa me-1 text-primary">📊</i> Saisie bon</a>
+                    <a href="Page_Principale_Finance.php?page=Afficher" class="nav-item nav-link bloc mt-2"><i class="fa fa me-1 text-primary">📊</i> Afficher</a>
+                    
+                    
+                    
+                   
+                                
+                </div>
+                
             <?php endif; ?>
             </nav>
         </div>

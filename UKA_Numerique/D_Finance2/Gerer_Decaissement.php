@@ -32,45 +32,81 @@
 </style>
 
 <div class="table-container">
-  <div class="table-header">Tableau des Décaissements</div>
+  <div class="table-header">
+    <span>Tableau des Décaissements</span>
+      <div class="actions">
+        <button id="btn-usd" class="action-button">➕ Opérations $</button>
+        <button id="btn-cdf" class="action-button">➕ Opérations Fc</button>
+      </div>
+
+  </div>
   
-  <table class="table" id="tableEncaissement">
-    <thead>
-      
-    </thead>
-    <tbody>
-     
-    </tbody>
-  </table>
+      <table class="table" id="tableEncaissement">
+        <thead>
+          
+        </thead>
+        <tbody>
+        
+        </tbody>
+      </table>
 </div>
 
-<div id="modalEdit" class="modal-overlay" style="display:none;">
-  <div class="modal-content">
-    <h3>Modifier le décaissement</h3>
-    <form id="editForm">
-      <label>Déposant</label>
-      <input type="text" id="editDeposant">
-      
-      <label>Motif</label>
-      <input type="text" id="editMotif">
-      
-      <label>Montant</label>
-      <input type="number" id="editMontant">
-      
-      <label>Date</label>
-      <input type="date" id="editDate">
-      
-      <label>Numéro Pièce</label>
-      <input type="text" id="editNumeroPce" disabled>
-      
-      <div class="modal-buttons">
-        <button type="button" id="editer">Enregistrer</button>
-        <button type="button" id="cancelEdi">Annuler</button>
+<div class="modal fade" id="modalEdit" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Modifier l'opération de décaissement</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-    </form>
+
+      <div class="modal-body">
+        <form id="editForm" >
+            
+          <div class="mb-3">
+            <label class="form-label">Id Opération</label>
+            <input type="text" class="form-control" id="editId" readonly>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Bénéficiaire</label>
+            <input type="text" class="form-control" id="editBen">
+          </div>
+
+
+          <div class="mb-3">
+            <label class="form-label">Motif</label>
+            <input type="text" class="form-control" id="editMotif">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Montant</label>
+            <input type="number" class="form-control" id="editMontant">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Date</label>
+            <input type="date" class="form-control" id="editDate">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Numéro Pièce</label>
+            <input type="text" class="form-control" id="editNumeroPce" readonly>
+          </div>
+
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="editer">Enregistrer</button>
+        
+        
+      </div>
+
+    </div>
   </div>
 </div>
-<style>
 
-</style>
+
+
 <script src="D_Finance/js/Selection_des_Decaissements.js"></script>

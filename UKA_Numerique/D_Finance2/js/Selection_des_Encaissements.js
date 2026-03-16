@@ -1,4 +1,4 @@
-console.log("✅ JS sélection des encaissements");
+ console.log("✅ JS sélection des encaissements");
 
 // 📌 Champs USD
 //const critere = document.getElementById("critere");
@@ -7,22 +7,18 @@ const date2 = document.getElementById("date2");
 const encaissement = document.getElementById("encaissementSelect");
 
 // 🔧 Champs du modal
-const modalEdit = document.getElementById("modalEdit");
+
 const editForm = document.getElementById("editForm");
+const editId = document.getElementById("editId");
 const editDeposant = document.getElementById("editDeposant");
 const editMotif = document.getElementById("editMotif");
 const editMontant = document.getElementById("editMontant");
 const editDate = document.getElementById("editDate");
 const editNumeroPce = document.getElementById("editNumeroPce");
-const cancelEdit = document.getElementById("cancelEdit");
 
 let rowBeingEdited = null;
 
-// Bouton Annuler
-cancelEdit.addEventListener("click", function () {
-  modalEdit.style.display = "none";
-  rowBeingEdited = null;
-});
+
 
 // Écouteur d'événement pour Encaissement USD
 document.getElementById('encaissementSelect').addEventListener('change', function () {
@@ -56,10 +52,13 @@ function AfficherEncaissement() {
   var tr1 = document.createElement("tr");
   tr1.style = "background-color:midnightblue; color:white;";
 
-  var headers = ["N°", "Déposant","Compte", "Motif", "Montant", "Date opération", "Numéro pce","Reçu","Modifier","Supprimer"];
+  var headers = ["N°","id", "Déposant","Compte", "Motif", "Montant", "Date opération", "Numéro pce","Reçu","",""];
   headers.forEach(headerText => {
     var th = document.createElement("th");
     th.textContent = headerText;
+    if (headerText === "id") {
+    th.classList.add("col-id");
+  }
     tr1.appendChild(th);
   });
 
@@ -75,122 +74,137 @@ function AfficherEncaissement() {
   fetch(url)
     .then(response => response.json())
     .then(data => {
-      data.forEach(infos => {
-        var tr = document.createElement("tr");
+        // ✅ Regrouper les opérations par numéro de pièce
+        const groupes = {};
+        data.forEach(infos => {
+        const numPce = infos.Numero_pce.replace(/[^\d]/g, '');
+        if (!groupes[numPce]) groupes[numPce] = [];
+        groupes[numPce].push(infos);
+        });
 
-        var tdnum = document.createElement("td");
-        tdnum.textContent = i;
+        // ✅ Parcourir chaque groupe (chaque numéro de pièce unique)
+        Object.keys(groupes).forEach(numPce => {
+        const lignes = groupes[numPce];
+        const nbLignes = lignes.length;
 
-        var tddeposant = document.createElement("td");
-        var tdcompte = document.createElement("td");
-        var tdmotif = document.createElement("td");
-        var tdmontant = document.createElement("td");
-        var tddate = document.createElement("td");
-        var tdnumpce = document.createElement("td");
+        lignes.forEach((infos, index) => {
+            const tr = document.createElement("tr");
 
-        tddeposant.textContent = infos.Deposant;
-        tdcompte.textContent = infos.Imputation;
-        tdmotif.textContent = infos.Motif;
-        tdmontant.textContent = infos.Montant;
-        tddate.textContent = infos.Date_Oper;
-        tdnumpce.textContent = infos.Numero_pce.replace(/[^\d]/g, '');
-     
-        // 🔧 Réimpression du reçu de versement
-        var tdrecu = document.createElement("td");
-        var recuBtn = document.createElement("button");
-        recuBtn.innerHTML = "🖨️"; // ou utilise une image : <img src='img/print-icon.png' width='20'>
-        recuBtn.title = "Réimprimer le reçu";
-        recuBtn.style.cursor = "pointer";
-        recuBtn.classList.add("btn", "btn-light", "btn-sm");
+            const tdnum = document.createElement("td");
+            tdnum.textContent = i++;
 
-         // Désactiver le bouton
-         //recuBtn.disabled = true;
-        recuBtn.classList.add("edit-btn");
-        recuBtn.addEventListener("click", function () {
-          recuBtn.addEventListener("click", function () {
-              const num_pce = tdnumpce.textContent;
-              const montant = parseFloat(tdmontant.textContent.replace(/[^\d.-]/g, ''));
-              const devise = type_oper === "USD" ? "USD" : type_oper === "CDF" ? "CDF" : "EUR";
-              const motif = tdmotif.textContent;
-              const date = tddate.textContent.split(' ')[0];
-              const deposant = tddeposant.textContent;
-              const imputation = tdcompte.textContent;
+            const id = document.createElement("td");
+            const tddeposant = document.createElement("td");
+            const tdcompte = document.createElement("td");
+            const tdmotif = document.createElement("td");
+            const tdmontant = document.createElement("td");
+            const tddate = document.createElement("td");
+            const tdnumpce = document.createElement("td");
 
-              const montantLettres = enLettresMontant(montant, devise);
-              montantEnLettres = montantLettres; // met à jour la variable globale utilisée dans ImpressionReçuVersement
+            
+            id.textContent = infos.Id;
+            id.classList.add("col-id");
 
-              ImpressionReçuVersement(num_pce, montant, devise, motif, date, deposant, imputation);
+            tddeposant.textContent = infos.Deposant;
+            tdcompte.textContent = infos.Imputation;
+            tdmotif.textContent = infos.Motif;
+            tdmontant.textContent = infos.Montant;
+            tddate.textContent = infos.Date_Oper.split(' ')[0];
+            tdnumpce.textContent = numPce;
+
+            tr.appendChild(tdnum);
+            tr.appendChild(id);
+
+            tr.appendChild(tddeposant);
+            tr.appendChild(tdcompte);
+            tr.appendChild(tdmotif);
+            tr.appendChild(tdmontant);
+            tr.appendChild(tddate);
+            tr.appendChild(tdnumpce);
+
+            // ✅ Fusionner uniquement la cellule "Reçu"
+            if (index === 0) {
+            const tdrecu = document.createElement("td");
+            tdrecu.rowSpan = nbLignes;
+            tdrecu.style.verticalAlign = "middle";
+            tdrecu.style.textAlign = "center";
+
+            const recuBtn = document.createElement("button");
+            recuBtn.innerHTML = "🖨️";
+            recuBtn.title = "Réimprimer le reçu";
+            recuBtn.classList.add("btn", "btn-light", "btn-sm");
+            recuBtn.style.cursor = "pointer";
+
+            recuBtn.addEventListener("click", function () {
+                // 🧩 Prendre toutes les lignes du même groupe (même numéro de pièce)
+                const premier = lignes[0];
+                const devise = type_oper === "USD" ? "USD" : type_oper === "CDF" ? "CDF" : "EUR";
+
+                // 🧮 Calcul du montant total cumulé
+                const totalMontant = lignes.reduce((somme, ligne) => {
+                    const m = parseFloat(String(ligne.Montant).replace(/[^\d.-]/g, '')) || 0;
+                    return somme + m;
+                }, 0);
+
+                // 🧾 Concaténer les motifs (éliminer doublons)
+                const motifsUniques = [...new Set(lignes.map(l => l.Motif))];
+                const motifGlobal = motifsUniques.join(", ");
+                // 🧾 Concaténer les motifs (éliminer doublons)
+                const CompteUniques = [...new Set(lignes.map(l => l.Imputation))];
+                const CompteGlobal = CompteUniques.join("|");
+                // ✅ Variables principales
+                const date = premier.Date_Oper.split(' ')[0];
+                const deposant = premier.Deposant;
+               
+
+                // ✍️ Montant en lettres
+                const montantLettres = enLettresMontant(totalMontant, devise);
+                montantEnLettres = montantLettres;
+
+                // 🖨️ Impression du reçu global
+                ImpressionReçuVersement(numPce, totalMontant, devise, motifGlobal, date, deposant, CompteGlobal);
             });
 
-          
+
+            tdrecu.appendChild(recuBtn);
+            tr.appendChild(tdrecu);
+            }
+
+            // ✅ Colonnes Modifier et Supprimer séparées à chaque ligne
+            const tdEdit = document.createElement("td");
+            const editBtn = document.createElement("button");
+            editBtn.innerHTML = "✏️";
+            editBtn.disabled = false;
+            editBtn.classList.add("btn", "btn-secondary", "btn-sm");
+            tdEdit.appendChild(editBtn);
+            tr.appendChild(tdEdit);
+
+            editBtn.addEventListener("click", function () {
+                rowBeingEdited = tr;
+
+                editId.value = infos.Id;
+                editDeposant.value = infos.Deposant;
+                editMotif.value = infos.Motif;
+                editMontant.value = infos.Montant;
+                editDate.value = infos.Date_Oper.split(' ')[0];
+                editNumeroPce.value = numPce;
+                modalEditInstance.show();
+                });
+
+
+
+            const tdDelete = document.createElement("td");
+            const deleteBtn = document.createElement("button");
+            deleteBtn.innerHTML = "❌";
+            deleteBtn.disabled = false;
+            deleteBtn.classList.add("btn", "btn-danger", "btn-sm");
+            tdDelete.appendChild(deleteBtn);
+            tr.appendChild(tdDelete);
+
+            tbody.appendChild(tr);
         });
-        tdrecu.appendChild(recuBtn);
-
-        // 🔧 Modifier
-        var tdEdit = document.createElement("td");
-        var editBtn = document.createElement("button");
-        editBtn.innerHTML = "✏️";
-         // Désactiver le bouton
-         editBtn.disabled = true;
-        editBtn.classList.add("edit-btn");
-        editBtn.addEventListener("click", function () {
-          // Pré-remplir les champs
-          editDeposant.value = tddeposant.textContent;
-          editMotif.value = tdmotif.textContent;
-          editMontant.value = tdmontant.textContent;
-          editDate.value = tddate.textContent;
-          editNumeroPce.value = tdnumpce.textContent;
-
-          rowBeingEdited = tr;
-          modalEdit.style.display = "flex"; // Affiche le modal
         });
-        tdEdit.appendChild(editBtn);
 
-        // ❌ Supprimer
-        var tdDelete = document.createElement("td");
-        var deleteBtn = document.createElement("button");
-        deleteBtn.innerHTML = "❌";
-         // Désactiver le bouton
-         deleteBtn.disabled = true;
-        deleteBtn.classList.add("delete-btn");
-        deleteBtn.addEventListener("click", function () {
-          //tr.remove();
-          let Num_Pce = tdnumpce.textContent;
-              type_oper="statut";
-
-          Swal.fire({
-              title: "Voulez-vous vraiment Annuler cette opération ?",
-              text: "Je m'engage",
-              icon: "warning",
-              showCancelButton: true,
-              confirmButtonColor: "#3085d6",
-              cancelButtonColor: "#d33",
-              confirmButtonText: "Oui, Confirmer",
-              cancelButtonText: "Abandonner"
-          }).then((result) => {
-              if (result.isConfirmed) {
-                  Cancel_Operation(Num_Pce,type_oper);
-                  console.log("le numero "+Num_Pce);
-              }
-          });
-
-        });
-        tdDelete.appendChild(deleteBtn);
-
-        tr.appendChild(tdnum);
-        tr.appendChild(tddeposant);
-        tr.appendChild(tdcompte);
-        tr.appendChild(tdmotif);
-        tr.appendChild(tdmontant);
-        tr.appendChild(tddate);
-        tr.appendChild(tdnumpce);
-        tr.appendChild(tdrecu);
-        tr.appendChild(tdEdit);
-        tr.appendChild(tdDelete);
-
-        tbody.appendChild(tr);
-        i++;
-      });
     })
     .catch(error => {
       console.log("Erreur lors de contacte de l'API Afficher Liste Paie" + error);
@@ -211,11 +225,10 @@ editForm.addEventListener("submit", function (e) {
     tds[4].textContent = editDate.value;
     tds[5].textContent = editNumeroPce.value;
 
-    modalEdit.style.display = "none";
     rowBeingEdited = null;
   }
 });
-
+let modalEditInstance = null;
 document.addEventListener("DOMContentLoaded", function () {
   const today = new Date().toISOString().split('T')[0];
 
@@ -226,18 +239,23 @@ document.addEventListener("DOMContentLoaded", function () {
   if (date2) date2.value = today;
   AfficherEncaissement(); 
 
+  const modalEl = document.getElementById("modalEdit");
+  modalEditInstance = new bootstrap.Modal(modalEl);
   
 });
 //MODIFICATION DE DONNEES ENCAISSEMENT
 
 document.getElementById('editer').addEventListener('click', function () {
             let Num_Pce = editNumeroPce.value;
+            let id_op = editId.value;
             let MotifVersementUSD = editMotif.value;
             
             let Montant_USD = editMontant.value;
             let Date_vers_USD = editDate.value;
             let Deposant_usd = editDeposant.value;
-                type_oper="modifier";
+            let Dev=encaissement.value;
+            let type_oper="modifier";
+            
             Swal.fire({
                 title: "Voulez-vous vraiment confirmer cette opération ?",
                 text: "Je m'engage",
@@ -249,20 +267,22 @@ document.getElementById('editer').addEventListener('click', function () {
                 cancelButtonText: "Annuler"
             }).then((result) => {
                 if (result.isConfirmed) {
-                    editionEncaissement(Num_Pce,MotifVersementUSD,Montant_USD,Date_vers_USD,Deposant_usd,type_oper);
+                    editionEncaissement(Num_Pce,id_op,MotifVersementUSD,Montant_USD,Date_vers_USD,Deposant_usd,Dev,type_oper);
                 }
             });
 });
 //********************* ENVOYER LES NOUVELLES DONNEES POUR MODIFICATION */
-function editionEncaissement(Num_Pce,MotifVersementUSD,Montant_USD,Date_vers_USD,Deposant_usd,type_oper) {
+function editionEncaissement(Num_Pce,Id,MotifVersementUSD,Montant_USD,Date_vers_USD,Deposant_usd,dev,type_oper) {
   
-  const lien = 'D_Finance/API/API_Select_Operation_Encaissement.php?Num_Pce=' + encodeURIComponent(Num_Pce) +
+  const lien = 'D_Finance/API/Modifier_Op_Enc.php?Num_Pce=' + encodeURIComponent(Num_Pce) +
       
       '&Motif=' + encodeURIComponent(MotifVersementUSD) +
       '&Montant=' + encodeURIComponent(Montant_USD) +
       '&Date_op=' + encodeURIComponent(Date_vers_USD)+
       '&Deposant=' + encodeURIComponent(Deposant_usd)+
-      '&type=' + encodeURIComponent(type_oper);
+      '&dev=' + encodeURIComponent(dev)+
+      '&type=' + encodeURIComponent(type_oper)+
+      '&id_op=' + encodeURIComponent(Id);
 
   fetch(lien)
       .then(response => response.json())
@@ -271,14 +291,7 @@ function editionEncaissement(Num_Pce,MotifVersementUSD,Montant_USD,Date_vers_USD
           if (data.success) {
               Swal.fire("✅ Succès", "Modification effectué avec succès", "success");
               AfficherEncaissement(); 
-              // Mise à jour du numéro de pièce
-              /*if (data.NumeroPieceSuivant) {
-                  num_pce.value = data.NumeroPieceSuivant;
-                  console.log("🔢 Prochain numéro de pièce appliqué :", data.NumeroPieceSuivant);
-              }*/
-
-              // Vider les champs après l'enregistrement
-                modalEdit.style.display = "none";
+           
               
           } else if (data.error) {
               Swal.fire("❌ Erreur: Modification non effectuée", data.message || "Une erreur est survenue.", "error");
@@ -310,7 +323,7 @@ function Cancel_Operation(Num_Pce,type_oper) {
               }*/
 
               // Vider les champs après l'enregistrement
-                modalEdit.style.display = "none";
+              
               
           } else if (data.error) {
               Swal.fire("❌ Erreur: Modification non effectuée", data.message || "Une erreur est survenue.", "error");
@@ -384,7 +397,7 @@ function Cancel_Operation(Num_Pce,type_oper) {
                             background-repeat: repeat x;
                             background-position: right center;
                             text-align: right;
-                            font-size: 40px;
+                            font-size: 20px;
                             font-weight: bold;
                             padding: 0px 0px;
                             -webkit-print-color-adjust: exact;
@@ -403,7 +416,7 @@ function Cancel_Operation(Num_Pce,type_oper) {
                                     .signature-section {
                                         display: flex;
                                         justify-content: space-between;
-                                        margin-top: 20px;
+                                        margin-top: 10px;
                                         text-align: center;
                                     }
 

@@ -1,0 +1,1 @@
+{"Num_Pce":"3","Text_Btn":"Encaisser USD","Motif_USD":"FA","Idser_USD":"serv 2","Montant_USD":"60","Date_op_usd":"2026-01-20T10:57","Deposant_usd":"PAULINE MANZANZA","Imputation_usd":"604123","AnneeAcad":"30"}

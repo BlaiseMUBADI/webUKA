@@ -27,7 +27,7 @@ $anneeRow = $anneeQuery->fetch(PDO::FETCH_ASSOC);
 $lastAnnee = $anneeRow['idAnnee_Acad'];
 $annee_debut = $anneeRow['Annee_debut'];
 
-
+        //echo $anneeRow; ca marche très bien on prend l'année en cours (cfr 02/2026)
         //$annee_debut = 2025; // à adapter dynamiquement si nécessaire
         //echo $lastAnnee;
         // Requête pour récupérer les montants réalisés par rubrique

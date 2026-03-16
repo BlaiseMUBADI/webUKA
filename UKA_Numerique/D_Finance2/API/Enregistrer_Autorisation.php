@@ -1,12 +1,20 @@
 <?php
 include("../../../Connexion_BDD/Connexion_1.php");
+header("Content-Type: application/json");
 
-if (!isset($_POST['devise'])) {
+// ⚡ On peut recevoir en POST classique ou en JSON
+$input = $_POST;
+if (empty($input)) {
+    $input = json_decode(file_get_contents("php://input"), true);
+}
+
+if (!isset($input['devise'])) {
     echo json_encode(['success' => false, 'error' => 'Aucune devise fournie']);
     exit;
 }
 
-$devise = $_POST['devise'];
+$devise = $input['devise'];
+$Beneficiaire = $input['beneficiaire'];
 $prefix = "";
 
 if ($devise === 'USD') {
@@ -18,15 +26,15 @@ if ($devise === 'USD') {
     exit;
 }
 
-// Cherche le dernier numéro existant
-$reponse = $con->prepare("
-    SELECT numero_pce 
+// ==========================
+// Génération du numéro unique
+// ==========================
+$reponse = $con->prepare("SELECT numero_pce 
     FROM numero_autorisation 
     WHERE numero_pce LIKE ?
     ORDER BY CAST(SUBSTRING(numero_pce, LENGTH(?) + 1) AS UNSIGNED) DESC 
     LIMIT 1
 ");
-
 $likePrefix = $prefix . '%';
 $reponse->execute([$likePrefix, $prefix]);
 
@@ -36,23 +44,42 @@ if ($ligne = $reponse->fetch()) {
 } else {
     $numericPart = 1;
 }
-
 $numeroFinal = $prefix . $numericPart;
 
-// Vérifie si ce numéro existe (précaution)
-$verif = $con->prepare("SELECT COUNT(*) FROM numero_autorisation WHERE numero_pce = ?");
-$verif->execute([$numeroFinal]);
+// ==========================
+// Transaction pour cohérence
+// ==========================
+try {
+    $con->beginTransaction();
 
-if ($verif->fetchColumn() > 0) {
-    echo json_encode(['success' => false, 'error' => 'Numéro déjà existant']);
-    exit;
-}
+    // Insertion du numéro dans numero_autorisation
+    $insert = $con->prepare("INSERT INTO numero_autorisation (numero_pce) VALUES (?)");
+    $insert->execute([$numeroFinal]);
 
-// Insertion
-$insert = $con->prepare("INSERT INTO numero_autorisation (numero_pce) VALUES (?)");
-if ($insert->execute([$numeroFinal])) {
+    // ==========================
+    // Traitement des lignes reçues
+    // ==========================
+    if (isset($input["lignes"]) && is_array($input["lignes"])) {
+        $date_ajout = date("Y-m-d H:m:s");
+
+        $stmt = $con->prepare("INSERT INTO autorisation_depense 
+            (Num_pce, Motif, Beneficiaire, Montant, Imputation, Date_ajout) 
+            VALUES (?, ?, ?, ?, ?, ?)");
+
+        foreach ($input["lignes"] as $ligne) {
+            $motif = $ligne["Motif"] ?? '';
+            
+            $montant = floatval($ligne["Montant"] ?? 0);
+            $imputation = intval($ligne["Imputation"] ?? 0);
+
+            $stmt->execute([$numeroFinal, $motif, $Beneficiaire, $montant, $imputation, $date_ajout]);
+        }
+    }
+
+    $con->commit();
     echo json_encode(['success' => true, 'numero' => $numeroFinal]);
-} else {
-    echo json_encode(['success' => false, 'error' => 'Erreur d’insertion']);
+} catch (Exception $e) {
+    $con->rollBack();
+    echo json_encode(['success' => false, 'error' => $e->getMessage()]);
 }
 ?>

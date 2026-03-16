@@ -479,7 +479,7 @@ $pdf->Cell(0,10,$text,0,1,'L');
 
 // affichage de rest à payer
 
-/*
+
 $pdf->SetY(65);
 $pdf->SetFont('Times','B',11);
 $text=mb_convert_encoding("Reste à payer", 'ISO-8859-1', 'UTF-8');
@@ -488,7 +488,7 @@ $pdf->Cell(0,5,$text,0,1,'C');
 $pdf->SetY(70);
 $pdf->SetFont('Times','B',11);
 $text="(FA: $reste_FA ) "." (E.M.S./E-1-Sem : $reste_EMS) "." (E-Rat-Sem_1 : $reste_RatSem1) "." (E.G.S/E-2-Sem : $reste_ES) "." (E.2.S/E-Ratt : $reste_E2S)";
-$pdf->Cell(0,5,$text,0,1,'C');*/
+$pdf->Cell(0,5,$text,0,1,'C');
 
 
 

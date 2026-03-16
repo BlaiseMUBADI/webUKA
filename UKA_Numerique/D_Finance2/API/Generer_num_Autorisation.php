@@ -17,8 +17,7 @@ if ($devise === 'USD') {
     exit;
 }
 
-$reponse = $con->query("
-    SELECT numero_pce 
+$reponse = $con->query("SELECT numero_pce 
     FROM numero_autorisation 
     WHERE numero_pce LIKE '$prefix%' 
     ORDER BY CAST(SUBSTRING(numero_pce, LENGTH('$prefix') + 1) AS UNSIGNED) DESC 

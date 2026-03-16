@@ -1,6 +1,6 @@
 <?php
 session_start(); 
-require_once("../../../Connexion_BDD/Connexion_1.php");
+include("../../../Connexion_BDD/Connexion_1.php");
 
 
 //recupération des variables qui viennent avec les données

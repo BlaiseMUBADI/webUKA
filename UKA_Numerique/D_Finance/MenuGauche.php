@@ -107,7 +107,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 <div class="navbar-nav w-100 ">
                    
                     <a href="Page_Principale_Finance.php?page=Dash_Board_Caisse" class="nav-item nav-link bloc"><i class="fa fa-exchange-alt me-2 text-primary"></i>Entrée</a>
-                    <a href="Page_Principale_Finance.php?page=AutoValide" class="nav-item nav-link bloc mt-2"><i class="fa fa-exchange-alt me-2 text-primary"></i>Sortie</a>
+                    <a href="Page_Principale_Finance.php?page=AutoValide" class="nav-item nav-link bloc mt-2"hidden><i class="fa fa-exchange-alt me-2 text-primary"></i>Sortie</a>
+                    <a href="Page_Principale_Finance.php?page=Sortie_caisse" class="nav-item nav-link bloc mt-2"><i class="fa fa-exchange-alt me-2 text-primary"></i>Sortie</a>
                     <a href="Page_Principale_Finance.php?page=Change" class="nav-item nav-link bloc mt-2"><i class="fa fa-exchange-alt me-2 text-primary"></i>Change</a>
                     <div class="nav-item  dropdown">
                         <a href="#" class="nav-link dropdown-toggle  bloc" data-bs-toggle="dropdown"><i class="fa fa-book me-2 text-primary "></i>Journal de Caisse</a>
@@ -153,9 +154,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     <div class="nav-item dropdown">
                         <a href="#" class="nav-link dropdown-toggle text-white bloc" data-bs-toggle="dropdown"><i class="fa fa me-2 text-primary">💰</i> Opérations Fin.</a>
                         <div class="dropdown-menu bg-transparent border-0">
-                            <a href="Page_Principale_Finance.php?page=Gerer_Encaissement" class=" dropdown-item text-white a_menu" id="liste" style="color:white;"><i class="fa fa-money-bill-wave me-2"></i>Encaissements du Jour</a>
-                            <a href="Page_Principale_Finance.php?page=Gerer_Decaissement" class=" dropdown-item text-white a_menu" id="liste" style="color:white;"><i class="fa fa-arrow-down me-2"></i>Décaissements du Jour </a>
-                            <a href="Page_Principale_Finance.php?page=" class=" dropdown-item text-white a_menu" id="liste" style="color:white;"><i class="fa fa-university me-2"></i>Opérations aux Guichets </a>
+                            <a href="Page_Principale_Finance.php?page=Afficher_Encaissement" class=" dropdown-item text-white a_menu" id="liste" style="color:white;"><i class="fa fa-money-bill-wave me-2"></i>Encaissements du Jour</a>
+                            <a href="Page_Principale_Finance.php?page=Afficher_Decaissement" class=" dropdown-item text-white a_menu" id="liste" style="color:white;"><i class="fa fa-arrow-down me-2"></i>Décaissements du Jour </a>
+                            <a href="Page_Principale_Finance.php?page=Rapport_guichet" class=" dropdown-item text-white a_menu" id="liste" style="color:white;"><i class="fa fa-university me-2"></i>Opérations aux Guichets </a>
                         </div>
                     </div>
                     <div class="nav-item dropdown">
@@ -207,8 +208,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     <div class="nav-item dropdown">
                         <a href="#" class="nav-link dropdown-toggle text-white bloc" data-bs-toggle="dropdown"><i class="fa fa me-2 text-primary">💰</i> Opérations Fin.</a>
                         <div class="dropdown-menu bg-transparent border-0">
-                            <a href="Page_Principale_Finance.php?page=Gerer_Encaissement" class=" dropdown-item text-white a_menu" id="liste" style="color:white;"><i class="fa fa-money-bill-wave me-2"></i>Encaissements du Jour</a>
-                            <a href="Page_Principale_Finance.php?page=Gerer_Decaissement" class=" dropdown-item text-white a_menu" id="liste" style="color:white;"><i class="fa fa-arrow-down me-2"></i>Décaissements du Jour </a>
+                            <a href="Page_Principale_Finance.php?page=Afficher_Encaissement" class=" dropdown-item text-white a_menu" id="liste" style="color:white;"><i class="fa fa-money-bill-wave me-2"></i>Encaissements du Jour</a>
+                            <a href="Page_Principale_Finance.php?page=Afficher_Decaissement" class=" dropdown-item text-white a_menu" id="liste" style="color:white;"><i class="fa fa-arrow-down me-2"></i>Décaissements du Jour </a>
                             <a href="Page_Principale_Finance.php?page=" class=" dropdown-item text-white a_menu" id="liste" style="color:white;"><i class="fa fa-university me-2"></i>Opérations aux Guichets </a>
                         </div>
                     </div>
@@ -238,8 +239,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     <div class="nav-item dropdown">
                         <a href="#" class="nav-link dropdown-toggle text-white bloc" data-bs-toggle="dropdown"><i class="fa fa me-2 text-primary">💰</i> Opérations Fin.</a>
                         <div class="dropdown-menu bg-transparent border-0">
-                            <a href="Page_Principale_Finance.php?page=Gerer_Encaissement" class=" dropdown-item text-white a_menu" id="liste" style="color:white;"><i class="fa fa-money-bill-wave me-2"></i>Encaissements du Jour</a>
-                            <a href="Page_Principale_Finance.php?page=Gerer_Decaissement" class=" dropdown-item text-white a_menu" id="liste" style="color:white;"><i class="fa fa-arrow-down me-2"></i>Décaissements du Jour </a>
+                            <a href="Page_Principale_Finance.php?page=Afficher_Encaissement" class=" dropdown-item text-white a_menu" id="liste" style="color:white;"><i class="fa fa-money-bill-wave me-2"></i>Encaissements du Jour</a>
+                            <a href="Page_Principale_Finance.php?page=Afficher_Decaissement" class=" dropdown-item text-white a_menu" id="liste" style="color:white;"><i class="fa fa-arrow-down me-2"></i>Décaissements du Jour </a>
                             <a href="Page_Principale_Finance.php?page=Rapport_guichet" class=" dropdown-item text-white a_menu" id="liste" style="color:white;"><i class="fa fa-university me-2"></i>Opérations aux Guichets </a>
                         </div>
                     </div>
@@ -286,8 +287,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     <div class="nav-item dropdown">
                         <a href="#" class="nav-link dropdown-toggle text-white bloc" data-bs-toggle="dropdown"><i class="fa fa me-2 text-primary">💰</i> Opérations Fin.</a>
                         <div class="dropdown-menu bg-transparent border-0">
-                            <a href="Page_Principale_Finance.php?page=Gerer_Encaissement" class=" dropdown-item text-white a_menu" id="liste" style="color:white;"><i class="fa fa-money-bill-wave me-2"></i>Encaissements du Jour</a>
-                            <a href="Page_Principale_Finance.php?page=Gerer_Decaissement" class=" dropdown-item text-white a_menu" id="liste" style="color:white;"><i class="fa fa-arrow-down me-2"></i>Décaissements du Jour </a>
+                            <a href="Page_Principale_Finance.php?page=Afficher_Encaissement" class=" dropdown-item text-white a_menu" id="liste" style="color:white;"><i class="fa fa-money-bill-wave me-2"></i>Encaissements du Jour</a>
+                            <a href="Page_Principale_Finance.php?page=Afficher_Decaissement" class=" dropdown-item text-white a_menu" id="liste" style="color:white;"><i class="fa fa-arrow-down me-2"></i>Décaissements du Jour </a>
                         <!--    <a href="Page_Principale_Finance.php?page=Rapport_guichet" class=" dropdown-item text-white a_menu" id="liste" style="color:white;"><i class="fa fa-university me-2"></i>Opérations aux Guichets </a>-->
                         </div>
                     </div>

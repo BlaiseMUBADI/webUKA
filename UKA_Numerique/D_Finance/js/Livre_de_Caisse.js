@@ -95,7 +95,7 @@ document.addEventListener("DOMContentLoaded", function () {
             tbody.innerHTML = "";
 
             const trHead = document.createElement("tr");
-            const headers = ["N°", "Date", "Noms", "N° pièce", "Imputation", "Libellé", "Débit", "Crédit", "Solde"];
+            const headers = ["N°", "Date", "N° pièce", "Imputation", "Libellé", "Débit", "Crédit", "Solde"];
             headers.forEach(header => {
                 const th = document.createElement("th");
                 th.textContent = header;
@@ -126,7 +126,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             const trSoldeInitial = document.createElement("tr");
             const tdInitLabel = document.createElement("td");
-            tdInitLabel.colSpan = 8;
+            tdInitLabel.colSpan = 7;
             tdInitLabel.style.fontWeight = "bold";
             tdInitLabel.textContent = "Solde initial de la période";
 
@@ -157,10 +157,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 tdIndex.textContent = index + 1;
 
                 const tdDate = document.createElement("td");
-                tdDate.textContent = item.Date_Oper;
+                tdDate.textContent = item.Date_Oper.split(' ')[0];
 
-                const tdBen = document.createElement("td");
-                tdBen.textContent = item.Deposant;
+                //const tdBen = document.createElement("td");
+                //tdBen.textContent = item.Deposant;
 
                 const tdNum = document.createElement("td");
                 tdNum.textContent = item.Numero.replace(/\D/g, '');
@@ -195,7 +195,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 tdSolde.style.textAlign = "right";;
                 tr.appendChild(tdIndex);
                 tr.appendChild(tdDate);
-                tr.appendChild(tdBen);
+                //tr.appendChild(tdBen);
                 tr.appendChild(tdNum);
                 tr.appendChild(tdImputation);
                 tr.appendChild(tdMotif);
@@ -263,7 +263,7 @@ document.getElementById('btn-action').addEventListener('click', function () {
     const table = document.getElementById('tableEncaissement_Dec');
     const tbody = table.querySelector("tbody");
 
-    const headers = ["N°", "Date", "Noms", "Numéro pièce", "Imputation", "Libellé", "Débit", "Crédit", "Solde"];
+    const headers = ["N°", "Date", "Numéro pièce", "Imputation", "Libellé", "Débit", "Crédit", "Solde"];
     const rows = [headers];
 
     tbody.querySelectorAll("tr").forEach((row) => {

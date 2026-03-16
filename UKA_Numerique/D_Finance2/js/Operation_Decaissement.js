@@ -193,33 +193,44 @@ function nettoyerMontant(montantString) {
 
 async function AfficherSoldes() {
     try {
-        let champSoldeFinalCDF = document.getElementById("soldeFinalCDF");
-        let champSoldeFinalUSD = document.getElementById("soldeFinalUSD");
-
+       
+        // 🟢 Attendre la réponse du serveur
         const response = await fetch("D_Finance/API/API_Select_Solde.php");
+
+        // 🟢 Vérifier si la réponse est correcte
+        if (!response.ok) {
+            throw new Error("Erreur HTTP : " + response.status);
+        }
+
+        // 🟢 Attendre la conversion en JSON
         const data = await response.json();
         console.log("🔍 Résultat JSON brut :", data);
-        
-        let solde_usd = parseFloat(data.Solde_usd.replace(/,/g, '')) || 0;
-        let solde_dec_usd = parseFloat(data.Solde__dec_usd.replace(/,/g, '')) || 0;
+
+        // 🟢 Conversion et calcul des soldes
+        let solde_usd = parseFloat(data.Solde_usd?.replace(/,/g, '') || 0);
+        let solde_dec_usd = parseFloat(data.Solde__dec_usd?.replace(/,/g, '') || 0);
         let solde_usd_montant = solde_usd - solde_dec_usd;
 
-        let solde_cdf = parseFloat(data.Solde_cdf.replace(/,/g, '')) || 0;
-        let solde_dec_cdf = parseFloat(data.Solde__dec_cdf.replace(/,/g, '')) || 0;
+        let solde_cdf = parseFloat(data.Solde_cdf?.replace(/,/g, '') || 0);
+        let solde_dec_cdf = parseFloat(data.Solde__dec_cdf?.replace(/,/g, '') || 0);
         let solde_cdf_montant = solde_cdf - solde_dec_cdf;
 
-        console.log("le solde après différence est de ",solde_dec_usd);
-        console.log("le solde usd ",solde_usd);
-        console.log("le solde dec est usd",solde_usd_montant);
-        document.getElementById("solde_CDF").innerText = solde_cdf_montant + " Fc";
-        document.getElementById("solde_USD").innerText = solde_usd_montant + " $";
-        document.getElementById("DecaissementUSD").innerText = data.Solde__dec_usd + " $";
-        document.getElementById("DecaissementCDF").innerText = data.Solde__dec_cdf + " Fc";
-        document.getElementById("DecaissementUSD_jour").innerText = data.Solde__dec_usd_jr + " $";
-        document.getElementById("DecaissementCDF_jour").innerText = data.Solde__dec_cdf_jr + " Fc";
-        champSoldeFinalCDF.value=solde_cdf_montant;
-        champSoldeFinalUSD.value=solde_usd_montant;
-        
+        // 🧾 Logs utiles pour debug
+        console.log("💰 Solde USD brut :", solde_usd);
+        console.log("💸 Décaissement USD :", solde_dec_usd);
+        console.log("✅ Solde final USD :", solde_usd_montant);
+        console.log("💰 Solde CDF brut :", solde_cdf);
+        console.log("💸 Décaissement CDF :", solde_dec_cdf);
+        console.log("✅ Solde final CDF :", solde_cdf_montant);
+
+        // 🟢 Affichage dans les champs HTML
+        document.getElementById("soldeCDF").innerText = solde_cdf_montant.toLocaleString() + " Fc";
+        document.getElementById("soldeUSD").innerText = solde_usd_montant.toLocaleString() + " $";
+
+        soldeUSD = solde_usd_montant;
+       soldeCDF = solde_cdf_montant;
+       
+
     } catch (error) {
         console.error("❌ Erreur lors du chargement du solde CDF :", error);
     }
@@ -231,24 +242,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 // Exemple de modification pour afficherSolde_decaissement
-function afficherSolde_decaissement() {
-    fetch("D_Finance/API/API_Solde_Decaisse.php")
-        .then(function(response) {
-            return response.json();
-        })
-        .then(function(data) {
-            console.log("🔍 Résultat JSON brut :", data);
 
-           // let solde_permanant=
-            document.getElementById("DecaissementUSD").innerText = data.Solde__dec_usd + " $";
-            document.getElementById("DecaissementCDF").innerText = data.Solde__dec_cdf + " Fc";
-
-            console.log("💰 Le solde décaissement USD :", data.Solde__dec_usd);
-        })
-        .catch(function(error) {
-            console.error("❌ Erreur lors du chargement du solde :", error);
-        });
-}
 
 //GESTION DE LA SAISIE DU MONTANT POUR EVITER LES LETTRES
 const champMontan = document.getElementById('montantDecUSD');
@@ -305,133 +299,161 @@ champMontandec.addEventListener('input', function () {
         }
 });
 
-function ImpressionBondeSortie(num_pce, montant, devise, motif, date,ben,imputation) {
-               
-    const contenus = `
-        <html>
-        <head>
-            <title>Reçu de versement</title>
-            <style>
-                body { font-family: Perpetua, sans-serif; padding: 20px; }
-                h4 { text-align: center; }
-                p { text-align: center; }
-               
-                .signature { margin-top: 40px; text-align: right; }
+function ImpressionBondeSortie(num_pce, montant, devise, motif, date, ben, imputation) {
+    const imagePrechargeeLogo = new Image();
+    const imagePrechargeeFond = new Image();
 
-                .header {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    border-bottom: 1px solid #000;
-                    padding-bottom: 0px;
-                    margin-bottom: 0px;
-                }
+    imagePrechargeeLogo.src = "D_Finance/img/logo.png";
+    imagePrechargeeFond.src = "D_Finance/img/fond-recu.jpg";
 
-                .header .text {
-                    flex: 1;
-                    text-align: right;
-                }
+    Promise.all([
+        new Promise(resolve => imagePrechargeeLogo.onload = resolve),
+        new Promise(resolve => imagePrechargeeFond.onload = resolve)
+    ]).then(() => {
+        // Convertir les images en base64 (DataURL)
+        const canvasLogo = document.createElement("canvas");
+        canvasLogo.width = imagePrechargeeLogo.width;
+        canvasLogo.height = imagePrechargeeLogo.height;
+        const ctxLogo = canvasLogo.getContext("2d");
+        ctxLogo.drawImage(imagePrechargeeLogo, 0, 0);
+        const logoDataURL = canvasLogo.toDataURL("image/png");
 
-                .header img {
-                    height: 70px;
-                    margin-right: 20px;
-                }
-                   /* .num_pce {
-                        
-                        background-color:rgb(227, 104, 104);
-                        -webkit-print-color-adjust: exact;  Force la couleur en impression 
-                        print-color-adjust: exact; Fonctionne pour certains navigateurs 
-                    }*/
-                .montant-fond {
-                    background-image: url('D_Finance/img/fond-recu.jpg'); /* Remplace par le chemin correct */
-                    background-size: contain; /* Ajuste la taille pour bien cadrer */
-                    background-repeat: repeat x; /* Empêche la répétition de l’image */
-                    background-position: right center; /* Positionne l’image correctement */
-                    padding: 0px 0px; /* Ajuste l'espacement pour bien intégrer l'image */
-                    font-weight: bold; /* Met le texte en valeur */
-                    -webkit-print-color-adjust: exact; /* Force le fond en impression */
-                    print-color-adjust: exact; /* Fonctionne pour certains navigateurs */
-                }
-        .montant-fond-chiffre {
-            background-image: url('D_Finance/img/fond-recu.jpg');
-            background-size: contain;
-            background-repeat: repeat x;
-            background-position: right center;
-            text-align: right;
-            font-size: 40px;
-            font-weight: bold;
-            padding: 0px 0px;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-        }
-            .signature-section {
-                display: flex;
-                justify-content: space-between;
-                margin-top: 20px;
-                text-align: center;
+        const canvasFond = document.createElement("canvas");
+        canvasFond.width = imagePrechargeeFond.width;
+        canvasFond.height = imagePrechargeeFond.height;
+        const ctxFond = canvasFond.getContext("2d");
+        ctxFond.drawImage(imagePrechargeeFond, 0, 0);
+        const fondDataURL = canvasFond.toDataURL("image/jpeg");
+
+        // Créer le contenu HTML
+        const contenu = `
+            <html>
+            <head>
+                <title>Bon de sortie</title>
+                <style>
+                    body {
+                        font-family: Perpetua, sans-serif;
+                        margin: 0;
+                        padding: 5px 20px 20px 20px;
+                    }
+                    h4 {
+                        text-align: center;
+                        margin-top: 5px;
+                        margin-bottom: 10px;
+                    }
+                    p { text-align: center; }
+
+                    .header {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        border-bottom: 1px solid #000;
+                        margin-bottom: 5px;
+                    }
+                    .header img {
+                        height: 70px;
+                        margin-right: 20px;
+                    }
+                    .header .text { flex: 1; text-align: right; }
+
+                    .montant-fond {
+                        background-image: url('${fondDataURL}');
+                        background-size: contain;
+                        background-repeat: repeat-x;
+                        background-position: right center;
+                        font-weight: bold;
+                        -webkit-print-color-adjust: exact;
+                        print-color-adjust: exact;
+                    }
+                    .montant-fond-chiffre {
+                        background-image: url('${fondDataURL}');
+                        background-size: contain;
+                        background-repeat: repeat-x;
+                        background-position: right center;
+                        text-align: right;
+                        font-size: 40px;
+                        font-weight: bold;
+                        -webkit-print-color-adjust: exact;
+                        print-color-adjust: exact;
+                    }
+
+                    .signature-section {
+                        display: flex;
+                        justify-content: space-between;
+                        margin-top: 20px;
+                        text-align: center;
+                    }
+                    .signature-section .column { flex: 1; }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <img src="${logoDataURL}" alt="Logo" id="logo-img">
+                    <div class="text">
+                        <p>
+                            République Démocratique du Congo<br>
+                            Ministère de l'Enseignement Supérieur et Universitaire<br>
+                            Université Notre-Dame du Kasayi (U.KA.)
+                        </p>
+                    </div>
+                </div>
+
+                <h4>BON DE SORTIE EN - ${devise} - N°: ${num_pce}</h4>
+
+                <div style="text-align: right;">
+                    <span class="montant-fond-chiffre">${montant} ${devise}</span>
+                </div><br>
+                Je soussigné <b>${ben}</b>, reconnais avoir reçu de la caisse U.KA. la somme de (toutes lettres) :
+                <span class="montant-fond">${montantEnLettre}</span><br>
+                Motif : ${motif}
+
+                <div class="signature-section">
+                    <div class="column">
+                        <p><strong>Signature Bénéficiaire</strong><br>${ben}</p>
+                    </div>
+                    <div class="column">
+                        <p><strong>Imputation</strong><br>${imputation}</p>
+                    </div>
+                    <div class="column">
+                        <p><strong>Fait à Kananga, le ${date}</strong><br>Visa du(de la) Caissier(é)</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+        `;
+
+        const fenetre = window.open('', '', 'width=700,height=500');
+        fenetre.document.open();
+        fenetre.document.write(contenu);
+        fenetre.document.close();
+
+        // ✅ Attendre que le DOM ET les images de la fenêtre soient chargés avant d’imprimer
+        fenetre.onload = () => {
+            const img = fenetre.document.getElementById('logo-img');
+            if (img && !img.complete) {
+                img.onload = () => {
+                    fenetre.focus();
+                    fenetre.print();
+                };
+            } else {
+                fenetre.focus();
+                fenetre.print();
             }
+        };
 
-            .signature-section .column {
-                flex: 1;
+        fenetre.onafterprint = function() {
+            try {
+                if (typeof rafraichirNumeros === 'function') rafraichirNumeros();
+                if (typeof AfficherSoldes === 'function') AfficherSoldes();
+            } catch (e) {
+                console.warn("Erreur post impression :", e);
             }
-                            body {
-                                    font-family: Perpetua, sans-serif;
-                                    margin: 0;
-                                    padding: 5px 20px 20px 20px; /* Réduction du padding en haut */
-                                }
-                            h4 {
-                                    text-align: center;
-                                    margin-top: 5px; /* Réduit l'espace au-dessus du titre */
-                                    margin-bottom: 10px;
-                                }     
-            </style>
-        </head>
-        <body>
-            <div class="header">
-                <img src="D_Finance/img/logo.png" alt="Logo">
-                <div class="text">
-                    <p>
-                        République Démocratique du Congo<br>
-                        Ministère de l'Enseignement Supérieur et Universitaire<br>
-                        Université Notre-Dame du Kasayi (U.KA.)
-                    </p>
-                </div>
-            </div>
-
-            <h4>BON DE SORTIE EN - ${devise} - N°: ${num_pce} </h4>
-           
-            <div class="border border-secondary" style="text-align: right;">
-                <span class="montant-fond-chiffre"> ${montant} ${devise}</span>
-            </div></br>
-            Je sousigné<b> ${ben}</b>, reconnais avoir reçu de la caisse U.KA. la somme de (toutes lettres):
-           <span class="montant-fond">${montantEnLettre}</span></br>
-           Motif : ${motif}
-
-            <div class="signature-section">
-                <div class="column">
-                    <p><strong>Signature Bénéficiaire</strong><br>${ben}</p>
-                </div>
-                <div class="column">
-                    <p><strong>Imputation</strong><br>${imputation}</p>
-                </div>
-                <div class="column">
-                    <p><strong>Fait à Kananga, le ${date}</strong><br>Visa du(de la) Caissier(é)</p>
-                </div>
-            </div>
-
-        </body>
-        </html>
-    `;
-
-    const fenetreImpressionBondeSortie = window.open('', '', 'width=700,height=500');
-    fenetreImpressionBondeSortie.document.open();
-    fenetreImpressionBondeSortie.document.write(contenus);
-    fenetreImpressionBondeSortie.document.close();
-    fenetreImpressionBondeSortie.print();
+        };
+    }).catch(() => {
+        Swal.fire('Erreur', 'Une erreur est survenue lors du chargement des images.', 'error');
+    });
 }
 
-const imgePrechargee = new Image();
-imgePrechargee.src = "D_Finance/img/fond-recu.jpg"; 
 
 
 

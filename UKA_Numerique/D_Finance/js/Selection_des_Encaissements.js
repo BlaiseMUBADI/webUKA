@@ -7,22 +7,18 @@ const date2 = document.getElementById("date2");
 const encaissement = document.getElementById("encaissementSelect");
 
 // 🔧 Champs du modal
-const modalEdit = document.getElementById("modalEdit");
+
 const editForm = document.getElementById("editForm");
+const editId = document.getElementById("editId");
 const editDeposant = document.getElementById("editDeposant");
 const editMotif = document.getElementById("editMotif");
 const editMontant = document.getElementById("editMontant");
 const editDate = document.getElementById("editDate");
 const editNumeroPce = document.getElementById("editNumeroPce");
-const cancelEdit = document.getElementById("cancelEdit");
 
 let rowBeingEdited = null;
 
-// Bouton Annuler
-cancelEdit.addEventListener("click", function () {
-  modalEdit.style.display = "none";
-  rowBeingEdited = null;
-});
+
 
 // Écouteur d'événement pour Encaissement USD
 document.getElementById('encaissementSelect').addEventListener('change', function () {
@@ -37,7 +33,10 @@ date2.addEventListener("change", function () {
 });
 
 
-
+ function formatForDateTimeLocal(mysqlDateTime) {
+                // mysqlDateTime = "2026-02-09 14:35:00"
+                return mysqlDateTime.replace(' ', 'T').slice(0, 16);
+            }
 function AfficherEncaissement() {
   //let Critere = critere.value;
   let Date1 = date1.value;
@@ -56,10 +55,13 @@ function AfficherEncaissement() {
   var tr1 = document.createElement("tr");
   tr1.style = "background-color:midnightblue; color:white;";
 
-  var headers = ["N°", "Déposant","Compte", "Motif", "Montant", "Date opération", "Numéro pce","Reçu","Modifier","Supprimer"];
+  var headers = ["N°","id", "Déposant","Compte", "Motif", "Montant", "Date opération", "Numéro pce","Reçu","",""];
   headers.forEach(headerText => {
     var th = document.createElement("th");
     th.textContent = headerText;
+    if (headerText === "id") {
+    th.classList.add("col-id");
+  }
     tr1.appendChild(th);
   });
 
@@ -94,6 +96,7 @@ function AfficherEncaissement() {
             const tdnum = document.createElement("td");
             tdnum.textContent = i++;
 
+            const id = document.createElement("td");
             const tddeposant = document.createElement("td");
             const tdcompte = document.createElement("td");
             const tdmotif = document.createElement("td");
@@ -101,14 +104,20 @@ function AfficherEncaissement() {
             const tddate = document.createElement("td");
             const tdnumpce = document.createElement("td");
 
+            
+            id.textContent = infos.Id;
+            id.classList.add("col-id");
+
             tddeposant.textContent = infos.Deposant;
             tdcompte.textContent = infos.Imputation;
             tdmotif.textContent = infos.Motif;
             tdmontant.textContent = infos.Montant;
-            tddate.textContent = infos.Date_Oper.split(' ')[0];
+            tddate.textContent = infos.Date_Oper;
             tdnumpce.textContent = numPce;
 
             tr.appendChild(tdnum);
+            tr.appendChild(id);
+
             tr.appendChild(tddeposant);
             tr.appendChild(tdcompte);
             tr.appendChild(tdmotif);
@@ -168,15 +177,29 @@ function AfficherEncaissement() {
             const tdEdit = document.createElement("td");
             const editBtn = document.createElement("button");
             editBtn.innerHTML = "✏️";
-            editBtn.disabled = true;
+            editBtn.disabled = false;
             editBtn.classList.add("btn", "btn-secondary", "btn-sm");
             tdEdit.appendChild(editBtn);
             tr.appendChild(tdEdit);
 
+            editBtn.addEventListener("click", function () {
+                rowBeingEdited = tr;
+
+                editId.value = infos.Id;
+                editDeposant.value = infos.Deposant;
+                editMotif.value = infos.Motif;
+                editMontant.value = infos.Montant;
+                editDate.value = formatForDateTimeLocal(infos.Date_Oper);
+                editNumeroPce.value = numPce;
+                modalEditInstance.show();
+                });
+
+           
+
             const tdDelete = document.createElement("td");
             const deleteBtn = document.createElement("button");
             deleteBtn.innerHTML = "❌";
-            deleteBtn.disabled = true;
+            deleteBtn.disabled = false;
             deleteBtn.classList.add("btn", "btn-danger", "btn-sm");
             tdDelete.appendChild(deleteBtn);
             tr.appendChild(tdDelete);
@@ -205,11 +228,10 @@ editForm.addEventListener("submit", function (e) {
     tds[4].textContent = editDate.value;
     tds[5].textContent = editNumeroPce.value;
 
-    modalEdit.style.display = "none";
     rowBeingEdited = null;
   }
 });
-
+let modalEditInstance = null;
 document.addEventListener("DOMContentLoaded", function () {
   const today = new Date().toISOString().split('T')[0];
 
@@ -220,18 +242,24 @@ document.addEventListener("DOMContentLoaded", function () {
   if (date2) date2.value = today;
   AfficherEncaissement(); 
 
+  const modalEl = document.getElementById("modalEdit");
+  modalEditInstance = new bootstrap.Modal(modalEl);
   
 });
 //MODIFICATION DE DONNEES ENCAISSEMENT
 
 document.getElementById('editer').addEventListener('click', function () {
             let Num_Pce = editNumeroPce.value;
+            let id_op = editId.value;
             let MotifVersementUSD = editMotif.value;
             
             let Montant_USD = editMontant.value;
-            let Date_vers_USD = editDate.value;
+            //let Date_vers_USD = editDate.value;
+            let Date_vers_USD = editDate.value.replace('T', ' ') + ':00';
             let Deposant_usd = editDeposant.value;
-                type_oper="modifier";
+            let Dev=encaissement.value;
+            let type_oper="modifier";
+            
             Swal.fire({
                 title: "Voulez-vous vraiment confirmer cette opération ?",
                 text: "Je m'engage",
@@ -243,20 +271,22 @@ document.getElementById('editer').addEventListener('click', function () {
                 cancelButtonText: "Annuler"
             }).then((result) => {
                 if (result.isConfirmed) {
-                    editionEncaissement(Num_Pce,MotifVersementUSD,Montant_USD,Date_vers_USD,Deposant_usd,type_oper);
+                    editionEncaissement(Num_Pce,id_op,MotifVersementUSD,Montant_USD,Date_vers_USD,Deposant_usd,Dev,type_oper);
                 }
             });
 });
 //********************* ENVOYER LES NOUVELLES DONNEES POUR MODIFICATION */
-function editionEncaissement(Num_Pce,MotifVersementUSD,Montant_USD,Date_vers_USD,Deposant_usd,type_oper) {
+function editionEncaissement(Num_Pce,Id,MotifVersementUSD,Montant_USD,Date_vers_USD,Deposant_usd,dev,type_oper) {
   
-  const lien = 'D_Finance/API/API_Select_Operation_Encaissement.php?Num_Pce=' + encodeURIComponent(Num_Pce) +
+  const lien = 'D_Finance/API/Modifier_Op_Enc.php?Num_Pce=' + encodeURIComponent(Num_Pce) +
       
       '&Motif=' + encodeURIComponent(MotifVersementUSD) +
       '&Montant=' + encodeURIComponent(Montant_USD) +
       '&Date_op=' + encodeURIComponent(Date_vers_USD)+
       '&Deposant=' + encodeURIComponent(Deposant_usd)+
-      '&type=' + encodeURIComponent(type_oper);
+      '&dev=' + encodeURIComponent(dev)+
+      '&type=' + encodeURIComponent(type_oper)+
+      '&id_op=' + encodeURIComponent(Id);
 
   fetch(lien)
       .then(response => response.json())
@@ -265,14 +295,7 @@ function editionEncaissement(Num_Pce,MotifVersementUSD,Montant_USD,Date_vers_USD
           if (data.success) {
               Swal.fire("✅ Succès", "Modification effectué avec succès", "success");
               AfficherEncaissement(); 
-              // Mise à jour du numéro de pièce
-              /*if (data.NumeroPieceSuivant) {
-                  num_pce.value = data.NumeroPieceSuivant;
-                  console.log("🔢 Prochain numéro de pièce appliqué :", data.NumeroPieceSuivant);
-              }*/
-
-              // Vider les champs après l'enregistrement
-                modalEdit.style.display = "none";
+           
               
           } else if (data.error) {
               Swal.fire("❌ Erreur: Modification non effectuée", data.message || "Une erreur est survenue.", "error");
@@ -304,7 +327,7 @@ function Cancel_Operation(Num_Pce,type_oper) {
               }*/
 
               // Vider les champs après l'enregistrement
-                modalEdit.style.display = "none";
+              
               
           } else if (data.error) {
               Swal.fire("❌ Erreur: Modification non effectuée", data.message || "Une erreur est survenue.", "error");

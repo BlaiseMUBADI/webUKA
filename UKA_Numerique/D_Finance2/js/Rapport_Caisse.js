@@ -1,4 +1,7 @@
-let dernierSolde = 0;  
+// Rapport de caisse
+console.log("✅ le JS Rapport caisse est lancé");
+
+let dernierSolde = 0;
 
 document.addEventListener("DOMContentLoaded", function () {
     const dateA = document.getElementById("date_A");
@@ -40,73 +43,155 @@ document.addEventListener("DOMContentLoaded", function () {
 
         fetch(url)
             .then(response => response.json())
-            .then(data => {
+            .then(result => {
+                console.log("Réponse API =", result);
+            
+                console.log("TYPE DE RESULT =", typeof result, Array.isArray(result));
+
+                let encaissements = [];
+                let decaissements = [];
+
+                if (type === "USD") {
+                    encaissements = result.encaissements_usd || [];
+                    decaissements = result.decaissements_usd || [];
+                }
+
+                if (type === "CDF") {
+                    encaissements = result.encaissements_cdf || [];
+                    decaissements = result.decaissements_cdf || [];
+                }
+
+
+               // 👉 Trier séparément
+                    encaissements.sort((a, b) => a.Imputation - b.Imputation);
+                    decaissements.sort((a, b) => a.Imputation - b.Imputation);
+
+
+
                 const thead = table.querySelector("thead");
                 const tbody = table.querySelector("tbody");
                 thead.innerHTML = "";
                 tbody.innerHTML = "";
+            
+                // Ligne 1 : Recettes / Dépenses
+                const trHead1 = document.createElement("tr");
+                trHead1.innerHTML = `
+                    <th colspan="3">Recettes</th>
+                    <th colspan="3">Dépenses</th>
+                `;
+                thead.appendChild(trHead1);
+            
+                // Ligne 2 : Titres colonnes
+                const trHead2 = document.createElement("tr");
+                trHead2.innerHTML = `
+                    <th>Compte</th><th>Description</th><th>Montant</th>
+                    <th>Compte</th><th>Description</th><th>Montant</th>
+                `;
+                thead.appendChild(trHead2);
+            
+                let recettesTotal = 0;
+                let depensesTotal = 0;
+            
+                if (encaissements.length === 0) {
+            
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `
+                        <td colspan="6" style="text-align:center; font-weight:bold;">
+                            Aucune opération trouvée pour cette période
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+            
+                } else {
+                        // ---------------------------
+                        // 1️⃣ AFFICHAGE ALIGNÉ (Recettes + Dépenses)
+                        // ---------------------------
 
-                const trHead = document.createElement("tr");
-                const headers = ["N°", "Compte", "Montant"];
-                headers.forEach(header => {
-                    const th = document.createElement("th");
-                    th.textContent = header;
-                    trHead.appendChild(th);
-                });
-                thead.appendChild(trHead);
+                        // Plus grande longueur entre recettes et dépenses
+                        const max = Math.max(encaissements.length, decaissements.length);
 
-                const grouped = {};
-                data.forEach(item => {
-                    if (!grouped[item.Imputation]) {
-                        grouped[item.Imputation] = [];
-                    }
-                    grouped[item.Imputation].push(item);
-                });
+                        for (let i = 0; i < max; i++) {
 
-                let index = 1;
-                let montantTotal = 0;
+                            const rec = encaissements[i] || null;
+                            const dep = decaissements[i] || null;
 
-                for (const items of Object.values(grouped)) {
-                    items.forEach(item => {
-                        const tr = document.createElement("tr");
+                            const tr = document.createElement("tr");
 
-                        const tdIndex = document.createElement("td");
-                        tdIndex.textContent = index++;
+                            // bloc recettes
+                            const recetteHTML = rec ? `
+                                <td>${rec.Imputation}</td>
+                                <td>${rec.Intitul_compte}</td>
+                                <td style="text-align:right;">${parseFloat(rec.MontantTotal).toLocaleString()}</td>
+                            ` : `
+                                <td></td><td></td><td></td>
+                                
+                            `;
 
-                        const tdImputation = document.createElement("td");
-                        tdImputation.textContent = item.Imputation+" - "+item.Intitul_compte;
+                            // bloc dépenses
+                            const depenseHTML = dep ? `
+                                <td>${dep.Imputation}</td>
+                                <td>${dep.Intitul_compte}</td>
+                                <td style="text-align:right;">${parseFloat(dep.MontantTotal).toLocaleString()}</td>
+                            ` : `
+                                <td></td><td></td><td></td>
+                            `;
 
-                        const tdMontant = document.createElement("td");
-                        const montant = parseFloat(item.MontantTotal) || 0;
-                        tdMontant.textContent = montant.toLocaleString(undefined, { minimumFractionDigits: 2 }) + " $";
+                            tr.innerHTML = recetteHTML + depenseHTML;
+                            tbody.appendChild(tr);
 
-                        montantTotal += montant;
+                            if (rec) recettesTotal += parseFloat(rec.MontantTotal);
+                            if (dep) depensesTotal += parseFloat(dep.MontantTotal);
+                        }
 
-                        tr.appendChild(tdIndex);
-                        tr.appendChild(tdImputation);
-                        tr.appendChild(tdMontant);
-
-                        tbody.appendChild(tr);
-                    });
+                  
                 }
-
+            
+                // Totaux
                 const trTotal = document.createElement("tr");
-                trTotal.style.backgroundColor = "black";
+                trTotal.style.backgroundColor = "OLIVE";
                 trTotal.style.color = "white";
                 trTotal.style.fontWeight = "bold";
-
-                const tdTotalLabel = document.createElement("td");
-                tdTotalLabel.colSpan = 2;
-                tdTotalLabel.style.textAlign = "right";
-                tdTotalLabel.textContent = "Totaux généraux";
-
-                const tdMontantTotal = document.createElement("td");
-                tdMontantTotal.textContent = montantTotal.toLocaleString(undefined, { minimumFractionDigits: 2 }) + " $";
-
-                trTotal.appendChild(tdTotalLabel);
-                trTotal.appendChild(tdMontantTotal);
+            
+                trTotal.innerHTML = `
+                    <td></td><td style="text-align:right;">Total Recettes</td>
+                    <td style="text-align:right;">${recettesTotal.toLocaleString()}</td>
+            
+                    <td></td><td style="text-align:right;">Total Dépenses</td>
+                    <td style="text-align:right;">${depensesTotal.toLocaleString()}</td>
+                `;
+            
                 tbody.appendChild(trTotal);
+            
+               
+                const trReport = document.createElement("tr");
+                trReport.style.backgroundColor = "OLIVE";
+                trReport.style.color = "white";
+                trReport.style.fontWeight = "bold";
+            
+                trReport.innerHTML = `
+                    <td></td><td style="text-align:right;">Report</td>
+                    <td style="text-align:right;">${(recettesTotal - depensesTotal).toLocaleString()}</td>
+                    <td></td><td></td><td></td>
+                `;
+            
+                tbody.appendChild(trReport);
+            
+
+                 // Solde CDF
+                 const trSolde = document.createElement("tr");
+                 trSolde.style.backgroundColor = "OLIVE";
+                 trSolde.style.color = "white";
+                 trSolde.style.fontWeight = "bold";
+             
+                 trSolde.innerHTML = `
+                     <td></td><td style="text-align:right;">Solde</td>
+                     <td></td>
+                     <td></td><td></td><td style="text-align:right;">${(recettesTotal - depensesTotal).toLocaleString()}</td>
+                 `;
+             
+                 tbody.appendChild(trSolde);
             })
+            
             .catch(error => {
                 console.error("❌ Erreur API :", error);
                 alert("Erreur lors du chargement des données.");
@@ -114,14 +199,13 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
-// EXPORTATION EN EXCEL
-document.getElementById('btn-action').addEventListener('click', function() {
+// ---------------- EXPORT EXCEL ----------------
+document.getElementById('btn-action').addEventListener('click', function () {
     const table = document.getElementById('tableRapport');
     const tbody = table.querySelector("tbody");
 
-    const headers = ["N°", "Imputation", "Montant"];
+    const headers = ["N°", "Compte", "Montant"];
     const rows = [];
-
     rows.push(headers);
 
     let montantTotal = 0;
@@ -149,15 +233,16 @@ document.getElementById('btn-action').addEventListener('click', function() {
     XLSX.writeFile(wb, "Rapport_Caisse.xlsx");
 });
 
+// ---------------- IMPRESSION ----------------
 function imprimer() {
-    var btn1 = document.getElementById('btn-action'); btn1.style.display='none';
-    var btn2 = document.getElementById('btn-print'); btn2.style.display='none';
+    const btn1 = document.getElementById('btn-action'); btn1.style.display = 'none';
+    const btn2 = document.getElementById('btn-print'); btn2.style.display = 'none';
 
-    var contenus = document.getElementById('entetepage').innerHTML;
-    var contenu = document.getElementById('tablePrint').innerHTML;
+    const contenus = document.getElementById('entetepage').innerHTML;
+    const contenu = document.getElementById('tablePrint').innerHTML;
 
-    var fenetreImpression = window.open('', '', 'height=600,width=800');
-    fenetreImpression.document.write('<html><head><title>Impression Rapport de Paie</title>');
+    const fenetreImpression = window.open('', '', 'height=600,width=800');
+    fenetreImpression.document.write('<html><head><title>Impression Rapport de Caisse</title>');
     fenetreImpression.document.write('<style>');
     fenetreImpression.document.write('body { font-family: Arial, sans-serif; }');
     fenetreImpression.document.write('table { width: 100%; border-collapse: collapse; }');
@@ -172,6 +257,6 @@ function imprimer() {
     fenetreImpression.print();
     fenetreImpression.close();
 
-    var btn1 = document.getElementById('btn-action'); btn1.style.display='block';
-    var btn2 = document.getElementById('btn-print'); btn2.style.display='block';
+    btn1.style.display = 'block';
+    btn2.style.display = 'block';
 }

@@ -1,5 +1,5 @@
 <?php
-require_once("../../../Connexion_BDD/Connexion_1.php");
+include("../../../Connexion_BDD/Connexion_1.php");
 
 $mat_etudiant=$_GET['matricule'];
 $Id_an_acad=$_GET['id_annee_acad'];

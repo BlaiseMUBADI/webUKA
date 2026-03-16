@@ -1,4 +1,5 @@
 // CLOTURE CDF
+console.log('CLOTIRE OPERATION');
 document.getElementById("btnCloturerCDF").addEventListener("click", function () {
     const dateNow = new Date();
     const dateSolde = dateNow.toISOString().slice(0, 19).replace("T", " "); // Format : "YYYY-MM-DD HH:mm:ss"
@@ -50,8 +51,7 @@ document.getElementById("btnCloturerCDF").addEventListener("click", function () 
 // Désactivation des formulaires CDF
 function desactiverFormulairesCDF() {
     const formElements = document.querySelectorAll(
-        "#collapseEncaissementCDF input, #collapseEncaissementCDF select, #collapseEncaissementCDF button," +
-        "#collapseDecaissementCDF input, #collapseDecaissementCDF select, #collapseDecaissementCDF button," +
+        "#collapseBoxCDF input, #collapseBoxCDF select, #collapseBoxCDF button," +
         "#btnCloturerCDF"
     );
 
@@ -112,8 +112,7 @@ document.getElementById("btnCloturerUSD").addEventListener("click", function () 
 // Désactivation des formulaires USD
 function desactiverFormulairesUSD() {
     const formElements = document.querySelectorAll(
-        "#collapseEncaissementUSD input, #collapseEncaissementUSD select, #collapseEncaissementUSD button," +
-        "#collapseDecaissementUSD input, #collapseDecaissementUSD select, #collapseDecaissementUSD button," +
+        "#collapseBoxUSD input, #collapseBoxUSD select, #collapseBoxUSD button," +
         "#btnCloturerUSD"
     );
 

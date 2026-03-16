@@ -157,7 +157,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 tdIndex.textContent = index + 1;
 
                 const tdDate = document.createElement("td");
-                tdDate.textContent = item.Date_Oper;
+                tdDate.textContent = item.Date_Oper.split(' ')[0];
 
                 const tdBen = document.createElement("td");
                 tdBen.textContent = item.Deposant;
@@ -175,11 +175,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 const montantEncaisse = parseFloat(item.Montant_Encaisse) || 0;
                 tdEncaisse.textContent = montantEncaisse ? montantEncaisse.toLocaleString() : "";
                 totalEncaisse += montantEncaisse;
+                tdEncaisse.style.textAlign = "right";
 
                 const tdDecaisse = document.createElement("td");
                 const montantDecaisse = parseFloat(item.Montant_Decaisse) || 0;
                 tdDecaisse.textContent = montantDecaisse ? montantDecaisse.toLocaleString() : "";
                 totalDecaisse += montantDecaisse;
+                tdDecaisse.style.textAlign = "right";;
 
                 if (item.Type_Operation === "Encaissement") {
                     solde += montantEncaisse;
@@ -190,7 +192,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 const tdSolde = document.createElement("td");
                 tdSolde.textContent = solde.toLocaleString(undefined, { minimumFractionDigits: 2 });
-
+                tdSolde.style.textAlign = "right";;
                 tr.appendChild(tdIndex);
                 tr.appendChild(tdDate);
                 tr.appendChild(tdBen);
@@ -215,13 +217,13 @@ document.addEventListener("DOMContentLoaded", function () {
             tdTotalLabel.textContent = "Totaux";
 
             const tdEncTotal = document.createElement("td");
-            tdEncTotal.textContent = totalEncaisse.toLocaleString(undefined, { minimumFractionDigits: 2 }) + " $";
+            tdEncTotal.textContent = totalEncaisse.toLocaleString(undefined, { minimumFractionDigits: 2 }) +" "+ type;
 
             const tdDecTotal = document.createElement("td");
-            tdDecTotal.textContent = totalDecaisse.toLocaleString(undefined, { minimumFractionDigits: 2 }) + " $";
+            tdDecTotal.textContent = totalDecaisse.toLocaleString(undefined, { minimumFractionDigits: 2 }) +" "+ type;
 
             const tdSoldeTotal = document.createElement("td");
-            tdSoldeTotal.textContent = dernierSolde.toLocaleString(undefined, { minimumFractionDigits: 2 }) + " $";
+            tdSoldeTotal.textContent = dernierSolde.toLocaleString(undefined, { minimumFractionDigits: 2 }) +" "+ type;
 
             trTotal.appendChild(tdTotalLabel);
             trTotal.appendChild(tdEncTotal);

@@ -1,0 +1,1 @@
+{"Num_Pce":"8234","Text_Btn":"Encaisser USD","Motif_USD":"ujuj","Idser_USD":"serv 2","Montant_USD":"23","Date_op_usd":"2026-01-21T11:48","Deposant_usd":"jjujuj","Imputation_usd":"13","AnneeAcad":"30"}

@@ -138,7 +138,7 @@ $rqt_nouvelle_rubrique_reelle = "
 SELECT 
     r.Code_promotion,
     m.Libelle_Mention,
-    CONCAT(prom.Libelle_promotion, ' ', m.Libelle_Mention) AS Libelle_promotion_mention,
+    CONCAT(prom.Abréviation, ' ', m.Libelle_Mention) AS Libelle_promotion_mention,
     rub.Libelle AS Rubrique,
     total_paiement.Total_paye AS Montant_total_paye,
     ROUND((r.Montant / total_rep.Montant_total) * 100, 2) AS Pourcentage_utilise,
